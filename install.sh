@@ -121,6 +121,12 @@ if [ -d "$DOTFILES_DIR/.config" ]; then
     done
 fi
 
+# Deploy wallpapers
+if [ -d "$DOTFILES_DIR/wallpapers" ]; then
+    mkdir -p "$HOME_TARGET/Pictures"
+    deploy_config "$DOTFILES_DIR/wallpapers" "$HOME_TARGET/Pictures/wallpapers"
+fi
+
 # Deploy home dotfiles (.zshrc, .zprofile, etc.)
 for home_file in .zshrc .zprofile; do
     if [ -f "$DOTFILES_DIR/$home_file" ]; then

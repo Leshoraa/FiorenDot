@@ -35,41 +35,6 @@ Personal dotfiles and system configurations for **Arch Linux** running **Hyprlan
 
 ---
 
-## Repository Structure
-
-```
-FiorenDot/
-├── .config/
-│   ├── btop/               # Btop resource monitor config
-│   ├── cava/               # Audio visualizer config
-│   ├── fastfetch/          # System specs fetch config
-│   ├── ghostty/            # Ghostty terminal config
-│   ├── gtk-3.0/            # GTK 3 settings
-│   ├── gtk-4.0/            # GTK 4 settings
-│   ├── hypr/               # Hyprland WM configs, UserConfigs, UserScripts, hyprlock
-│   ├── kitty/              # Kitty terminal config & themes
-│   ├── Kvantum/            # Kvantum Qt theme config
-│   ├── nwg-look/           # GTK theme switcher config
-│   ├── qt5ct/              # Qt5 config
-│   ├── qt6ct/              # Qt6 config
-│   ├── rofi/               # Rofi app launcher, themes & menus
-│   ├── starship.toml       # Starship shell prompt config
-│   ├── swappy/             # Screenshot annotator config
-│   ├── swaync/             # Sway notification center config
-│   ├── wallust/            # Dynamic palette generation config
-│   ├── waybar/             # Waybar configs & styles (Fioren V1)
-│   └── wlogout/            # Logout / power menu config
-├── assets/
-│   ├── screenshots/        # Preview screenshot poster
-│   └── videos/             # Demo video (FioDot.mp4)
-├── .zshrc                  # Zsh shell configuration
-├── .zprofile               # Zsh login profile
-├── install.sh              # Automated backup & deployment script
-└── .gitignore              # Ignored files & caches
-```
-
----
-
 ## Installation
 
 ### 1. Clone the repository

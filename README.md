@@ -4,12 +4,13 @@ Personal dotfiles and system configurations for **Arch Linux** running **Hyprlan
 
 ---
 
-## Previews
+## Demo & Previews
 
-<!-- Drop your preview screenshot into assets/screenshots/preview.png -->
-![Desktop Preview](assets/screenshots/preview.png)
+[![Watch Desktop Demo Video](assets/screenshots/preview.png)](assets/videos/FioDot.mp4)
 
-*Preview screenshots showcase Hyprland, Waybar (Fioren V1), Rofi, and active terminal styling.*
+> 🎬 **[▶ Click here to watch / download full demo video (FioDot.mp4)](assets/videos/FioDot.mp4)**
+>
+> *Showcasing Hyprland tiling, Waybar (Fioren V1), Rofi launcher, fastfetch, terminal, and animations.*
 
 ---
 
@@ -59,7 +60,8 @@ FiorenDot/
 │   ├── waybar/             # Waybar configs & styles (Fioren V1)
 │   └── wlogout/            # Logout / power menu config
 ├── assets/
-│   └── screenshots/        # Repository preview images
+│   ├── screenshots/        # Preview screenshot poster
+│   └── videos/             # Demo video (FioDot.mp4)
 ├── .zshrc                  # Zsh shell configuration
 ├── .zprofile               # Zsh login profile
 ├── install.sh              # Automated backup & deployment script

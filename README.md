@@ -6,9 +6,9 @@ Personal dotfiles and system configurations for **Arch Linux** running **Hyprlan
 
 ## Demo & Previews
 
-[![Watch Desktop Demo Video](assets/screenshots/preview.png)](assets/videos/FioDot.mp4)
+[![Desktop Preview & Demo](assets/gif/demo.gif)](assets/videos/FioDot.mp4)
 
-> 🎬 **[▶ Click here to watch / download full demo video (FioDot.mp4)](assets/videos/FioDot.mp4)**
+> 🎬 **[▶ Click here to download / watch high-resolution video with audio (FioDot.mp4)](assets/videos/FioDot.mp4)**
 >
 > *Showcasing Hyprland tiling, Waybar (Fioren V1), Rofi launcher, fastfetch, terminal, and animations.*
 
@@ -32,6 +32,42 @@ Personal dotfiles and system configurations for **Arch Linux** running **Hyprlan
 | **System Monitor**| Btop | Terminal resource monitor |
 | **Screenshots** | Swappy + Grim/Slurp | Screen capture & annotation |
 | **GTK & Qt Theme**| GTK 3/4, Kvantum, Qt5ct, Qt6ct | Unified desktop theme & styling |
+
+---
+
+## Repository Structure
+
+```
+FiorenDot/
+├── .config/
+│   ├── btop/               # Btop resource monitor config
+│   ├── cava/               # Audio visualizer config
+│   ├── fastfetch/          # System specs fetch config
+│   ├── ghostty/            # Ghostty terminal config
+│   ├── gtk-3.0/            # GTK 3 settings
+│   ├── gtk-4.0/            # GTK 4 settings
+│   ├── hypr/               # Hyprland WM configs, UserConfigs, UserScripts, hyprlock
+│   ├── kitty/              # Kitty terminal config & themes
+│   ├── Kvantum/            # Kvantum Qt theme config
+│   ├── nwg-look/           # GTK theme switcher config
+│   ├── qt5ct/              # Qt5 config
+│   ├── qt6ct/              # Qt6 config
+│   ├── rofi/               # Rofi app launcher, themes & menus
+│   ├── starship.toml       # Starship shell prompt config
+│   ├── swappy/             # Screenshot annotator config
+│   ├── swaync/             # Sway notification center config
+│   ├── wallust/            # Dynamic palette generation config
+│   ├── waybar/             # Waybar configs & styles (Fioren V1)
+│   └── wlogout/            # Logout / power menu config
+├── assets/
+│   ├── gif/                # Inline autoplay animated demo (demo.gif)
+│   ├── screenshots/        # Preview screenshot poster (preview.png)
+│   └── videos/             # Full video demo (FioDot.mp4)
+├── .zshrc                  # Zsh shell configuration
+├── .zprofile               # Zsh login profile
+├── install.sh              # Automated backup & deployment script
+└── .gitignore              # Ignored files & caches
+```
 
 ---
 

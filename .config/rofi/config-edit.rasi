@@ -1,0 +1,39 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* KooL Hyprland Edit Rofi Config */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Configuration ---- */ 
+configuration {
+  modi: "drun";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  spacing: 6px;
+  cycle: true;
+}
+
+/* ---- Entry input ---- */
+entry {
+  expand: true;
+  placeholder: "   Customize Hyprland";
+  horizontal-align: 0.0;
+}
+
+
+/* ---- Elements ---- */
+element {
+  orientation: horizontal;
+}
+
+element-icon {
+  size: 0%;
+}
+element-text {
+  horizontal-align: 0.0;
+  margin: 0px;
+  padding: 0px;
+}

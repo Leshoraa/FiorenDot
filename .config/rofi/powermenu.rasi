@@ -1,0 +1,93 @@
+/* =======================================================
+ *   FIOREN — Minimal Floating Circle Powermenu
+ * ======================================================= */
+
+configuration {
+    show-icons:                 false;
+}
+
+/* Load wallust colors*/
+@theme "~/.config/rofi/wallust/colors-rofi.rasi"
+
+* {
+    font:                       "JetBrainsMono Nerd Font 22";
+    background-color:           transparent;
+    text-color:                 #ffffff;
+}
+
+window {
+    fullscreen:                 true;
+    background-color:           rgba(10, 10, 16, 0.64);
+    cursor:                     "default";
+}
+
+mainbox {
+    background-color:           transparent;
+    orientation:                horizontal;
+    children:                   [ "dummy", "box-center", "dummy" ];
+}
+
+/* Box Center: Menyusun Greeting & Icon secara Vertikal */
+box-center {
+    background-color:           transparent;
+    orientation:                vertical;
+    children:                   [ "dummy", "inputbar", "listview", "dummy" ];
+    expand:                     true;
+}
+
+/* Teks Greeting ("See you later, fioren!") */
+inputbar {
+    background-color:           transparent;
+    children:                   [ "prompt" ];
+    margin:                     6px 0px 32px 38px;
+}
+
+prompt {
+    background-color:           transparent;
+    text-color:                 #ffffff;
+    font:                       "JetBrainsMono Nerd Font 26";
+    horizontal-align:           0.5;
+}
+
+/* Barisan Icon Melayang */
+listview {
+    background-color:           transparent;
+    layout:                     horizontal;
+    spacing:                    12px;
+    lines:                      5;
+    fixed-height:               true;
+    margin:                     0px 0px 0px 16px;
+    expand:                     false;
+    width:                      1680px; /* Lebar dikunci agar 5 ikon muat sejajar */
+}
+
+/* Tombol Lingkaran */
+element {
+    background-color:           rgba(255, 255, 255, 0);
+    text-color:                 rgba(255, 255, 255, 0.28);
+    width:                      90px;      
+    padding:                    20px 0px;  
+    border-radius:              100%;      
+    cursor:                     pointer;
+}
+
+/* Tombol Lingkaran Terpilih */
+element selected.normal {
+    background-color:           rgba(255, 255, 255, 0);
+    text-color:                 #ffffff;
+}
+
+/* Teks / Ikon di Dalam Tombol */
+element-text {
+    background-color:           transparent;
+    text-color:                 inherit;
+    font:                       "JetBrainsMono Nerd Font 28";
+    horizontal-align:           0.5;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+dummy {
+    expand:                     true;
+    background-color:           transparent;
+}

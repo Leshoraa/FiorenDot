@@ -1,0 +1,273 @@
+@import '../../.config/waybar/wallust/colors-waybar.css';
+@import "../waybar/style/catppuccin-themes/latte.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-weight: bold;
+    min-height: 0;
+    font-size: 94%;
+    font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
+}
+
+window#waybar {
+    background: transparent;
+    border-radius: 0px;
+    color: mix(@color0, @foreground, 1.15);
+}
+
+window#waybar.hidden {
+    opacity: 0;
+}
+
+tooltip {
+    background: @color1;
+    border-radius: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @foreground, 1.15);
+}
+
+
+.modules-center {
+    background-color: alpha(mix(@color1, black, 0.52), 0.76);
+    border-radius: 12px;
+    padding: 1px 4px;
+}
+
+.modules-left,
+.modules-right {
+    background-color: alpha(mix(@color1, black, 0.52), 0.76);
+    border-radius: 12px;
+    padding: 1px 4px;
+}
+
+#workspaces {
+    padding : 1px 2px
+}
+
+#taskbar button,
+#workspaces button {
+    color: mix(@color12, @color8, 0.54);
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: 6px;
+    padding: 1px 0px;
+     animation: gradient_f 20s ease infinite;
+    transition: all 0.5s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#taskbar button.active,
+#workspaces button.active {
+    color: mix(@color0, black, 0.66);
+    background-color: mix(@color12, white, 0.14);
+    border-radius: 12px;
+    padding: 1px 12px;
+    animation: gradient_f 20s ease infinite;
+    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#workspaces button.urgent {
+    color: mix(@color1, @foreground, 0.3);
+    background-color: mix(@color0, @foreground, 1.15);
+    border-radius: 8px;
+}
+
+#taskbar button:hover,
+#workspaces button:hover {
+    color: mix(@color0, @foreground, 1.15);
+    padding: 1px 10px;
+}
+
+#backlight,
+#backlight-slider,
+#battery,
+#bluetooth,
+#clock,
+#cpu,
+#disk,
+#idle_inhibitor,
+#memory,
+#mode,
+#mpris,
+#network,
+#power-profiles-daemon,
+#pulseaudio,
+#pulseaudio-slider,
+#taskbar,
+#temperature,
+#tray,
+#window,
+#wireplumber,
+#custom-backlight,
+#custom-browser,
+#custom-cycle_wall,
+#custom-dot_update,
+#custom-file_manager,
+#custom-keybinds,
+#custom-light_dark,
+#custom-hint,
+#custom-hypridle,
+#custom-playerctl,
+#custom-power_vertical,
+#custom-quit,
+#custom-reboot,
+#custom-settings,
+#custom-spotify,
+#custom-tty,
+#custom-updater,
+#custom-hyprpicker,
+#custom-weather,
+#custom-weather.clearNight,
+#custom-weather.cloudyFoggyDay,
+#custom-weather.cloudyFoggyNight,
+#custom-weather.default,
+#custom-weather.rainyDay,
+#custom-weather.rainyNight,
+#custom-weather.severe,
+#custom-weather.showyIcyDay,
+#custom-weather.snowyIcyNight,
+#custom-weather.sunnyDay {
+    color: mix(@color0, @foreground, 1.15);
+    padding: 1px 5px;
+}
+
+#temperature.critical {
+    background-color: mix(@color4, @foreground, 0.3);
+    color: mix(@color2, @foreground, 0.3);
+}
+
+#custom-lock,
+#custom-reboot,
+#custom-power {
+    padding: 1px 5px;
+     color:mix(@color12, white, 0.14);
+}
+
+#custom-swaync {
+    padding: 1px 5px;
+     color:mix(@color12, white, 0.14);
+}
+
+#backlight-slider slider,
+#pulseaudio-slider slider {
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+    border: none;
+}
+
+#custom-cava_mviz {
+    letter-spacing: 3px;
+    padding: 1px 5px;
+    color:mix(@color12, white, 0.14);
+}
+
+#backlight-slider trough,
+#pulseaudio-slider trough {
+    min-width: 70px;
+    min-height: 4px;
+    border-radius: 4px;
+    background-color: mix(@color0, @foreground, 1.15);
+}
+
+#backlight-slider highlight,
+#pulseaudio-slider highlight {
+    min-height: 4px;
+    border-radius: 4px;
+    background-color: mix(@color0, @foreground, 1.15);
+}
+
+#custom-title, 
+#custom-artist {
+    padding: 0px 1px;
+    margin: 0px;
+    color:mix(@color12, white, 0.14);
+}
+
+#custom-separatorsong {
+    padding: 0px 2px;
+    margin: 0px;
+    color:mix(@color12, white, 0.14);
+}
+
+#custom-title.Paused, 
+#custom-artist.Paused, 
+#custom-separatorsong.Paused {
+    font-style: italic;
+}
+
+#custom-title {
+    padding-left: 8px;
+}
+
+#custom-artist {
+    padding-right: 8px;
+    font-style: italic;
+}
+
+#custom-menu {
+    font-size: 120%;
+    padding: 1px 3px;
+}
+
+#pulseaudio,
+#pulseaudio-slider {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#pulseaudio.muted {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#memory {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#cpu {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#group-mobo_drawer {
+    font-size: 100%;
+}
+
+#battery {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#disk {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#battery.critical:not(.charging) {
+    color: mix(@color0, @foreground, 1.15);
+    animation-name: blink;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#custom-hypridle,
+#idle_inhibitor {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#clock {
+    color: mix(@color0, @foreground, 1.15);
+    padding: 1px 8px;
+}
+
+#custom-updates {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+#swaync {
+    color: mix(@color0, @foreground, 1.15);
+}
+
+@keyframes blink {
+    to {
+        color: mix(@color0, @foreground, 1.15);
+    }
+}

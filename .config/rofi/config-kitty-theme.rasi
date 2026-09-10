@@ -1,0 +1,47 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Oh My ZSH Theme */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Configuration ---- */ 
+configuration {
+  modi: "drun";
+}
+
+/* ---- Listbox ---- */
+listbox {
+  border-radius: 12px;
+}
+
+entry {
+  expand: true;
+  placeholder: " 󰄛  Choose Kitty theme: Enter to Preview; CTRL S to Apply";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  spacing: 6px;
+  border-radius: 10px;
+  cycle: true;
+}
+
+/* ---- Element ---- */
+element {
+  orientation: horizontal;
+}
+
+/* ---- Message ---- */
+message {
+  enabled: false;
+}
+
+/* ---- Element ---- */
+element-icon {
+  size: 0%;
+}
+element-text {
+  horizontal-align: 0.0;
+  margin: 0px;
+}

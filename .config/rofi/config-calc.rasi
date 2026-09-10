@@ -1,0 +1,32 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main Config Calculator */
+/* Submitted by: https://github.com/JosephArmas */
+
+@import "~/.config/rofi/config.rasi" 
+
+/* ---- Mainbox ---- */
+mainbox {
+  orientation: vertical;
+  children: [ "entry", "message" ];
+  height: inherit;
+}
+
+/* ---- Window ---- */
+window {
+  width: 30%;
+  height: inherit;
+}
+
+/* ---- Entry ---- */
+entry {
+  expand: true;
+  placeholder: "   Calculate";
+}
+
+listview {
+  enable: false;
+}
+
+message {
+  enabled: true;
+}

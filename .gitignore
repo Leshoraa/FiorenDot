@@ -1,0 +1,21 @@
+# Temporary, lock, and backup files
+*.save
+*.bak
+*.swp
+*~
+*.log
+.DS_Store
+
+# Hyprland / Rofi runtime state
+.initial_startup_done
+.current_wallpaper
+.current_wallpaper_square.png
+
+# Shell & tool histories
+.zsh_history
+.bash_history
+
+# Caches
+__pycache__/
+*.pyc
+.cache/

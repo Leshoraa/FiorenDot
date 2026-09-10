@@ -1,0 +1,28 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Monitor Profiles Menu */
+
+@import "~/.config/rofi/config.rasi" 
+
+/* ---- Entry ---- */ 
+entry {
+  placeholder: " 󰍹  Search / Choose which Monitor Profiles to load";
+  horizontal-align: 0.0;
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  margin: 0px;
+  cycle: true;
+}
+
+/* ---- Elements ---- */
+element-icon {
+  size: 0%;
+}
+element-text {
+  horizontal-align: 0.0;
+  vertical-align: 0.5;
+  margin: 0px;
+}

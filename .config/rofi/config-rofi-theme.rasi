@@ -1,0 +1,45 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main Config Rofi Theme */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Custombox ---- */
+/* Override custombox to ensure listview is visible for themes that use it */
+custombox {
+  spacing:                     0px;
+  background-color:            inherit;
+  text-color:                  inherit;
+  orientation:                 vertical;
+  children:                    [ "listview" ];
+}
+
+/* ---- Entry input ---- */
+entry {
+  expand: true;
+  placeholder: " 󰔚  Select Which Rofi Theme wanted to apply";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  margin: 0px;
+  spacing: 6px;
+  cycle: true;
+}
+
+/* ---- Elements ---- */
+element-icon {
+  size: 0%;
+}
+element-text {
+  horizontal-align: 0.0;
+  vertical-align: 0.5;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* ---- Message ---- */
+message {
+  enabled: false;
+}

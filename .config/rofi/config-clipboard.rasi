@@ -1,0 +1,47 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Clipboard Config - Clipboard (FIO x HYURA Clean Edition) */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Override Mainbox: Replace static imagebox with live icon-current-entry ---- */
+mainbox {
+  children:                   [ "icon-current-entry", "listbox" ];
+}
+
+icon-current-entry {
+  enabled:                    true;
+  size:                       416px;
+  border-radius:              16px;
+  expand:                     false;
+  horizontal-align:           0.5;
+  vertical-align:             0.5;
+}
+
+/* ---- Entry ---- */
+entry {
+  placeholder: " 󰅍  Search Clipboard... ";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  spacing: 10px;
+  cycle: true;
+}
+
+/* ---- Elements (Clean Text Only - Tanpa Ikon Kecil) ---- */
+element {
+  orientation:                horizontal;
+  spacing:                    14px;
+  padding:                    10px 16px;
+  border-radius:              10px;
+  children:                   [ "element-text" ];
+}
+
+element-text {
+  horizontal-align:           0.0;
+  vertical-align:             0.5;
+  margin:                     0px;
+  padding:                    0px;
+}

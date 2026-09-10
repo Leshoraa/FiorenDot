@@ -1,0 +1,215 @@
+/* =======================================================
+ *   FIO x HYURA — Custom Rofi Interface
+ *   Style: Split Horizontal / 1:1 Preview / Balanced Glass
+ * ======================================================= */
+
+configuration {
+    modi:                       "drun,run,filebrowser,window";
+    show-icons:                 false;
+    display-drun:               "󰣇  Apps";
+    display-run:                "  Term";
+    display-filebrowser:        "  Files";
+    display-window:             "  Window";
+    drun-display-format:        "{name}";
+    hover-select:               true;
+    me-select-entry:            "MouseSecondary";
+    me-accept-entry:            "MousePrimary";
+    window-format:              "{w} · {c} · {t}";
+}
+
+/* ---- Color Scheme Sourced from Wallust ---- */
+@theme "~/.config/rofi/wallust/colors-rofi.rasi"
+
+* {
+    font:                       "JetBrainsMono Nerd Font 11";
+    background-alt:             @color1;
+    selected:                   @color12;
+    active:                     @color11;
+    urgent:                     @color13;
+
+    text-selected:              @background;
+    text-color:                 @foreground;
+    border-color:               @selected;
+}
+
+/* ---- Main Window ---- */
+window {
+    enabled:                    true;
+    fullscreen:                 false;
+    transparency:               "real";
+    cursor:                     "default";
+    spacing:                    0px;
+    border:                     2px;
+    border-radius:              20px;
+    border-color:               @selected;
+    location:                   center;
+    anchor:                     center;
+    width:                      860px;
+    height:                     460px;
+    background-color:           rgba(15, 15, 23, 0.75);
+}
+
+/* ---- Main Container ---- */
+mainbox {
+    enabled:                    true;
+    orientation:                horizontal;
+    spacing:                    24px;
+    padding:                    20px;
+    background-color:           transparent;
+    children:                   [ "imagebox", "listbox" ];
+}
+
+/* ---- Left Panel: 1:1 Wallpaper Preview (Center Crop) ---- */
+imagebox {
+    enabled:                    true;
+    width:                      416px;
+    height:                     416px;
+    expand:                     false;
+    border-radius:              16px;
+    background-color:           transparent;
+    background-image:           url("~/.config/rofi/.current_wallpaper_square.png", both);
+    children:                   [ "dummy" ];
+}
+
+/* ---- Right Panel: Konten ---- */
+listbox {
+    enabled:                    true;
+    spacing:                    18px;
+    padding:                    2px 8px 2px 2px;
+    background-color:           transparent;
+    orientation:                vertical;
+    children:                   [ "inputbar", "listview" ];
+}
+
+/* ---- Search Inputbar (Semi-Transparan Kaca) ---- */
+inputbar {
+    enabled:                    true;
+    spacing:                    12px;
+    padding:                    12px 16px;
+    border:                     1.5px;
+    border-radius:              12px;
+    border-color:               @selected;
+    background-color:           rgba(15, 15, 23, 0.5);
+    children:                   [ "entry" ];
+}
+
+entry {
+    enabled:                    true;
+    background-color:           transparent;
+    text-color:                 @foreground;
+    cursor:                     text;
+    placeholder:                "  Search...";
+    placeholder-color:          rgba(255, 255, 255, 0.4);
+    vertical-align:             0.5;
+}
+
+/* Mode switcher dinonaktifkan di UI (tetap aktif via keyboard) */
+mode-switcher {
+    enabled:                    false;
+}
+
+/* ---- Single Column Listview ---- */
+listview {
+    enabled:                    true;
+    columns:                    1;
+    lines:                      6;
+    cycle:                      true;
+    dynamic:                    true;
+    scrollbar:                  false;
+    layout:                     vertical;
+    reverse:                    false;
+    fixed-height:               true;
+    fixed-columns:              true;
+    spacing:                    10px;
+    padding:                    2px 0px;
+    background-color:           transparent;
+    border:                     0px;
+}
+
+/* ---- Item Elements ---- */
+element {
+    enabled:                    true;
+    spacing:                    14px;
+    padding:                    10px 16px;
+    border-radius:              10px;
+    background-color:           transparent;
+    cursor:                     pointer;
+}
+
+element normal.normal {
+    background-color:           transparent;
+    text-color:                 @foreground;
+}
+
+element normal.urgent {
+    background-color:           @urgent;
+    text-color:                 @foreground;
+}
+
+element normal.active {
+    background-color:           @active;
+    text-color:                 @foreground;
+}
+
+element selected.normal {
+    background-color:           @selected;
+    text-color:                 @background;
+}
+
+element selected.urgent {
+    background-color:           @selected;
+    text-color:                 @background;
+}
+
+element selected.active {
+    background-color:           @selected;
+    text-color:                 @background;
+}
+
+element alternate.normal {
+    background-color:           transparent;
+    text-color:                 @foreground;
+}
+
+element-icon {
+    background-color:           transparent;
+    text-color:                 inherit;
+    size:                       28px;
+    cursor:                     inherit;
+    vertical-align:             0.5;
+}
+
+element-text {
+    background-color:           transparent;
+    text-color:                 inherit;
+    cursor:                     inherit;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+element-text selected {
+    background-color:           transparent;
+    text-color:                 @background;
+}
+
+/* ---- Helpers ---- */
+dummy {
+    expand:                     true;
+    background-color:           transparent;
+}
+
+message {
+    enabled:                    false;
+    background-color:           transparent;
+    border:                     0px;
+}
+
+textbox {
+    margin:                     6px 0px;
+    padding:                    8px;
+    border-radius:              10px;
+    background-color:           @background-alt;
+    text-color:                 @foreground;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}

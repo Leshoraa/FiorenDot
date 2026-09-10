@@ -1,0 +1,147 @@
+{
+    "window.titleBarStyle": "native",
+    "window.menuBarVisibility": "hidden",
+    "window.zoomLevel": -0.2,
+    "workbench.activityBar.location": "hidden",
+    "editor.padding.top": 12,
+    "editor.minimap.enabled": false,
+    "editor.scrollbar.vertical": "auto",
+    "editor.scrollbar.horizontal": "hidden",
+    "editor.stickyScroll.enabled": false,
+    "window.commandCenter": false,
+    "editor.fontFamily": "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'FiraCode Nerd Font', monospace",
+    "editor.fontSize": 12.2,
+    "editor.lineHeight": 20,
+    "editor.fontWeight": "600",
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font', monospace",
+    "workbench.layoutControl.enabled": false,
+    "workbench.editor.showTabs": "single",
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.limit.enabled": false,
+    "workbench.editor.editorActionsLocation": "hidden",
+    "workbench.statusBar.visible": false,
+    "editor.semanticHighlighting.enabled": false,
+    "editor.bracketPairColorization.enabled": false,
+    "workbench.colorCustomizations": {
+        "editor.selectionBackground": "{{color4}}80",
+        "editor.selectionHighlightBackground": "{{color4}}40",
+        "titleBar.activeBackground": "{{background | blend('#040507')}}",
+        "titleBar.activeForeground": "{{background | blend('#040507')}}",
+        "titleBar.inactiveBackground": "{{background | blend('#040507')}}",
+        "titleBar.inactiveForeground": "{{background | blend('#040507')}}",
+        "tab.activeBorderTop": "{{color12}}",
+        "editorGutter.background": "{{background | blend('#040507')}}",
+        "editor.background": "{{background | blend('#040507')}}",
+        "editor.foreground": "{{foreground}}",
+        "sideBar.background": "{{background | blend('#040507')}}",
+        "sideBar.foreground": "{{color12}}",
+        "list.activeSelectionForeground": "{{color12}}",
+        "list.inactiveSelectionForeground": "{{color12}}",
+        "list.focusForeground": "{{color12}}",
+        "list.hoverForeground": "{{color12}}",
+        "activityBar.background": "{{background | blend('#040507')}}",
+        "activityBar.foreground": "{{color12}}",
+        "statusBar.background": "{{background | blend('#040507')}}",
+        "statusBar.foreground": "{{foreground}}",
+        "terminal.ansiBlack": "{{color0}}",
+        "terminal.ansiRed": "{{color1}}",
+        "terminal.ansiGreen": "{{color2}}",
+        "terminal.ansiYellow": "{{color3}}",
+        "terminal.ansiBlue": "{{color4}}",
+        "terminal.ansiMagenta": "{{color5}}",
+        "terminal.ansiCyan": "{{color10}}",
+        "terminal.ansiWhite": "{{color12}}",
+        "editorStickyScroll.background": "{{background | blend('#040507')}}",
+        "editorStickyScrollHover.background": "{{background | blend('#040507')}}",
+        "tab.activeBackground": "{{background | blend('#040507')}}",
+        "tab.inactiveBackground": "{{background | blend('#040507')}}",
+        "tab.activeForeground": "{{color12}}",
+        "tab.activeUnfocusedForeground": "{{color12}}",
+        "breadcrumb.foreground": "{{color12}}",
+        "breadcrumb.focusForeground": "{{foreground}}",
+        "textLink.foreground": "{{foreground}}",
+        "textLink.activeForeground": "{{color12}}",
+        "button.background": "{{color12}}",
+        "button.foreground": "{{background | blend('#040507')}}",
+        "button.hoverBackground": "{{color4}}",
+        "button.secondaryBackground": "{{background | blend('#040507')}}",
+        "button.secondaryForeground": "{{foreground}}"
+    },
+    "editor.tokenColorCustomizations": {
+        "comments": "{{color13}}",
+        "textMateRules": [
+            {
+                "scope": [
+                    "keyword.operator",
+                    "keyword.other.directive.using.cs",
+                    "storage",
+                    "constant.language",
+                    "punctuation",
+                    "punctuation.separator",
+                    "punctuation.terminator",
+                    "punctuation.terminator.statement.cs",
+                    "punctuation.parenthesis.open.cs",
+                    "punctuation.parenthesis.close.cs",
+                    "punctuation.curlybrace.open.cs",
+                    "punctuation.curlybrace.close.cs"
+                ],
+                "settings": {
+                    "foreground": "{{foreground}}"
+                }
+            },
+            {
+                "scope": [
+                    "variable.language",
+                    "variable.language.base.cs",
+                    "variable.language.this.cs"
+                ],
+                "settings": {
+                    "foreground": "{{color12}}"
+                }
+            },
+            {
+                "scope": [
+                    "string",
+                    "string.quoted",
+                    "string.quoted.double",
+                    "string.quoted.single",
+                    "string.template",
+                    "constant.numeric"
+                ],
+                "settings": {
+                    "foreground": "{{color12}}"
+                }
+            },
+            {
+                "scope": [
+                    "entity.name.class",
+                    "entity.name.namespace",
+                    "support.class",
+                    "support.type",
+                    "entity.name.variable",
+                    "constant.character.escape",
+                    "keyword.operator.expression",
+                    "constant.numeric.decimal.cs",
+                    "entity.other.attribute-name.html",
+                    "keyword.operator.new.js",
+                    "punctuation.definition.template-expression.begin.js",
+                    "string.template.js",
+                    "punctuation.definition.template-expression.end.js"
+                ],
+                "settings": {
+                    "foreground": "{{color12}}"
+                }
+            }
+        ]
+    },
+    "files.autoSave": "afterDelay",
+    "workbench.iconTheme": "minimal-icons-without-explorer-arrows",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "chat.experimental.incrementalRendering.animationStyle": "blur",
+    "editor.smoothScrolling": true,
+    "editor.cursorBlinking": "expand",
+    "terminal.integrated.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true,
+    "workbench.iconTheme": "material-icon-theme"
+}

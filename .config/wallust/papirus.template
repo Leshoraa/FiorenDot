@@ -1,0 +1,3 @@
+#!/bin/sh
+papirus-folders -c --hex {{color4}} -t Papirus-Dark
+thunar -q

@@ -1,0 +1,323 @@
+/* PENGATURAN WARNA DASAR (Diambil dari wallust/waybar) */
+@import '../../.config/waybar/wallust/colors-waybar.css';
+
+@define-color noti-bg mix(@background, #2C2C2C, 0.6);
+@define-color text-color @foreground;
+
+/* PENGATURAN FONT GLOBAL */
+* {
+    font-family: "JetBrains Mono Nerd Font";
+    font-weight: bold;
+    font-size: 13px;
+    outline: none;
+    --notification-icon-size: 24px;
+    --mpris-album-art-icon-size: 90px;
+}
+
+button {
+    transition: all 0.2s ease-in-out;
+    /* Animasi transisi saat tombol di-hover/diklik */
+}
+
+/* WADAH UTAMA CONTROL CENTER (Latar belakang melengkung luar) */
+.control-center {
+    background: @noti-bg;
+    border-radius: 14px;
+    padding: 8px;
+    margin: 8px;
+    border: 2px solid @color4;
+    /* Garis border luar */
+}
+
+/* 1. BAGIAN ATAS: MENU BAR (Ombak & Power) */
+.widget-menubar {
+    background: @background;
+    border-radius: 14px;
+    margin: 24px 16px 0px 16px;
+    padding: 4px;
+}
+
+.widget-menubar box {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.widget-menubar button:hover,
+.widget-menubar button {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Teks ombak di sisi kiri menu bar */
+.widget-menubar>box>box:first-child>button {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    color: @text-color;
+    font-size: 14px;
+}
+
+/* Tombol Power di sisi kanan menu bar */
+.widget-menubar>box>box:last-child>button {
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 22px;
+    /* Ukuran ikon power */
+    color: @text-color;
+}
+
+.widget-menubar>box>box:last-child>button:hover {
+    background-color: lighter(@color12);
+    /* Warna berubah saat mouse diarahkan (hover) */
+    color: @background;
+}
+
+/* 2. BAGIAN TENGAH: GRID TOMBOL AKSI (Kotak-kotak 3x2) */
+.widget-buttons-grid {
+    margin: 2px 8px 6px 8px;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button {
+    background: mix(@background, #383838, 0.6);
+    /* Warna tombol keadaan normal */
+    border-radius: 14px;
+    min-height: 48px;
+    min-width: 48px;
+    margin: 4px;
+    font-size: 18px;
+    /* Ukuran ikon di dalam tombol grid */
+}
+
+/* Efek saat tombol grid di-hover atau sedang menyala (aktif) */
+.widget-buttons-grid>flowbox>flowboxchild>button:hover,
+.widget-buttons-grid>flowbox>flowboxchild>button:checked {
+    background-color: lighter(@color12);
+    color: @background;
+}
+
+/* 3. BAGIAN SLIDER (Volume dan Brightness) */
+.widget-volume,
+.widget-backlight {
+    background: transparent;
+    border-radius: 0;
+    margin: 12px 20px;
+    padding: 0;
+}
+
+/* Ikon speaker dan lampu di samping slider */
+.widget-volume label,
+.widget-backlight label {
+    font-size: 14px;
+    color: alpha(@foreground, 0.6);
+    margin-right: 18px;
+}
+
+.widget-volume button,
+.widget-title button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: @text-color;
+}
+
+/* 1. JALUR KOSONG (Track) */
+scale trough {
+    background: alpha(@foreground, 0.1);
+    border-radius: 6px;
+    min-height: 4px;
+    /* Tinggi normal rel */
+    border: none;
+    outline: none;
+
+    /* Tambahkan transition biar rel membesar secara smooth */
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+}
+
+/* 2. JALUR TERISI (Highlight) */
+scale highlight {
+    background-color: lighter(@color12);
+    border-radius: 6px 0px 0px 6px;
+    min-height: 4px;
+    /* Tinggi normal rel */
+
+    /* Tambahkan transition juga di sini */
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+}
+
+/* 3. PEGANGAN (Slider) */
+scale slider {
+    background: @foreground;
+    border-radius: 4px;
+    min-height: 8px;
+    /* Tinggi normal pegangan */
+    min-width: 2px;
+
+    /* Hitungan margin normal: (8px pegangan - 4px rel) / 2 = 2px */
+    margin: -8px 0;
+
+    box-shadow: none;
+    border-left: 4px solid @noti-bg;
+    border-right: 4px solid @noti-bg;
+    background-clip: padding-box;
+
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+}
+
+/* Rel kosong membesar & ganti warna */
+scale:hover trough {
+    background: alpha(@foreground, 0.2);
+    min-height: 24px;
+    /* Rel menebal jadi 12px */
+}
+
+/* Rel warna (highlight) ikut menebal biar sejajar */
+scale:hover highlight {
+    min-height: 24px;
+}
+
+/* Pegangan (garis putih) membesar */
+scale:hover slider {
+    min-height: 36px;
+    min-width: 3px;
+    border-radius: 4.6px;
+
+    /* Hitungan margin hover: (36px pegangan - 24px rel) / 2 = 10px */
+    margin: -6px 0;
+}
+
+
+/* 4. JUDUL NOTIFIKASI (Tulisan "Notifications" & Ikon Trash) */
+.widget-title {
+    color: @text-color;
+    margin: 0px 16px 4px 16px;
+    font-size: 12px;
+}
+
+/* 5. GAYA KARTU NOTIFIKASI INDIVIDUAL */
+.control-center-list,
+.widget-notifications,
+.notification-row {
+    background: transparent;
+    border: none;
+    outline: none;
+    margin-top: 0px;
+}
+
+.notification-row:focus,
+.notification-row:hover,
+.notification-row:selected {
+    background: transparent;
+    background-color: transparent;
+    background-image: transparent;
+    box-shadow: none;
+    border: none;
+    outline: none;
+}
+
+/* Menyembunyikan beberapa elemen default bawaan notifikasi */
+.notification-icon,
+.notification-image,
+.notification-action,
+.notification-default-action {
+    display: none;
+}
+
+/* Bentuk kotak dari tiap notifikasi yang masuk */
+.notification {
+    background: @noti-bg;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1.4px solid @color4;
+    margin-bottom: 6px;
+    min-width: 0px;
+    min-height: 32px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Progress bar di dalam notifikasi (misalnya saat mendownload file) */
+.notification progressbar {
+    margin-top: 10px;
+}
+
+.notification progressbar trough {
+    background-color: alpha(@foreground, 0.1);
+    border: none;
+    border-radius: 24px;
+    min-height: 6px;
+}
+
+.notification progressbar progress {
+    background-color: @color13;
+    background-image: none;
+    border: none;
+    border-radius: 24px;
+    min-height: 6px;
+}
+
+/* Teks ringkasan/judul dari notifikasi */
+.notification-content .summary {
+    font-weight: 800;
+    font-size: 14px;
+}
+
+/* Scrollbar di dalam list notifikasi */
+scrollbar,
+scrollbar trough,
+scrollbar slider {
+    background: transparent;
+    width: 0px;
+    min-width: 0px;
+    border: none;
+    /* Disembunyikan agar tampilan bersih */
+}
+
+/* 6. BAGIAN BAWAH: PEMUTAR MEDIA MPRIS (Visual "Gravits" di gambar) */
+.widget-mpris {
+    background: alpha(@background, 0.4);
+    border-radius: 14px;
+    padding: 12px;
+    margin: 24px 16px;
+    border: 1.4px solid @color4;
+    /* Garis tepi media player */
+}
+
+.widget-mpris-player {
+    padding: 8px;
+    margin: 0px;
+}
+
+.widget-mpris-title {
+    font-weight: bold;
+    font-size: 14px;
+    /* Judul lagu */
+    color: @text-color;
+}
+
+.widget-mpris-subtitle {
+    font-size: 12px;
+    /* Nama artist/album */
+    color: @color13;
+}
+
+/* Tombol kontrol media (Play, Pause, Next, Prev) */
+.widget-mpris-player>box>button {
+    background: transparent;
+    color: @text-color;
+    border-radius: 8px;
+    min-width: 30px;
+    min-height: 30px;
+    box-shadow: none;
+}
+
+.widget-mpris-player>box>button:hover {
+    background-color: lighter(@color12);
+    /* Warna tombol media saat di-hover */
+    color: @background;
+}

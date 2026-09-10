@@ -1,0 +1,133 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main Config (wallpaper) */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Configuration ---- */ 
+configuration {
+  modi: "drun";
+  show-icons: true;
+}
+
+window {
+  width: 1066px;
+  height: 460px;
+  border-radius: 20px;
+}
+
+/* ---- Mainbox ---- */
+mainbox {
+  orientation: horizontal;
+  padding: 20px;
+  spacing: 24px;
+  children: [ "imagebox", "listbox" ];
+}
+
+/* ---- Imagebox (Current Wallpaper 1:1 Square) ---- */
+imagebox {
+  enabled: true;
+  width: 416px;
+  height: 416px;
+  expand: false;
+  border-radius: 16px;
+  background-color: transparent;
+  background-image: url("~/.config/rofi/.current_wallpaper_square.png", both);
+  children: [ "dummy" ];
+}
+
+/* ---- Listbox ---- */
+listbox {
+  orientation: vertical;
+  spacing: 16px;
+  padding: 0px;
+  children: [ "inputbar", "listview" ];
+  expand: true;
+}
+
+/* ---- Inputbar (Search Bar) ---- */
+inputbar {
+  enabled: true;
+  padding: 10px 16px;
+  border: 1.5px;
+  border-radius: 12px;
+  border-color: @selected;
+  background-color: rgba(15, 15, 23, 0.5);
+  children: [ "entry" ];
+}
+
+/* ---- Entry ---- */
+entry {
+  expand: true;
+  placeholder: " 󰸉  Search / Choose Wallpaper";
+  horizontal-align: 0.5;
+}
+
+/* ---- Listview (3 Rows x 3 Columns) ---- */
+listview {
+  columns: 3;
+  lines: 3;
+  spacing: 14px;
+  padding: 0px;
+  flow: horizontal;
+  fixed-width: true;
+  fixed-height: true;
+  cycle: true;
+}
+
+/* ---- Element ---- */
+element {
+  orientation: vertical;
+  padding: 4px;
+  spacing: 0px;
+  border-radius: 12px;
+  border: 2px;
+  border-color: transparent;
+  background-color: transparent;
+  children: [ "element-icon" ];
+  cursor: pointer;
+}
+
+element normal.normal {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+element normal.active {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+element alternate.normal {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+element alternate.active {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+element selected.normal {
+  border: 2px;
+  border-color: var(selected);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+element selected.active {
+  border: 2px;
+  border-color: var(selected);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+element-icon {
+  size: 174px;
+  margin: -38px 0px;
+  cursor: inherit;
+  horizontal-align: 0.5;
+  vertical-align: 0.5;
+  border-radius: 8px;
+}
+
+element-text {
+  enabled: false;
+}

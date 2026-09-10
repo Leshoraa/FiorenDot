@@ -1,0 +1,34 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main Config - emoji */
+
+@import "~/.config/rofi/config.rasi" 
+
+/* ---- Entry ---- */
+entry {
+  placeholder: " 󰞅  Search / Choose Emoji";
+  horizontal-align: 0.0;
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 6;
+  spacing: 6px;
+  cycle: true;
+}
+
+/* ---- Elements ---- */
+element {
+  orientation: horizontal;
+}
+
+element-icon {
+  size: 0%;
+}
+
+element-text {
+  horizontal-align: 0.0;
+  vertical-align: 0.5;
+  padding: 0px;
+  margin: 0px;
+}

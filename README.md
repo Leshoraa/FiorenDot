@@ -81,6 +81,7 @@ The included `install.sh` script automates backing up any existing configuration
 | `Super + Q` / `Super + C` | Close active window |
 | `Super + Alt + V` | Open clipboard manager |
 | `Super + Alt + R` | Refresh Waybar, SwayNC, and desktop components |
+| `Super + Alt + O` | Toggle blur mode (Optimized / Ultra Blur) |
 | `Super + H` | Toggle keybind cheat sheet |
 | `Super + Alt + E` | Emoji picker |
 

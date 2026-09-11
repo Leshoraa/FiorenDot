@@ -8,13 +8,16 @@
 
 set -e
 
+# Pastikan direktori state ada agar tidak terjadi crash user_migration di Waydroid
+mkdir -p "$HOME/.local/state/waydroid" "$HOME/.local/share/applications"
+
 ARG="${1:-normal}"
 
 case "$ARG" in
     90|"portrait")
         WIDTH=1200
         HEIGHT=1920
-        ROT=1
+        ROT=0
         MODE_NAME="Portrait (90° - 1200x1920)"
         ;;
     180|"inverted")
@@ -26,7 +29,7 @@ case "$ARG" in
     270|"reverse-portrait")
         WIDTH=1200
         HEIGHT=1920
-        ROT=3
+        ROT=2
         MODE_NAME="Reverse Portrait (270° - 1200x1920)"
         ;;
     0|"normal"|"landscape"|*)
@@ -41,47 +44,38 @@ echo "========================================="
 echo " Starting Waydroid: $MODE_NAME"
 echo "========================================="
 
-# Baca resolusi saat ini dari waydroid.cfg
-CURRENT_WIDTH=$(grep "persist.waydroid.width" /var/lib/waydroid/waydroid.cfg 2>/dev/null | cut -d= -f2 | tr -d ' ' || true)
-CURRENT_HEIGHT=$(grep "persist.waydroid.height" /var/lib/waydroid/waydroid.cfg 2>/dev/null | cut -d= -f2 | tr -d ' ' || true)
-
-NEED_RESTART=false
-
-if [ "$CURRENT_WIDTH" != "$WIDTH" ] || [ "$CURRENT_HEIGHT" != "$HEIGHT" ]; then
-    echo "Mengatur resolusi Waydroid ke ${WIDTH}x${HEIGHT}..."
-    sudo waydroid prop set persist.waydroid.width "$WIDTH"
-    sudo waydroid prop set persist.waydroid.height "$HEIGHT"
-    NEED_RESTART=true
-fi
-
-# Jika sesi sedang berjalan dan resolusi berubah, restart sesi & container
+# 1. Hentikan sesi yang sedang berjalan jika ada
 if waydroid status 2>/dev/null | grep -q "RUNNING"; then
-    if [ "$NEED_RESTART" = true ]; then
-        echo "Me-restart container Waydroid untuk menerapkan resolusi baru..."
-        waydroid session stop 2>/dev/null || true
-        sleep 1
-        sudo systemctl restart waydroid-container.service
-    fi
-else
-    sudo systemctl start waydroid-container.service
+    echo "Menghentikan sesi Waydroid aktif..."
+    waydroid session stop 2>/dev/null || true
+    sleep 1
 fi
 
-# Jalankan sesi Full UI jika belum berjalan
-if ! pgrep -f "waydroid show-full-ui" >/dev/null 2>&1; then
-    echo "Membuka Waydroid Full UI..."
-    waydroid show-full-ui &
-fi
+# 2. Atur resolusi sesuai mode
+echo "Mengatur resolusi Waydroid ke ${WIDTH}x${HEIGHT}..."
+sudo waydroid prop set persist.waydroid.width "$WIDTH"
+sudo waydroid prop set persist.waydroid.height "$HEIGHT"
 
-# Terapkan rotasi internal Android di latar belakang
-(
-    for i in {1..10}; do
-        sleep 1
-        if waydroid status 2>/dev/null | grep -q "RUNNING"; then
-            sudo waydroid shell settings put system accelerometer_rotation 0 >/dev/null 2>&1 || true
-            sudo waydroid shell settings put system user_rotation "$ROT" >/dev/null 2>&1 || true
-            break
-        fi
-    done
-) &
+# 3. Restart container agar resolusi baru dibaca
+echo "Memuat ulang service Waydroid..."
+sudo systemctl restart waydroid-container.service
+
+# 4. Jalankan Full UI
+echo "Membuka Waydroid Full UI..."
+waydroid show-full-ui &
+
+# 5. Atur rotasi jika mode inverted
+if [ "$ROT" -ne 0 ]; then
+    (
+        for i in {1..10}; do
+            sleep 1
+            if waydroid status 2>/dev/null | grep -q "RUNNING"; then
+                sudo waydroid shell settings put system accelerometer_rotation 0 >/dev/null 2>&1 || true
+                sudo waydroid shell settings put system user_rotation "$ROT" >/dev/null 2>&1 || true
+                break
+            fi
+        done
+    ) &
+fi
 
 echo "Waydroid berhasil dijalankan ($MODE_NAME)!"

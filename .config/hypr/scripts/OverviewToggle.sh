@@ -4,11 +4,9 @@
 
 set -euo pipefail
 
-# 1) Try Quickshell via IPC (works if QS is running and listening)
-if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
-  if qs ipc -c overview call overview toggle >/dev/null 2>&1; then
-    exit 0
-  fi
+# 1) Try Quickshell via IPC directly (instant if running)
+if qs ipc -c overview call overview toggle >/dev/null 2>&1; then
+  exit 0
 fi
 
 # If QS isn't running, but the CLI exists, try starting it and retry once

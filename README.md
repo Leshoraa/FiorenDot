@@ -18,6 +18,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 | **Compositor** | Hyprland | Dynamic tiling Wayland compositor |
 | **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) |
 | **App Launcher** | Rofi-wayland | Application menu, beats, wallpapers, calculator |
+| **Overview** | Quickshell | Lightweight workspace overview with live window previews |
 | **Notification** | SwayNC | Wayland notification daemon & control center |
 | **Terminals** | Kitty / Ghostty | GPU-accelerated terminal emulators |
 | **Shell** | Zsh + Oh My Zsh | Shell environment with plugins & completions |
@@ -70,6 +71,7 @@ The included `install.sh` script automates backing up any existing configuration
 | Shortcut | Action |
 | :--- | :--- |
 | `Super + Return` | Open default terminal (Kitty / Ghostty) |
+| `Super + A` | Toggle desktop workspace overview (Quickshell) |
 | `Super + D` | Open Rofi application launcher |
 | `Super + T` | Open default file manager |
 | `Super + B` | Open default web browser |
@@ -96,7 +98,7 @@ sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop 
 
 Optional/AUR tools:
 ```bash
-yay -S wallust-git wlogout ghostty fastfetch
+yay -S wallust-git wlogout ghostty fastfetch quickshell
 ```
 
 ---

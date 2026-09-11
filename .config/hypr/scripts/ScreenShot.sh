@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Screenshots scripts - MODIFIED: No Sound & Faster + Auto Save
+# Screenshots scripts - MODIFIED: No Sound & Faster + Auto Save (No Icon)
 
 # variables
 time=$(date "+%d-%b_%H-%M-%S")
 dir="$(xdg-user-dir PICTURES)/Screenshots"
 file="Screenshot_${time}_${RANDOM}.png"
 
-iDIR="$HOME/.config/swaync/icons"
-iDoR="$HOME/.config/swaync/images"
 sDIR="$HOME/.config/hypr/scripts"
 
 active_window_class=$(hyprctl -j activewindow 2>/dev/null | jq -r '(.class // "window")')
@@ -16,24 +14,24 @@ active_window_file="Screenshot_${time}_${active_window_class}.png"
 active_window_path="${dir}/${active_window_file}"
 
 notify_cmd_base="notify-send -t 2200 -h string:x-canonical-private-synchronous:shot-notify"
-notify_cmd_shot="${notify_cmd_base} -i ${iDIR}/picture.png "
-notify_cmd_shot_win="${notify_cmd_base} -i ${iDIR}/picture.png "
-notify_cmd_NOT="notify-send -u low -i ${iDoR}/note.png "
+notify_cmd_shot="${notify_cmd_base} "
+notify_cmd_shot_win="${notify_cmd_base} "
+notify_cmd_NOT="notify-send -u low "
 
 # notify and view screenshot
 notify_view() {
     if [[ "$1" == "active" ]]; then
         if [[ -e "${active_window_path}" ]]; then
-            ${notify_cmd_shot_win} " Screenshot of:" " ${active_window_class} Saved."
+            ${notify_cmd_shot_win} "Screenshot of:" "${active_window_class} Saved."
         else
-            ${notify_cmd_NOT} " Screenshot of:" " ${active_window_class} NOT Saved."
+            ${notify_cmd_NOT} "Screenshot of:" "${active_window_class} NOT Saved."
         fi
     else
         local check_file="${dir}/${file}"
         if [[ -e "$check_file" ]]; then
-            ${notify_cmd_shot} " Screenshot" " Saved & Copied to Clipboard"
+            ${notify_cmd_shot} "Screenshot" "Saved & Copied to Clipboard"
         else
-            ${notify_cmd_NOT} " Screenshot" " NOT Saved"
+            ${notify_cmd_NOT} "Screenshot" "NOT Saved"
         fi
     fi
 }
@@ -41,7 +39,7 @@ notify_view() {
 # countdown
 countdown() {
     for sec in $(seq $1 -1 1); do
-        notify-send -h string:x-canonical-private-synchronous:shot-notify -t 1000 -i "$iDIR"/timer.png  " Taking shot" " in: $sec secs"
+        notify-send -h string:x-canonical-private-synchronous:shot-notify -t 1000 "Taking shot" "in: $sec secs"
         sleep 1
     done
 }

@@ -14,12 +14,12 @@ if [ -f "$STATE_FILE" ]; then
         if pgrep -x wvkbd-mobintl >/dev/null; then
             pkill -SIGUSR2 wvkbd-mobintl
         else
-            nohup wvkbd-mobintl -L 300 -H 350 >/dev/null 2>&1 &
+            hyprctl dispatch exec "$HOME/.local/bin/wvkbd-mobintl -L 300 -H 350"
         fi
     else
         # Normal laptop mode: run hidden so it's ready upon rotation
         if ! pgrep -x wvkbd-mobintl >/dev/null; then
-            nohup wvkbd-mobintl -L 300 -H 350 --hidden >/dev/null 2>&1 &
+            hyprctl dispatch exec "$HOME/.local/bin/wvkbd-mobintl -L 300 -H 350 --hidden"
         fi
     fi
 

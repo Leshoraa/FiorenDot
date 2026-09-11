@@ -36,7 +36,7 @@ if [ -n "$TRANSFORM" ]; then
     if [ ! -f "$STATE_FILE" ]; then
         if [ "$TRANSFORM" -ne 0 ]; then
             # Mode Tablet / Vertikal: Munculkan keyboard virtual
-            pkill -SIGUSR2 wvkbd-mobintl || hyprctl dispatch exec "wvkbd-mobintl -L 300 -H 350"
+            pkill -SIGUSR2 wvkbd-mobintl || hyprctl dispatch exec "$HOME/.local/bin/wvkbd-mobintl -L 300 -H 350"
         else
             # Mode Laptop Biasa: Sembunyikan keyboard virtual
             pkill -SIGUSR1 wvkbd-mobintl

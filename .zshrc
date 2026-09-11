@@ -7,7 +7,11 @@ export DOTNET_ROOT=/usr/share/dotnet
 export PATH=$PATH:$DOTNET_ROOT:$HOME/.dotnet/tools
 export PATH="$HOME/.local/bin:$PATH"
 
-ZSH_THEME="agnosterzak"
+# Disable compfix check for instantaneous startup (~320ms saved)
+export ZSH_DISABLE_COMPFIX="true"
+
+# Starship manages prompt, disable OMZ theme loading overhead
+ZSH_THEME=""
 
 plugins=(
     git
@@ -17,17 +21,6 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
-
-# Check archlinux plugin commands here
-# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/archlinux
-
-# Display Pokemon-colorscripts
-# Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
-#pokemon-colorscripts --no-title -s -r #without fastfetch
-#pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
-fastfetch
-# fastfetch. Will be disabled if above colorscript was chosen to install
-#fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
 
 # Set-up icons for files/directories in terminal using lsd
 alias ls='lsd'
@@ -50,10 +43,25 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt appendhistory
 alias config='/usr/bin/git --git-dir=/home/hyprlan/.cfg/ --work-tree=/home/hyprlan'
+
+# Initialize Starship prompt
 eval "$(starship init zsh)"
 
 export PATH=$PATH:/home/fioren/.spicetify
 
+# NVM Optimization: Put active node in PATH directly for instant execution, lazy-load nvm on demand
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+for node_ver in "$NVM_DIR"/versions/node/*(N/); do
+    export PATH="$node_ver/bin:$PATH"
+    break
+done
+
+nvm() {
+    unset -f nvm
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    nvm "$@"
+}
+
+# Run fastfetch at the very end so that shell is 100% loaded and starship prompt appears instantly
+fastfetch

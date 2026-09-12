@@ -56,7 +56,12 @@ echo "Mengatur resolusi Waydroid ke ${WIDTH}x${HEIGHT}..."
 sudo waydroid prop set persist.waydroid.width "$WIDTH"
 sudo waydroid prop set persist.waydroid.height "$HEIGHT"
 
-# 3. Restart container agar resolusi baru dibaca
+# 3. Pastikan folder shared Waydroid (~/WaydroidShare) terinisialisasi
+if [ -f "$HOME/.config/hypr/UserScripts/waydroid-share-init.sh" ]; then
+    sudo "$HOME/.config/hypr/UserScripts/waydroid-share-init.sh" >/dev/null 2>&1 || true
+fi
+
+# 4. Restart container agar resolusi baru dibaca
 echo "Memuat ulang service Waydroid..."
 sudo systemctl restart waydroid-container.service
 

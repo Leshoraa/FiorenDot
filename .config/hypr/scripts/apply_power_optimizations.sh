@@ -31,7 +31,11 @@ for conf in /boot/loader/entries/*.conf; do
     fi
 done
 
-echo "🧹 [3/6] Menonaktifkan service background yang tidak diperlukan..."
+echo "📦 [3/6] Mendaftarkan Linux Boot Manager (systemd-boot) ke UEFI NVRAM..."
+bootctl install || true
+echo "  ✓ Bootloader Linux terdaftar di NVRAM."
+
+echo "🧹 [4/6] Menonaktifkan service background yang tidak diperlukan..."
 if systemctl is-enabled supergfxd.service &>/dev/null; then
     systemctl disable --now supergfxd.service || true
     echo "  ✓ supergfxd.service dinonaktifkan."
@@ -49,21 +53,21 @@ if systemctl is-enabled NetworkManager-wait-online.service &>/dev/null; then
     echo "  ✓ NetworkManager-wait-online.service dinonaktifkan."
 fi
 
-echo "🔋 [4/6] Mengonfigurasi Battery Health Charging Limit (80%) & Izin Akses Tombol..."
+echo "🔋 [5/6] Mengonfigurasi Battery Health Charging Limit (Preserve State) & Izin Akses Tombol..."
 if [ -f /sys/class/power_supply/BATT/charge_control_end_threshold ]; then
-    echo 80 > /sys/class/power_supply/BATT/charge_control_end_threshold || true
     chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold || true
+    touch /etc/asus-battery-charge-threshold && chmod 0666 /etc/asus-battery-charge-threshold || true
 
     cat << 'EOF' > /etc/systemd/system/asus-battery-charge-threshold.service
 [Unit]
-Description=Set ASUS Battery Charge Threshold to 80% and allow user control
+Description=Restore ASUS Battery Charge Threshold and allow user control
 After=multi-user.target
 StartLimitBurst=0
 
 [Service]
 Type=oneshot
 Restart=on-failure
-ExecStart=/bin/sh -c 'echo 80 > /sys/class/power_supply/BATT/charge_control_end_threshold && chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold'
+ExecStart=/bin/sh -c 'chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold; touch /etc/asus-battery-charge-threshold && chmod 0666 /etc/asus-battery-charge-threshold; if [ -s /etc/asus-battery-charge-threshold ]; then cat /etc/asus-battery-charge-threshold > /sys/class/power_supply/BATT/charge_control_end_threshold; elif [ -s /home/fioren/.local/state/battery_charge_limit ]; then cat /home/fioren/.local/state/battery_charge_limit > /sys/class/power_supply/BATT/charge_control_end_threshold; else echo 80 > /sys/class/power_supply/BATT/charge_control_end_threshold; fi'
 
 [Install]
 WantedBy=multi-user.target
@@ -82,7 +86,7 @@ else
     echo "  - Hardware tidak mendukung charge_control_end_threshold."
 fi
 
-echo "🧠 [5/6] Mengoptimalkan ZRAM (Multitasking Satset)..."
+echo "🧠 [6/7] Mengoptimalkan ZRAM (Multitasking Satset)..."
 cat << 'EOF' > /etc/systemd/zram-generator.conf
 [zram0]
 zram-size = ram / 2
@@ -93,7 +97,7 @@ EOF
 systemctl restart systemd-zram-setup@zram0.service 2>/dev/null || true
 echo "  ✓ ZRAM dikonfigurasi ke 50% RAM (~7.5GB) dengan kompresi cepat zstd."
 
-echo "⚡ [6/6] Mengaktifkan PCIe ASPM & Runtime Power Management..."
+echo "⚡ [7/7] Mengaktifkan PCIe ASPM & Runtime Power Management..."
 cat << 'EOF' > /etc/udev/rules.d/99-powersave.rules
 # Audio power save
 ACTION=="add", SUBSYSTEM=="module", KERNEL=="snd_hda_intel", ATTR{parameters/power_save}="10"

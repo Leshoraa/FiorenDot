@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+refresh_audio() {
+    echo "[Audio] Restarting PipeWire and WirePlumber..."
+    systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || true
+}
+
+refresh_ui() {
+    echo "[Desktop] Reloading Hyprland and refreshing UI..."
+    hyprctl reload >/dev/null 2>&1 || true
+    if [ -f "$HOME/.config/hypr/scripts/Refresh.sh" ]; then
+        "$HOME/.config/hypr/scripts/Refresh.sh" >/dev/null 2>&1 || true
+    fi
+}
+
+refresh_cache() {
+    echo "[Memory] Flushing dirty pages and dropping caches..."
+    sudo sync
+    echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
+}
+
+refresh_network() {
+    echo "[Network] Restarting NetworkManager..."
+    sudo systemctl restart NetworkManager
+}
+
+refresh_bluetooth() {
+    echo "[Bluetooth] Restarting Bluetooth service..."
+    sudo systemctl restart bluetooth
+}
+
+case "${1:-}" in
+    --all|-a|all)
+        echo "Executing full system refresh..."
+        refresh_audio
+        refresh_ui
+        refresh_cache
+        refresh_network
+        refresh_bluetooth
+        echo "Full system refresh completed."
+        ;;
+    --audio)
+        refresh_audio
+        ;;
+    --ui)
+        refresh_ui
+        ;;
+    --cache)
+        refresh_cache
+        ;;
+    --net)
+        refresh_network
+        refresh_bluetooth
+        ;;
+    -h|--help)
+        echo "Usage: refresh [OPTION]"
+        echo ""
+        echo "Options:"
+        echo "  (no args)    Safe refresh: Audio stack + Hyprland UI (no sudo, no disconnects)"
+        echo "  --all, -a    Full refresh: Audio, UI, RAM cache, NetworkManager, Bluetooth"
+        echo "  --audio      Restart audio stack only (PipeWire, WirePlumber)"
+        echo "  --ui         Reload Hyprland and restart Waybar/SwayNC"
+        echo "  --cache      Flush and clear RAM page caches (requires sudo)"
+        echo "  --net        Restart NetworkManager and Bluetooth (requires sudo)"
+        ;;
+    *)
+        echo "Executing safe refresh (Audio + Desktop UI)..."
+        refresh_audio
+        refresh_ui
+        echo "Done. All desktop services and audio nodes are refreshed."
+        echo "Note: To also flush RAM cache and restart Network/Bluetooth, run: refresh --all"
+        ;;
+esac

@@ -26,6 +26,9 @@ pkill qs && qs &
 swaync >/dev/null 2>&1 &
 swaync-client --reload-config
 
+# Restart WirePlumber audio session manager (auto-fixes audio desync/dummy output without reboot)
+systemctl --user restart wireplumber 2>/dev/null || true
+
 # Relaunching rainbow borders if the script exists
 #if file_exists "${UserScripts}/RainbowBorders.sh"; then
 #  ${UserScripts}/RainbowBorders.sh &

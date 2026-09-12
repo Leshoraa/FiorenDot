@@ -48,6 +48,12 @@ echo "3. Membuat symlink ~/WaydroidShare di direktori Home..."
 ln -snf "$WAYDROID_STORAGE" "$SHARED_LINK"
 chown -h "$USER_NAME:$USER_NAME" "$SHARED_LINK" 2>/dev/null || true
 
+# Daftarkan ke /usr/local/bin agar dapat dipanggil dengan 'sudo waydroid-share-init'
+if [ "$EUID" -eq 0 ]; then
+    ln -snf "$USER_HOME/.config/hypr/UserScripts/waydroid-share-init.sh" /usr/local/bin/waydroid-share-init 2>/dev/null || true
+    ln -snf "$USER_HOME/.config/hypr/UserScripts/waydroid-rescan.sh" /usr/local/bin/waydroid-rescan 2>/dev/null || true
+fi
+
 echo "========================================="
 echo " Sukses! Folder penghubung telah aktif di:"
 echo " -> $SHARED_LINK"

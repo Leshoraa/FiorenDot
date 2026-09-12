@@ -34,6 +34,7 @@ alias pipes.sh='pipes.sh -r 800'
 alias discord='DISCORDO_TOKEN="" discordo'
 alias tf='yazi'
 alias ard-ide='arduino-ide --no-sandbox --ozone-platform=x11 --disable-gpu'
+alias kitty='kitty -1'
 
 # Set-up FZF key bindings (CTRL R for fuzzy history finder)
 source <(fzf --zsh)

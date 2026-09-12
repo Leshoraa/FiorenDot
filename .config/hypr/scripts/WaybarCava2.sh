@@ -122,7 +122,7 @@ def main():
     tmp_conf = tempfile.NamedTemporaryFile(mode="w", prefix="waybar-cava2-", suffix=".conf", delete=False)
     conf_path = tmp_conf.name
     tmp_conf.write("""[general]
-framerate = 45
+framerate = 25
 bars = 10
 
 [input]

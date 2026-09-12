@@ -78,9 +78,10 @@
           "update-command": "swaync-client -D"
         },
         {
-          "label": "󰀝",
+          "label": " ",
           "type": "toggle",
-          "command": "bash -c $HOME/.config/hypr/scripts/AirplaneMode.sh"
+          "command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh toggle",
+          "update-command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh status"
         },
         {
           "label": "󰝟",

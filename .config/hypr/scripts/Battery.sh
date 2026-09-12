@@ -3,10 +3,11 @@
 NOTIFIED_15=false
 
 while true; do
-    for i in {0..3}; do
-        if [ -f /sys/class/power_supply/BAT$i/capacity ]; then
-            battery_status=$(cat /sys/class/power_supply/BAT$i/status)
-            battery_capacity=$(cat /sys/class/power_supply/BAT$i/capacity)
+    for bat_cap in /sys/class/power_supply/BAT*/capacity; do
+        if [ -f "$bat_cap" ]; then
+            bat_dir=$(dirname "$bat_cap")
+            battery_status=$(cat "$bat_dir/status")
+            battery_capacity=$(cat "$bat_cap")
 
             if [ "$battery_status" = "Discharging" ]; then
                 if [ "$battery_capacity" -le 15 ] && [ "$NOTIFIED_15" = false ]; then

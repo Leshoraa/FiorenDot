@@ -102,6 +102,27 @@ button {
     color: @background;
 }
 
+/* Tombol Batas Baterai (80% vs 100%) */
+.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button {
+    background-image: url('icons/battery-100.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 48px 48px;
+    font-size: 0px;
+    color: transparent;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:hover {
+    background-image: url('icons/battery-100-hover.svg');
+    background-color: lighter(@color12);
+}
+
+.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked,
+.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked:hover {
+    background-image: url('icons/battery-80.svg');
+    background-color: lighter(@color12);
+}
+
 /* 3. BAGIAN SLIDER (Volume dan Brightness) */
 .widget-volume,
 .widget-backlight {
@@ -215,7 +236,7 @@ scale:hover slider {
 .notification-row:selected {
     background: transparent;
     background-color: transparent;
-    background-image: transparent;
+    background-image: none;
     box-shadow: none;
     border: none;
     outline: none;

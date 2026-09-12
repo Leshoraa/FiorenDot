@@ -2,14 +2,6 @@
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
 # This script for selecting wallpapers (SUPER W)
 
-# Auto-boost CPU temporarily for fast thumbnail generation and menu browsing
-if [[ -z "${WALLPAPER_BOOSTED:-}" ]] && command -v powerprofilesctl >/dev/null 2>&1; then
-  if [[ "$(powerprofilesctl get 2>/dev/null)" == "power-saver" ]]; then
-    export WALLPAPER_BOOSTED=1
-    exec powerprofilesctl launch --profile performance -- "$0" "$@"
-  fi
-fi
-
 # WALLPAPERS PATH
 terminal=kitty
 wallDIR="$HOME/Pictures/wallpapers"
@@ -24,29 +16,8 @@ iDIRi="$HOME/.config/swaync/icons"
 TYPE="none"
 AWWW_PARAMS="--transition-type $TYPE"
 
-# Check if package bc exists
-if ! command -v bc &>/dev/null; then
-  notify-send -i "$iDIR/error.png" "bc missing" "Install package bc first"
-  exit 1
-fi
-
 # Variables
 rofi_theme="$HOME/.config/rofi/config-wallpaper.rasi"
-focused_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
-
-# Ensure focused_monitor is detected
-if [[ -z "$focused_monitor" ]]; then
-  notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Could not detect focused monitor"
-  exit 1
-fi
-
-# Monitor details
-scale_factor=$(hyprctl monitors -j | jq -r --arg mon "$focused_monitor" '.[] | select(.name == $mon) | .scale')
-monitor_height=$(hyprctl monitors -j | jq -r --arg mon "$focused_monitor" '.[] | select(.name == $mon) | .height')
-
-icon_size=$(echo "scale=1; ($monitor_height * 3) / ($scale_factor * 150)" | bc)
-adjusted_icon_size=$(echo "$icon_size" | awk '{if ($1 < 10) $1 = 12; if ($1 > 15) $1 = 13; print $1}')
-rofi_override="element-icon{size:${adjusted_icon_size}%;}"
 
 # Kill existing wallpaper daemons for video
 kill_wallpaper_for_video() {
@@ -82,7 +53,7 @@ menu() {
   cache_dir="$HOME/.cache/rofi_wallpaper_preview"
   mkdir -p "$cache_dir"
 
-  random_thumb="$cache_dir/$(basename "$RANDOM_PIC").png"
+  random_thumb="$cache_dir/${RANDOM_PIC##*/}.png"
   if [[ -f "$random_thumb" ]]; then
     printf "%s\x00icon\x1f%s\n" "$RANDOM_PIC_NAME" "$random_thumb"
   else
@@ -90,7 +61,7 @@ menu() {
   fi
 
   for pic_path in "${sorted_options[@]}"; do
-    pic_name=$(basename "$pic_path")
+    pic_name="${pic_path##*/}"
     if [[ "$pic_name" =~ \.gif$ ]]; then
       cache_gif_image="$HOME/.cache/gif_preview/${pic_name}.png"
       if [[ ! -f "$cache_gif_image" || "$pic_path" -nt "$cache_gif_image" ]]; then
@@ -168,6 +139,8 @@ modify_startup_config() {
 # Apply Image Wallpaper
 apply_image_wallpaper() {
   local image_path="$1"
+  local focused_monitor
+  focused_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name' 2>/dev/null || echo "eDP-1")
 
   kill_wallpaper_for_image
 

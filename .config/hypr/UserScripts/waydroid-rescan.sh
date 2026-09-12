@@ -1,30 +1,27 @@
 #!/usr/bin/env bash
-# waydroid-rescan: Trigger Android MediaScanner to refresh files in Waydroid
+# waydroid-rescan: Trigger Android MediaScanner to refresh files in Waydroid Gallery/MediaStore
 
 if ! waydroid status 2>/dev/null | grep -q "RUNNING"; then
-    echo "Waydroid tidak sedang berjalan."
+    echo "Waydroid tidak sedang berjalan. Jalankan Waydroid terlebih dahulu."
     exit 0
 fi
 
-echo "Menyegarkan galeri & dokumen di Waydroid..."
-TARGET="${1:-all}"
+echo "==> Menyegarkan database media & galeri di Waydroid..."
 
-case "$TARGET" in
-    pictures|gambar)
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Pictures" >/dev/null 2>&1 || true
-        ;;
-    documents|dokumen)
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Documents" >/dev/null 2>&1 || true
-        ;;
-    download|downloads)
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Download" >/dev/null 2>&1 || true
-        ;;
-    *)
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Pictures" >/dev/null 2>&1 || true
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Documents" >/dev/null 2>&1 || true
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Download" >/dev/null 2>&1 || true
-        sudo waydroid shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Shared" >/dev/null 2>&1 || true
-        ;;
-esac
+# 1. Metode Android 11+: Scan volume external_primary melalui MediaProvider
+sudo waydroid shell content call --uri content://media --method scan_volume --arg external_primary >/dev/null 2>&1 || true
 
-echo "Selesai! MediaScanner Waydroid telah diperbarui."
+# 2. Metode intent broadcast untuk setiap file media yang ada di /sdcard/
+sudo waydroid shell sh -c '
+for folder in /sdcard/Pictures /sdcard/DCIM /sdcard/Movies /sdcard/Download /sdcard/Documents /sdcard/Shared; do
+    if [ -d "$folder" ]; then
+        for f in "$folder"/*; do
+            if [ -f "$f" ]; then
+                am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$f" >/dev/null 2>&1
+            fi
+        done
+    fi
+done
+' || true
+
+echo "==> Selesai! Galeri, Video, dan MediaStore Android telah diperbarui."

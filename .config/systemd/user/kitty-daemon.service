@@ -1,0 +1,12 @@
+[Unit]
+Description=Kitty Terminal Background Server
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kitty -1 --start-as=hidden
+Restart=always
+RestartSec=0.2
+
+[Install]
+WantedBy=default.target

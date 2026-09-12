@@ -1,0 +1,14 @@
+[Unit]
+Description=Easy Effects Audio DSP Service
+Documentation=https://github.com/wwmm/easyeffects
+After=pipewire.service wireplumber.service
+PartOf=pipewire.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/easyeffects --service-mode --hide-window
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=default.target

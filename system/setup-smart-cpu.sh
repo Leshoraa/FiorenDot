@@ -5,10 +5,20 @@
 
 set -e
 
+# Detect correct user home directory even when executed via sudo
+ACTUAL_USER="${SUDO_USER:-$USER}"
+USER_HOME="$(getent passwd "$ACTUAL_USER" | cut -d: -f6)"
+SOURCE_FILE="$USER_HOME/Projects/FiorenDot/system/amd-smart-epp.service"
+
+if [ ! -f "$SOURCE_FILE" ]; then
+    echo "Error: File $SOURCE_FILE tidak ditemukan!"
+    exit 1
+fi
+
 echo "Memasang AMD Smart EPP Service..."
-sudo cp "$HOME/Projects/FiorenDot/system/amd-smart-epp.service" /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now amd-smart-epp.service
+cp "$SOURCE_FILE" /etc/systemd/system/amd-smart-epp.service
+systemctl daemon-reload
+systemctl enable --now amd-smart-epp.service
 
 echo ""
 echo "Verifikasi status core CPU:"
@@ -18,4 +28,4 @@ for i in {0..3}; do
 done
 
 echo ""
-echo "SUKSES! Mode pintar AMD sudah aktif permanen."
+echo "SUKSES! Mode pintar AMD (balance_power) sudah aktif permanen!"

@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+# Auto-boost CPU temporarily for instant color derivation if currently in power-saver
+if [[ -z "${WALLUST_BOOSTED:-}" ]] && command -v powerprofilesctl >/dev/null 2>&1; then
+  if [[ "$(powerprofilesctl get 2>/dev/null)" == "power-saver" ]]; then
+    export WALLUST_BOOSTED=1
+    exec powerprofilesctl launch --profile performance -- "$0" "$@"
+  fi
+fi
+
 # Inputs and paths
 passed_path="${1:-}"
 cache_dir="$HOME/.cache/awww/"

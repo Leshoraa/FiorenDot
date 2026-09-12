@@ -2,6 +2,14 @@
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
 # This script for selecting wallpapers (SUPER W)
 
+# Auto-boost CPU temporarily for fast thumbnail generation and menu browsing
+if [[ -z "${WALLPAPER_BOOSTED:-}" ]] && command -v powerprofilesctl >/dev/null 2>&1; then
+  if [[ "$(powerprofilesctl get 2>/dev/null)" == "power-saver" ]]; then
+    export WALLPAPER_BOOSTED=1
+    exec powerprofilesctl launch --profile performance -- "$0" "$@"
+  fi
+fi
+
 # WALLPAPERS PATH
 terminal=kitty
 wallDIR="$HOME/Pictures/wallpapers"

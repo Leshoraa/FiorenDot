@@ -1,0 +1,23 @@
+{
+  "mouse_speed": 0.25,
+  "trackpad_speed": 4.0,
+  "smoothing_k": 0.25,
+  "collision_gap": 10,
+  "nav_cooldown": 0.2,
+  "pseudo_scale_w": 0.994,
+  "pseudo_scale_h": 0.966,
+  "protected_apps": [
+    "brave-browser",
+    "chromium",
+    "chromium-browser",
+    "google-chrome",
+    "firefox",
+    "firefoxdeveloperedition",
+    "librewolf",
+    "vivaldi",
+    "opera",
+    "microsoft-edge"
+  ],
+  "enable_session_restore": true,
+  "enable_waybar_status": true
+}

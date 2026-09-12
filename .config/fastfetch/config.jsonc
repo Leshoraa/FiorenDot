@@ -73,10 +73,10 @@
             "keyColor": "white"
         },
         {
-            "type": "command",
+            "type": "custom",
             "key": "  󰢮 GPU",
             "keyColor": "white",
-            "text": "lspci | grep -i vga | sed 's/.*\\[//; s/\\].*//' | cut -d '/' -f1 | xargs"
+            "format": "Radeon Vega Series"
         },
         {
             "type": "memory",

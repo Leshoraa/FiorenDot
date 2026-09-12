@@ -11,17 +11,9 @@ if [[ ! -f "$config_file" ]]; then
     exit 1
 fi
 
-# Process the config file in memory, removing the $ and fixing spaces
-config_content=$(sed 's/\$//g' "$config_file" | sed 's/ = /=/')
-
-# Source the modified content directly from the variable
-eval "$config_content"
-
-# Check if $term is set correctly
-if [[ -z "$Search_Engine" ]]; then
-    echo "Error: \$Search_Engine is not set in the configuration file!"
-    exit 1
-fi
+# Extract Search_Engine cleanly without fragile eval
+Search_Engine=$(grep -E '^\s*\$Search_Engine\s*=' "$config_file" | sed -E 's/^\s*\$Search_Engine\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
+Search_Engine=${Search_Engine:-"https://www.google.com/search?q={}"}
 
 # Rofi theme and message
 rofi_theme="$HOME/.config/rofi/config-search.rasi"

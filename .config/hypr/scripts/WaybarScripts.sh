@@ -11,17 +11,13 @@ if [[ ! -f "$config_file" ]]; then
     exit 1
 fi
 
-# Process the config file in memory, removing the $ and fixing spaces
-config_content=$(sed 's/\$//g' "$config_file" | sed 's/ = /=/')
+# Extract variables cleanly without fragile eval
+term=$(grep -E '^\s*\$term\s*=' "$config_file" | sed -E 's/^\s*\$term\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
+files=$(grep -E '^\s*\$files\s*=' "$config_file" | sed -E 's/^\s*\$files\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
 
-# Source the modified content directly from the variable
-eval "$config_content"
-
-# Check if $term is set correctly
-if [[ -z "$term" ]]; then
-    echo "Error: \$term is not set in the configuration file!"
-    exit 1
-fi
+# Fallback defaults if empty
+term=${term:-kitty}
+files=${files:-thunar}
 
 # Execute accordingly based on the passed argument
 if [[ "$1" == "--btop" ]]; then

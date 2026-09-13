@@ -31,18 +31,23 @@ if [ -n "$TRANSFORM" ]; then
     hyprctl keyword "device[wdht1f01:00-2575:0911]:transform" "$TRANSFORM" >> /tmp/touchrotate.log 2>&1
     hyprctl keyword "device[wdht1f01:00-2575:0911-stylus]:transform" "$TRANSFORM" >> /tmp/touchrotate.log 2>&1
 
-    # Kontrol Keyboard Virtual (wvkbd) jika tidak dinonaktifkan
-    STATE_FILE="$HOME/.cache/virtual_keyboard_disabled"
-    if [ ! -f "$STATE_FILE" ]; then
-        if [ "$TRANSFORM" -ne 0 ]; then
-            # Mode Tablet / Vertikal: Munculkan keyboard virtual
-            pkill -SIGUSR2 wvkbd-mobintl || hyprctl dispatch exec "$HOME/.local/bin/wvkbd-mobintl -L 300 -H 350"
+    # Kontrol Keyboard Virtual (wvkbd)
+    WVKBD_BIN="$HOME/.local/bin/wvkbd-mobintl"
+    STATE_FILE="$HOME/.cache/virtual_keyboard_state"
+
+    if [ "$TRANSFORM" -ne 0 ]; then
+        # Mode Tablet / Vertikal: Munculkan keyboard virtual
+        if pgrep -x wvkbd-mobintl >/dev/null; then
+            pkill -SIGUSR2 wvkbd-mobintl
         else
-            # Mode Laptop Biasa: Sembunyikan keyboard virtual
+            hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
+        fi
+        echo "visible" > "$STATE_FILE"
+    else
+        # Mode Laptop Biasa: Sembunyikan keyboard virtual
+        if pgrep -x wvkbd-mobintl >/dev/null; then
             pkill -SIGUSR1 wvkbd-mobintl
         fi
-    else
-        # Jika virtual keyboard dinonaktifkan, pastikan wvkbd tidak berjalan
-        pkill -x wvkbd-mobintl 2>/dev/null
+        echo "hidden" > "$STATE_FILE"
     fi
 fi

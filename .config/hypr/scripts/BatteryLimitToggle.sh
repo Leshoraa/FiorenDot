@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # BatteryLimitToggle.sh
-# Smart Battery Management & Notification Daemon (MacBook-Style Optimized Charging)
+# Smart Battery Health Management & Notification Daemon
 # ==============================================================================
 
 # Locate power supply interfaces dynamically

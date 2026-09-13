@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 
 ## ✨ Key Features & Innovations
 
-### 🔋 1. MacBook-Style Smart Battery Management
+### 🔋 1. Smart Battery Health & Longevity Management
 An intelligent, automated battery protection system built directly on top of Linux kernel sysfs and systemd user services:
 * **80% Battery Health Threshold**: Default charge limit locked at 80% (`charge_control_end_threshold`) to drastically reduce battery aging and prevent cell swelling. Hardware automatically bypasses the battery to AC power when the threshold is reached.
 * **Temporary 100% Full-Charge Override**: Easily toggle to 100% via the SwayNC Control Center button or CLI (`BatteryLimitToggle.sh toggle`).

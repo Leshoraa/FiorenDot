@@ -4,6 +4,8 @@ refresh_audio() {
     echo "[Audio] Restarting PipeWire, WirePlumber, and EasyEffects..."
     systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || true
     systemctl --user restart easyeffects 2>/dev/null || true
+    sleep 1
+    easyeffects -l "Harman Kardon VivoBook" 2>/dev/null || true
 }
 
 refresh_ui() {

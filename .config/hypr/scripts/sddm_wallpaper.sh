@@ -34,15 +34,13 @@ elif [[ "$1" == "--effects" ]]; then
 fi
 
 # Extract colors from rofi wallust config
-
-color0=$(grep -oP 'color1:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-color1=$(grep -oP 'color0:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-color7=$(grep -oP 'color14:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-color10=$(grep -oP 'color10:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-color12=$(grep -oP 'color12:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-color13=$(grep -oP 'color13:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-foreground=$(grep -oP 'foreground:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
-#background-color=$(grep -oP 'background:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color0=$(grep -oP '^color1:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color1=$(grep -oP '^color0:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color7=$(grep -oP '^color14:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color10=$(grep -oP '^color10:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color12=$(grep -oP '^color12:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+color13=$(grep -oP '^color13:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
+foreground=$(grep -oP '^foreground:\s*\K#[A-Fa-f0-9]+' "$rofi_wallust")
 
 # wallpaper to use
 if [[ "$mode" == "normal" ]]; then
@@ -57,38 +55,37 @@ if hostnamectl 2>/dev/null | grep -q 'Operating System: NixOS'; then
     exit 0
 fi
 
-# Launch terminal and apply changes
-$terminal -e bash -c
-echo 'Enter your password to update SDDM wallpapers and colors';
+# Apply changes to SDDM theme if accessible
+if [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ] && [ -w "$sddm_theme_conf" ]; then
+    # Update the colors in the SDDM config
+    sed -i "s/HeaderTextColor=\"#.*\"/HeaderTextColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/DateTextColor=\"#.*\"/DateTextColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/TimeTextColor=\"#.*\"/TimeTextColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/DropdownSelectedBackgroundColor=\"#.*\"/DropdownSelectedBackgroundColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/SystemButtonsIconsColor=\"#.*\"/SystemButtonsIconsColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/SessionButtonTextColor=\"#.*\"/SessionButtonTextColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/VirtualKeyboardButtonTextColor=\"#.*\"/VirtualKeyboardButtonTextColor=\"$color13\"/" "$sddm_theme_conf"
+    sed -i "s/HighlightBackgroundColor=\"#.*\"/HighlightBackgroundColor=\"$color12\"/" "$sddm_theme_conf"
+    sed -i "s/LoginFieldTextColor=\"#.*\"/LoginFieldTextColor=\"$color12\"/" "$sddm_theme_conf"
+    sed -i "s/PasswordFieldTextColor=\"#.*\"/PasswordFieldTextColor=\"$color12\"/" "$sddm_theme_conf"
 
-# Update the colors in the SDDM config
-sudo sed -i \"s/HeaderTextColor=\\\"#.*\\\"/HeaderTextColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/DateTextColor=\\\"#.*\\\"/DateTextColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/TimeTextColor=\\\"#.*\\\"/TimeTextColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/DropdownSelectedBackgroundColor=\\\"#.*\\\"/DropdownSelectedBackgroundColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/SystemButtonsIconsColor=\\\"#.*\\\"/SystemButtonsIconsColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/SessionButtonTextColor=\\\"#.*\\\"/SessionButtonTextColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/VirtualKeyboardButtonTextColor=\\\"#.*\\\"/VirtualKeyboardButtonTextColor=\\\"$color13\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/HighlightBackgroundColor=\\\"#.*\\\"/HighlightBackgroundColor=\\\"$color12\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/LoginFieldTextColor=\\\"#.*\\\"/LoginFieldTextColor=\\\"$color12\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/PasswordFieldTextColor=\\\"#.*\\\"/PasswordFieldTextColor=\\\"$color12\\\"/\" \"$sddm_theme_conf\"
+    sed -i "s/DropdownBackgroundColor=\"#.*\"/DropdownBackgroundColor=\"$color1\"/" "$sddm_theme_conf"
+    sed -i "s/HighlightTextColor=\"#.*\"/HighlightTextColor=\"$color10\"/" "$sddm_theme_conf"
 
-sudo sed -i \"s/DropdownBackgroundColor=\\\"#.*\\\"/DropdownBackgroundColor=\\\"$color1\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/HighlightTextColor=\\\"#.*\\\"/HighlightTextColor=\\\"$color10\\\"/\" \"$sddm_theme_conf\"
+    sed -i "s/PlaceholderTextColor=\"#.*\"/PlaceholderTextColor=\"$color7\"/" "$sddm_theme_conf"
+    sed -i "s/UserIconColor=\"#.*\"/UserIconColor=\"$color7\"/" "$sddm_theme_conf"
+    sed -i "s/PasswordIconColor=\"#.*\"/PasswordIconColor=\"$color7\"/" "$sddm_theme_conf"
 
-sudo sed -i \"s/PlaceholderTextColor=\\\"#.*\\\"/PlaceholderTextColor=\\\"$color7\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/UserIconColor=\\\"#.*\\\"/UserIconColor=\\\"$color7\\\"/\" \"$sddm_theme_conf\"
-sudo sed -i \"s/PasswordIconColor=\\\"#.*\\\"/PasswordIconColor=\\\"$color7\\\"/\" \"$sddm_theme_conf\"
+    # Copy wallpaper to SDDM theme
+    # Primary: set Backgrounds/default (no extension) for simple_sddm_2
+    cp -f "$wallpaper_path" "$sddm_simple/Backgrounds/default" || true
+    # Fallbacks: if theme ships default.jpg or default.png, update those too
+    if [ -e "$sddm_simple/Backgrounds/default.jpg" ]; then
+        cp -f "$wallpaper_path" "$sddm_simple/Backgrounds/default.jpg"
+    fi
+    if [ -e "$sddm_simple/Backgrounds/default.png" ]; then
+        cp -f "$wallpaper_path" "$sddm_simple/Backgrounds/default.png"
+    fi
 
-# Copy wallpaper to SDDM theme
-# Primary: set Backgrounds/default (no extension) for simple_sddm_2
-sudo cp -f \"$wallpaper_path\" \"$sddm_simple/Backgrounds/default\" || true
-# Fallbacks: if theme ships default.jpg or default.png, update those too
-if [ -e \"$sddm_simple/Backgrounds/default.jpg\" ]; then
-  sudo cp -f \"$wallpaper_path\" \"$sddm_simple/Backgrounds/default.jpg\"
+    notify-send -i "$iDIR/ja.png" "SDDM" "Background SET"
 fi
-if [ -e \"$sddm_simple/Backgrounds/default.png\" ]; then
-  sudo cp -f \"$wallpaper_path\" \"$sddm_simple/Backgrounds/default.png\"
-fi
-
-notify-send -i \"$iDIR/ja.png\" \"SDDM\" \"Background SET\"

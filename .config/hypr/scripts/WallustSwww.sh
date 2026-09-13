@@ -69,7 +69,7 @@ pkill -USR2 waybar || true
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x qs 2>/dev/null || true
   pkill -x quickshell 2>/dev/null || true
-  qs -c overview >/dev/null 2>&1 &
+  qs -c overview -d >/dev/null 2>&1 &
 fi
 
 # Close any running rofi instances to load fresh colors on next open

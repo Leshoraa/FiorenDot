@@ -22,8 +22,8 @@ def generate_palette(img_path):
     Uses pixel population histogram + hue-excited neighbor smoothing (+-15 deg)
     to select dominant and secondary tonal palettes that mirror human visual perception.
     """
-    # 1. Quantize to 48 color clusters with exact pixel counts (histogram)
-    cmd = ['magick', f'{img_path}[0]', '-resize', '150x150!', '-colors', '48', '-format', '%c', 'histogram:info:']
+    # 1. Fast quantize to 36 color clusters with exact pixel counts (histogram)
+    cmd = ['magick', f'{img_path}[0]', '-sample', '128x128!', '-colors', '36', '-format', '%c', 'histogram:info:']
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0 or not res.stdout.strip():
         return None

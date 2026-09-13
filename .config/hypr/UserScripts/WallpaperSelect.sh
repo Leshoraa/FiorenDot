@@ -140,12 +140,12 @@ apply_image_wallpaper() {
     sleep 0.1
   fi
 
-  awww img -o "$focused_monitor" "$image_path" $AWWW_PARAMS
+  awww img -o "$focused_monitor" "$image_path" $AWWW_PARAMS &
 
   # 1. Update warna UI (Otomatis reload Waybar, SwayNC, Rofi, Kitty)
   "$SCRIPTSDIR/WallustSwww.sh" "$image_path"
 
-  set_sddm_wallpaper
+  set_sddm_wallpaper &
 }
 
 apply_video_wallpaper() {
@@ -173,6 +173,9 @@ main() {
     exit 0
   fi
 
+  # Dismiss rofi immediately so the transition is seen right away
+  pkill -x rofi 2>/dev/null || true
+
   # Handle random selection correctly
   if [[ "$choice" == "$RANDOM_PIC_NAME" ]]; then
     choice=$(basename "$RANDOM_PIC")
@@ -188,8 +191,8 @@ main() {
     exit 1
   fi
 
-  # Modify the Startup_Apps.conf file based on wallpaper type
-  modify_startup_config "$selected_file"
+  # Modify the Startup_Apps.conf file asynchronously
+  modify_startup_config "$selected_file" &
 
   # **CHECK FIRST** if it's a video or an image **before calling any function**
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm|MP4|MKV|MOV|WEBM)$ ]]; then

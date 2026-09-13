@@ -1,20 +1,20 @@
 add_newline = true
 
 format = """
-[╭─](12)[](15)\
+[╭─](12)[](13)\
 $os\
-[](bg:10 fg:15)\
+[](bg:12 fg:13)\
 $directory\
-[](fg:10)
+[](fg:12)
 [╰─](12)$character"""
 
 [os]
 disabled = false
-style = "bg:15 fg:1"
+style = "bg:13 fg:0"
 symbols.Arch = "   "
 
 [directory]
-style = "bg:10 fg:15"
+style = "bg:12 fg:15"
 format = "[ $path ]($style)"
 truncation_length = 5
 truncation_symbol = "…/"
@@ -24,5 +24,5 @@ read_only = " 󰌾 "
 "~" = " ~"
 
 [character]
-success_symbol = "[❯](bold 14)"
+success_symbol = "[❯](bold 12)"
 error_symbol = "[❯](bold red)"

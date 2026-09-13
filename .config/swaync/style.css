@@ -25,7 +25,7 @@ button {
     border-radius: 14px;
     padding: 8px;
     margin: 8px;
-    border: 2px solid @color4;
+    border: 2px solid @primary;
     /* Garis border luar */
 }
 
@@ -74,7 +74,7 @@ button {
 }
 
 .widget-menubar>box>box:last-child>button:hover {
-    background-color: lighter(@color12);
+    background-color: @secondary;
     /* Warna berubah saat mouse diarahkan (hover) */
     color: @background;
 }
@@ -96,15 +96,19 @@ button {
 }
 
 /* Efek saat tombol grid di-hover atau sedang menyala (aktif) */
-.widget-buttons-grid>flowbox>flowboxchild>button:hover,
+.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+    background-color: @secondary;
+    color: @background;
+}
+
 .widget-buttons-grid>flowbox>flowboxchild>button:checked {
-    background-color: lighter(@color12);
+    background-color: @primary;
     color: @background;
 }
 
 /* Tombol Batas Baterai (80% vs 100%) */
 .widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button {
-    background-color: lighter(@color12);
+    background-color: @primary;
     background-image: url('icons/battery-100-hover.svg');
     background-repeat: no-repeat;
     background-position: center;
@@ -115,13 +119,13 @@ button {
 
 .widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:hover {
     background-image: url('icons/battery-100-hover.svg');
-    background-color: lighter(@color12);
+    background-color: @secondary;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked,
 .widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked:hover {
     background-image: url('icons/battery-80.svg');
-    background-color: lighter(@color12);
+    background-color: @primary;
 }
 
 /* 3. BAGIAN SLIDER (Volume dan Brightness) */
@@ -164,7 +168,7 @@ scale trough {
 
 /* 2. JALUR TERISI (Highlight) */
 scale highlight {
-    background-color: lighter(@color12);
+    background-color: @primary;
     border-radius: 6px 0px 0px 6px;
     min-height: 4px;
     /* Tinggi normal rel */

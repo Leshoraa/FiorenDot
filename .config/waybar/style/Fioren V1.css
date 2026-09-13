@@ -59,8 +59,8 @@ tooltip {
 
 #taskbar button.active,
 #workspaces button.active {
-    color: mix(@color0, black, 0.66);
-    background-color: lighter(@color12);
+    color: @color0;
+    background-color: @primary;
     border-radius: 12px;
     padding: 1px 12px;
     animation: gradient_f 20s ease infinite;
@@ -68,18 +68,18 @@ tooltip {
 }
 
 #workspaces button.urgent {
-    color: mix(@color1, @foreground, 0.3);
-    background-color: mix(@color0, @foreground, 1.15);
+    color: @color0;
+    background-color: @secondary;
     border-radius: 8px;
 }
 
 #taskbar button:hover,
 #workspaces button:hover {
-    color: mix(@color0, black, 0.66);
+    color: @color0;
     padding: 1px 16px;
     margin: 0px 1px;
     border-radius: 12px;
-    background-color: lighter(@color12);
+    background-color: @secondary;
     background-image: none;
     box-shadow: none;
 }
@@ -145,12 +145,12 @@ tooltip {
 #custom-reboot,
 #custom-power {
     padding: 1px 5px;
-     color:lighter(@color12);
+     color: @primary;
 }
 
 #custom-swaync {
     padding: 1px 5px;
-     color:lighter(@color12);
+     color: @primary;
 }
 
 #backlight-slider slider,
@@ -165,7 +165,7 @@ tooltip {
     font-size: 84%;
     letter-spacing: 3px;
     padding: 1px 6px;
-    color: lighter(@color12);
+    color: @primary;
 }
 
 #backlight-slider trough,
@@ -180,7 +180,7 @@ tooltip {
 #pulseaudio-slider highlight {
     min-height: 4px;
     border-radius: 4px;
-    background-color: mix(@color0, @foreground, 1.15);
+    background-color: @primary;
 }
 
 #custom-title, 
@@ -190,7 +190,7 @@ tooltip {
     font-weight: 600;
     padding: 0px 1px;
     margin: 0px;
-    color: lighter(@color12);
+    color: @primary;
     transition: all 0.3s ease;
 }
 

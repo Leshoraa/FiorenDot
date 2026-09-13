@@ -6,6 +6,9 @@
  @define-color background-alt rgba({{color0 | rgb}},0.25);
  @define-color cursor {{cursor}};
  
+ @define-color primary {{color9}};
+ @define-color secondary {{color13}};
+
  @define-color color0 {{color0}};
  @define-color color1 {{color1}};
  @define-color color2 {{color2}};
@@ -18,7 +21,7 @@
  @define-color color9 {{color9}};
  @define-color color10 {{color10}};
  @define-color color11 {{color11}};
- @define-color color12 {{color12}};
+ @define-color color12 {{color9}};
  @define-color color13 {{color13}};
  @define-color color14 {{color14}};
  @define-color color15 {{color15}}; 

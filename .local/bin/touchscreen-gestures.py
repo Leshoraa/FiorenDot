@@ -136,8 +136,8 @@ def main():
                             del active_touches[tid]
 
                     # Detect Multi-Finger Swipes while fingers are in motion
-                    # Triggerable when 3 or 4 fingers participate and at least 2 are moving together
-                    if not session_gesture_done and session_max_fingers in (3, 4) and num_contacts >= 2:
+                    # Triggerable when 2, 3, or 4 fingers participate and at least 2 are moving together
+                    if not session_gesture_done and session_max_fingers in (2, 3, 4) and num_contacts >= 2:
                         if (now - last_trigger_time) > 0.35 and (now - session_start_time) < 1.5:
                             displacements = []
                             for tid, (x, y) in current_contacts.items():
@@ -163,8 +163,8 @@ def main():
                                 abs_avg_x = abs(avg_dx)
                                 abs_avg_y = abs(avg_dy)
 
-                                # Check Vertical Swipe
-                                if abs_avg_y >= SWIPE_THRESHOLD_MM and abs_avg_y > abs_avg_x * 1.2:
+                                # Vertical Swipes (Only for 3 or 4 fingers)
+                                if session_max_fingers in (3, 4) and abs_avg_y >= SWIPE_THRESHOLD_MM and abs_avg_y > abs_avg_x * 1.2:
                                     if avg_dy < 0 and all(d[1] <= -MIN_FINGER_SWIPE_MM for d in displacements):
                                         # Swipe UP
                                         session_gesture_done = True
@@ -182,21 +182,21 @@ def main():
                                         elif session_max_fingers == 4:
                                             run_dispatch(['bash', '-c', 'pkill -x rofi || rofi -show drun'])
 
-                                # Check Horizontal Swipe
+                                # Horizontal Swipes (For 2, 3, or 4 fingers)
                                 elif abs_avg_x >= SWIPE_THRESHOLD_MM and abs_avg_x > abs_avg_y * 1.2:
-                                    if avg_dx < 0 and all(d[0] <= -MIN_FINGER_SWIPE_MM for d in displacements):
-                                        # Swipe LEFT
+                                    if avg_dx > 0 and all(d[0] >= MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe RIGHT -> Workspace selanjutnya
                                         session_gesture_done = True
                                         last_trigger_time = now
-                                        if session_max_fingers == 3:
+                                        if session_max_fingers in (2, 3):
                                             run_dispatch(['hyprctl', 'dispatch', 'workspace', '+1'])
                                         elif session_max_fingers == 4:
                                             run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '+1'])
-                                    elif avg_dx > 0 and all(d[0] >= MIN_FINGER_SWIPE_MM for d in displacements):
-                                        # Swipe RIGHT
+                                    elif avg_dx < 0 and all(d[0] <= -MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe LEFT -> Workspace sebelumnya
                                         session_gesture_done = True
                                         last_trigger_time = now
-                                        if session_max_fingers == 3:
+                                        if session_max_fingers in (2, 3):
                                             run_dispatch(['hyprctl', 'dispatch', 'workspace', '-1'])
                                         elif session_max_fingers == 4:
                                             run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '-1'])
@@ -206,23 +206,34 @@ def main():
                     if len(active_touches) > 0 or len(session_touches) > 0:
                         duration = now - session_start_time
 
-                        # Check 3-finger single tap
+                        # Check multi-finger single taps
                         # Requirements:
-                        # - Exactly 3 fingers engaged at peak
+                        # - Exactly target finger count engaged at peak
                         # - No swipe gesture triggered
                         # - Natural tap duration: 0.05s <= duration <= 0.65s
                         # - Stationary touch: max_disp < 8.0 mm across all contacts
                         # - Debounce interval satisfied
                         if (not session_gesture_done and
-                            session_max_fingers == 3 and
-                            len(session_touches) in (3, 4) and
+                            session_max_fingers in (2, 3, 4, 5) and
+                            len(session_touches) >= session_max_fingers and
                             0.05 <= duration <= 0.65):
 
                             max_disp = max((t['max_disp_mm'] for t in session_touches.values()), default=0.0)
                             if max_disp < MAX_TAP_DISP_MM:
                                 if (now - last_trigger_time) > 0.35:
                                     last_trigger_time = now
-                                    run_dispatch([os.path.expanduser('~/.config/hypr/UserScripts/VirtualKeyboardVisibility.sh')])
+                                    if session_max_fingers == 2:
+                                        # 2-Finger Tap: Open App Launcher (Rofi)
+                                        run_dispatch(['bash', '-c', 'pkill -x rofi || rofi -show drun'])
+                                    elif session_max_fingers == 3:
+                                        # 3-Finger Tap: Toggle Virtual Keyboard (wvkbd)
+                                        run_dispatch([os.path.expanduser('~/.config/hypr/UserScripts/VirtualKeyboardVisibility.sh')])
+                                    elif session_max_fingers == 4:
+                                        # 4-Finger Tap: Open Terminal (kitty)
+                                        run_dispatch(['hyprctl', 'dispatch', 'exec', 'kitty -1'])
+                                    elif session_max_fingers == 5:
+                                        # 5-Finger Tap: Close Active Application (Super + Q)
+                                        run_dispatch([os.path.expanduser('~/.config/hypr/scripts/KillActiveProcess.sh')])
 
                         # Reset session tracking
                         active_touches.clear()

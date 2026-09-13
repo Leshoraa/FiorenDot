@@ -37,8 +37,14 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 ### 4. 2-in-1 Convertible & Touchscreen Integration
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
 * **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
-* **3-Finger Tap Gesture**: Tap with 3 fingers once anywhere on the touchscreen to instantly open or close the virtual keyboard.
-* **Touchscreen Gestures Daemon**: Custom gesture listener running in background via `touchscreen-gestures.service`.
+* **Multi-Finger Touchscreen Gestures**: Hardware-level atomic multi-touch gestures running in background via `touchscreen-gestures.service`:
+  * `2-Finger Tap`: Open / close application launcher (Rofi).
+  * `3-Finger Tap`: Instant toggle on-screen virtual keyboard (`wvkbd`).
+  * `4-Finger Tap`: Launch terminal emulator (`Kitty`).
+  * `5-Finger Tap`: Close active application window (`KillActiveProcess.sh`).
+  * `2-Finger Swipe Right / Left`: Switch workspace to next / previous.
+  * `3-Finger Swipe Up / Down`: Open desktop overview / toggle special workspace.
+  * `4-Finger Swipe Up / Down`: Open SwayNC notification panel / Rofi app launcher.
 
 ### 5. Studio-Grade Audio DSP (EasyEffects)
 * **Custom Hardware Tuned Presets**: Tailored acoustic equalization profiles for Asus VivoBook speakers (Harman Kardon, Dolby Atmos, Perfect EQ).
@@ -127,7 +133,12 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 ### Touchscreen Gestures
 | Gesture | Action |
 | :--- | :--- |
+| `2-Finger Single Tap` | Open / toggle Rofi application launcher |
 | `3-Finger Single Tap` | Open / close on-screen virtual keyboard (wvkbd) |
+| `4-Finger Single Tap` | Open default terminal (Kitty) |
+| `5-Finger Single Tap` | Close active application window (Kill active) |
+| `2-Finger Swipe Right`| Switch to next workspace |
+| `2-Finger Swipe Left` | Switch to previous workspace |
 | `3-Finger Swipe Up` | Toggle Quickshell desktop overview |
 | `3-Finger Swipe Down` | Toggle special workspace (scratchpad) |
 | `3-Finger Swipe Left / Right`| Switch workspace (+1 / -1) |

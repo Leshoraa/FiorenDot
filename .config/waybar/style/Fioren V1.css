@@ -20,7 +20,7 @@ window#waybar.hidden {
 }
 
 tooltip {
-    background: mix(@background, black, 0.35);
+    background: alpha(@color0, 0.90);
     border-radius: 10px;
     border-width: 1px;
     border-style: solid;
@@ -30,7 +30,7 @@ tooltip {
 
 
 .modules-center {
-    background-color: alpha(mix(@background, black, 0.65), 0.88);
+    background-color: alpha(@color0, 0.75);
     border-radius: 12px;
     padding: 1px 4px;
 }

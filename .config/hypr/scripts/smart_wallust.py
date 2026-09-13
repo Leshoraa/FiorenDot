@@ -7,6 +7,9 @@ import colorsys
 import subprocess
 
 def hsl_to_hex(h, s, l):
+    h = h % 360
+    s = max(0.0, min(100.0, s))
+    l = max(0.0, min(100.0, l))
     r, g, b = colorsys.hls_to_rgb(h / 360.0, l / 100.0, s / 100.0)
     ir = max(0, min(255, int(round(r * 255))))
     ig = max(0, min(255, int(round(g * 255))))
@@ -14,77 +17,118 @@ def hsl_to_hex(h, s, l):
     return f"#{ir:02x}{ig:02x}{ib:02x}"
 
 def generate_palette(img_path):
-    # Use ImageMagick to get up to 32 quantized color clusters
-    cmd = ['magick', f'{img_path}[0]', '-resize', '128x128!', '-colors', '32', '-unique-colors', 'txt:-']
+    """
+    Caelestia / Material You (M3) inspired color extraction.
+    Uses pixel population histogram + hue-excited neighbor smoothing (+-15 deg)
+    to select dominant and secondary tonal palettes that mirror human visual perception.
+    """
+    # 1. Quantize to 48 color clusters with exact pixel counts (histogram)
+    cmd = ['magick', f'{img_path}[0]', '-resize', '150x150!', '-colors', '48', '-format', '%c', 'histogram:info:']
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0 or not res.stdout.strip():
         return None
 
-    colors = []
-    for line in res.stdout.strip().split('\n'):
-        m = re.search(r'\((\d+),\s*(\d+),\s*(\d+)(?:,\s*\d+)?\)', line)
-        if m:
-            r, g, b = int(m.group(1)), int(m.group(2)), int(m.group(3))
-            colors.append((r, g, b))
+    clusters = []
+    hue_population = [0.0] * 360
+    total_pop = 0
 
-    if not colors:
+    for line in res.stdout.strip().split('\n'):
+        m = re.search(r'^\s*(\d+):.*#([0-9A-Fa-f]{6})', line)
+        if m:
+            cnt = int(m.group(1))
+            hex_str = m.group(2)
+            r = int(hex_str[0:2], 16)
+            g = int(hex_str[2:4], 16)
+            b = int(hex_str[4:6], 16)
+            h, l, s = colorsys.rgb_to_hls(r / 255.0, g / 255.0, b / 255.0)
+            h_deg = round(h * 360) % 360
+            s_pct = s * 100.0
+            l_pct = l * 100.0
+            clusters.append((cnt, r, g, b, h_deg, s_pct, l_pct))
+
+            # Exclude extreme crushed blacks and blown-out whites from dominating hue calculations
+            if 8 < l_pct < 94 and s_pct > 8:
+                hue_population[h_deg] += cnt
+                total_pop += cnt
+
+    if not clusters:
         return None
 
-    # Tonal & Hue population analysis
-    hue_weights = {}
-    total_sat = 0
-    total_luma = 0
+    # Fallback if image is completely monochrome / dark
+    if total_pop == 0:
+        for cnt, r, g, b, h_deg, s_pct, l_pct in clusters:
+            hue_population[h_deg] += cnt
+            total_pop += cnt
 
-    for r, g, b in colors:
-        h, l, s = colorsys.rgb_to_hls(r / 255.0, g / 255.0, b / 255.0)
-        h_deg = round(h * 360)
-        s_pct = s * 100.0
-        l_pct = l * 100.0
-        luma = 0.299 * r + 0.587 * g + 0.114 * b
-        total_sat += s_pct
-        total_luma += luma
+    # 2. Caelestia Hue-Excited Proportions (smooth across +- 15 degrees)
+    hue_proportions = [0.0] * 360
+    for h in range(360):
+        if total_pop > 0:
+            prop = hue_population[h] / total_pop
+            for nh in range(h - 15, h + 16):
+                hue_proportions[nh % 360] += prop
 
-        # Weighting: prioritize colors that are not pitch black or blown-out white
-        weight = (s_pct + 10) * (1.0 - abs(l_pct - 50.0) / 50.0)
-        bucket = int((h_deg // 15) * 15) % 360
-        hue_weights[bucket] = hue_weights.get(bucket, 0) + weight
+    # 3. Score color clusters (Balance between spatial area & chroma/vibrancy)
+    candidates = []
+    for cnt, r, g, b, h_deg, s_pct, l_pct in clusters:
+        if l_pct < 10 or l_pct > 92 or s_pct < 8:
+            continue
+        prop = hue_proportions[h_deg]
+        # Saturation curve targeting 45-75%
+        sat_factor = min(1.0, s_pct / 45.0)
+        # Lightness curve peaking around 50%
+        light_factor = 1.0 - (abs(l_pct - 50.0) / 50.0) ** 1.6
+        # Caelestia formula: 65% area proportion + 35% chroma/vibrancy
+        score = (prop * 65.0) + (sat_factor * 35.0) * light_factor
+        candidates.append((score, h_deg, s_pct, l_pct))
 
-    avg_sat = total_sat / len(colors)
-    if avg_sat < 12.0 or not hue_weights or max(hue_weights.values()) == 0:
-        dom_hue = 220
-        base_sat = 15.0
+    candidates.sort(key=lambda x: x[0], reverse=True)
+
+    if not candidates:
+        dom_h = 220
+        dom_s = 25.0
     else:
-        dom_hue = max(hue_weights.items(), key=lambda x: x[1])[0]
-        base_sat = max(35.0, min(80.0, avg_sat))
+        dom_h = candidates[0][1]
+        dom_s = max(25.0, min(85.0, candidates[0][2]))
 
-    # Eliminate greenish/cyan-toska undertones for blue wallpapers:
-    # Hues between 175 and 212 are cyan/aquamarine (looks greenish).
-    # Shift them to 220 (pure royal/sky blue) so blue is ALWAYS pure blue!
-    if 175 <= dom_hue <= 212:
-        dom_hue = 220
+    # 4. Find secondary distinct accent color from the wallpaper
+    sec_h = (dom_h + 180) % 360
+    sec_s = dom_s * 0.8
+    for c in candidates[1:]:
+        diff = abs(c[1] - dom_h)
+        if diff > 180:
+            diff = 360 - diff
+        if diff >= 35 and c[2] >= 20.0:
+            sec_h = c[1]
+            sec_s = max(25.0, min(80.0, c[2]))
+            break
 
-    H = dom_hue
+    # 5. Build Material Design 3 Tonal Palette
+    H = dom_h
+    S = dom_s
+    H2 = sec_h
+    S2 = sec_s
 
-    # Pure Monochromatic Tonal Palette (100% harmonized to dominant wallpaper hue)
-    bg = hsl_to_hex(H, min(18.0, base_sat * 0.25), 8.0)     # Deep dark surface
-    fg = hsl_to_hex(H, min(14.0, base_sat * 0.20), 92.0)    # Crisp tinted off-white
-    
-    # UI Tonal roles (Berserk logo, keys, prompt, borders, waybar)
-    c14 = hsl_to_hex(H, base_sat, 72.0)             # Brightest highlight (Logo, Starship pill 1)
-    c6  = hsl_to_hex(H, base_sat * 0.90, 75.0)      # Fastfetch keys
-    c12 = hsl_to_hex(H, base_sat * 0.95, 62.0)      # Primary active (Window border, Waybar pill)
-    c13 = hsl_to_hex(H, base_sat * 0.85, 65.0)      # Fastfetch username / title
-    c4  = hsl_to_hex(H, base_sat * 0.80, 52.0)      # Mid accent
-    c10 = hsl_to_hex(H, base_sat * 0.75, 48.0)      # Starship pill 2 / secondary border
-    c2  = hsl_to_hex(H, base_sat * 0.65, 42.0)      # Deeper tonal shade for fastfetch dots
-    c8  = hsl_to_hex(H, min(16.0, base_sat * 0.25), 38.0) # Inactive / surface gray
+    # Tonal surfaces (subtly tinted dark surface and off-white foreground)
+    bg = hsl_to_hex(H, min(16.0, S * 0.22), 8.5)
+    fg = hsl_to_hex(H, min(14.0, S * 0.18), 91.5)
 
-    # Utility CLI accents (harmonized with H but distinct for git status)
-    c1 = hsl_to_hex((H + 180) % 360, min(70.0, base_sat * 0.8), 58.0) # Complementary accent
-    c9 = hsl_to_hex((H + 180) % 360, min(80.0, base_sat * 0.9), 68.0)
-    c3 = hsl_to_hex((H + 60) % 360, min(65.0, base_sat * 0.75), 58.0)  # Analogous warm
-    c11 = hsl_to_hex((H + 60) % 360, min(75.0, base_sat * 0.85), 68.0)
-    c5 = hsl_to_hex((H + 30) % 360, min(70.0, base_sat * 0.8), 60.0)
+    # Primary UI roles (Berserk logo, Starship prompt, Waybar, Active window borders)
+    c14 = hsl_to_hex(H, S, 72.0)                   # Highlight / Berserk Logo
+    c12 = hsl_to_hex(H, S * 0.95, 62.0)            # Active border / Waybar pill
+    c6  = hsl_to_hex(H, S * 0.85, 75.0)            # Fastfetch keys
+    c4  = hsl_to_hex(H, S * 0.80, 52.0)            # Mid accent
+    c10 = hsl_to_hex(H, S * 0.75, 48.0)            # Secondary border / Starship 2
+    c8  = hsl_to_hex(H, min(14.0, S * 0.20), 38.0) # Inactive / surface gray
+
+    # Secondary & Tertiary accents (Username, dots, CLI colors)
+    c2  = hsl_to_hex(H2, S2 * 0.85, 55.0)          # Secondary distinct accent (dots / status)
+    c13 = hsl_to_hex(H2, S2 * 0.90, 68.0)          # Secondary bright (username)
+    c1  = hsl_to_hex((H + 180) % 360, min(75.0, S * 0.85), 58.0) # Complementary warm
+    c9  = hsl_to_hex((H + 180) % 360, min(85.0, S * 0.90), 68.0)
+    c3  = hsl_to_hex((H + 60) % 360, min(70.0, S * 0.80), 60.0)  # Analogous
+    c11 = hsl_to_hex((H + 60) % 360, min(80.0, S * 0.85), 70.0)
+    c5  = hsl_to_hex((H2 + 30) % 360, min(75.0, S2 * 0.85), 62.0)
 
     palette = {
         'wallpaper': img_path,
@@ -141,7 +185,7 @@ def main():
     # Apply via wallust cs
     res = subprocess.run(['wallust', 'cs', '-s', '-f', 'pywal', theme_file])
     if res.returncode != 0:
-        print(f"Warning: wallust cs failed, falling back to wallust run", file=sys.stderr)
+        print("Warning: wallust cs failed, falling back to wallust run", file=sys.stderr)
         subprocess.run(['wallust', 'run', '-s', '-w', img_path])
 
 if __name__ == '__main__':

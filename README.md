@@ -1,18 +1,18 @@
-# 🌸 FiorenDot
+# FiorenDot
 
 Personal dotfiles and system configurations for **Arch Linux** powered by **Hyprland** Wayland compositor. Tailored for high productivity, 2-in-1 touchscreen convertibles, intelligent battery longevity, and dynamic aesthetic theming.
 
 ---
 
-## 📽️ Preview
+## Preview
 
 https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 
 ---
 
-## ✨ Key Features & Innovations
+## Key Features & Innovations
 
-### 🔋 1. Smart Battery Health & Longevity Management
+### 1. Smart Battery Health & Longevity Management
 An intelligent, automated battery protection system built directly on top of Linux kernel sysfs and systemd user services:
 * **80% Battery Health Threshold**: Default charge limit locked at 80% (`charge_control_end_threshold`) to drastically reduce battery aging and prevent cell swelling. Hardware automatically bypasses the battery to AC power when the threshold is reached.
 * **Temporary 100% Full-Charge Override**: Easily toggle to 100% via the SwayNC Control Center button or CLI (`BatteryLimitToggle.sh toggle`).
@@ -21,36 +21,36 @@ An intelligent, automated battery protection system built directly on top of Lin
 * **Sleep & Reboot Persistence**: Automatically re-enforces the threshold across system reboots and wake from sleep/suspend, counteracting ASUS Embedded Controller (EC) firmware resets.
 * **Streamlined Notifications**: Real-time notifications for `Charging`, `Discharging`, `Low Battery` (<15%), `Critical Battery` (≤5%), and `Charge Limit Reached`—delivered in clean English without notification icons.
 
-### 🌌 2. Finityren (Infinite Canvas & Spatial Navigation)
+### 2. Finityren (Infinite Canvas & Spatial Navigation)
 Transforms your workspace into an unbounded infinite 2D canvas:
 * **True Spatial Geometry**: Direct navigation calculates Euclidean distance and directional cone angles rather than simple index cycling.
 * **Tear-Free Atomic Batch Movements**: Dispatches window coordinate shifts atomically via `hyprctl --batch` for 1:1 synchronized multi-window panning.
 * **Touchpad & Mouse Panning**: Hold `Super + Alt` and drag with mouse or slide fingers across absolute touchpads without physical clicking.
 * **Absolute Physical Centering**: Calculates the exact physical center of the monitor in logical pixels, compensating for top and bottom status bars.
 
-### 🎨 3. Dynamic Material You Tonal Theming (Wallust + Caelestia)
+### 3. Dynamic Material You Tonal Theming (Wallust + Caelestia)
 * **Perceptual Color Extraction**: Uses pixel population histogram quantization with hue-excited neighbor smoothing in CIELAB / Saliencedark16 color space for high-contrast, eye-pleasing tonal palettes.
 * **Static & Video Wallpaper Engine**: Full support for both ultra-high-resolution images and animated video wallpapers (`.mp4`, `.webm`, `.mkv`).
 * **Instant Hot-Reload**: Wallpapers apply asynchronously via `awww` while Waybar reloads instantly via `SIGUSR2`, eliminating bar flashing and UI latency.
 * **System-wide Theme Propagation**: Synchronously updates Hyprland borders, Waybar, SwayNC, Rofi, Kitty, Ghostty, and Starship prompt.
 
-### 📱 4. 2-in-1 Convertible & Touchscreen Integration
+### 4. 2-in-1 Convertible & Touchscreen Integration
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
 * **Custom On-Screen Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`), toggled instantly via `Super + K`.
 * **Touchscreen Gestures Daemon**: Custom gesture listener running in background via `touchscreen-gestures.service`.
 
-### 🎧 5. Studio-Grade Audio DSP (EasyEffects)
+### 5. Studio-Grade Audio DSP (EasyEffects)
 * **Custom Hardware Tuned Presets**: Tailored acoustic equalization profiles for Asus VivoBook speakers (Harman Kardon, Dolby Atmos, Perfect EQ).
 * **AI Noise Suppression**: Deep-learning background voice isolation using RNNoise for crystal clear microphone audio.
 
-### ⚡ 6. System Performance & Power Tuning
+### 6. System Performance & Power Tuning
 * **ZRAM with zstd Compression**: High-throughput memory compression configured via `systemd-zram-generator`.
 * **Hardware Udev Rules**: Passwordless user control for charging thresholds (`99-battery-charge-threshold.rules`).
 * **Quickshell Workspace Overview**: Instant native overview with live window previews (`Super + A`).
 
 ---
 
-## 🖥️ System Stack & Components
+## System Stack & Components
 
 | Component | Software / Tool | Description |
 | :--- | :--- | :--- |
@@ -71,7 +71,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 
 ---
 
-## ⌨️ Keybindings Reference
+## Keybindings Reference
 
 ### Window & Workspace Management
 | Shortcut | Action |
@@ -125,7 +125,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### 1. Clone the Repository
 
@@ -178,7 +178,7 @@ sudo usermod -aG input $USER
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
 FiorenDot/
@@ -203,8 +203,8 @@ FiorenDot/
 
 ---
 
-## 📄 License & Credits
+## License & Credits
 
-- Maintained with ❤️ by [Leshoraa](https://github.com/Leshoraa).
+- Maintained by [Leshoraa](https://github.com/Leshoraa).
 - Base structure inspired by the Arch-Hyprland community.
 

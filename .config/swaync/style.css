@@ -104,7 +104,8 @@ button {
 
 /* Tombol Batas Baterai (80% vs 100%) */
 .widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button {
-    background-image: url('icons/battery-100.svg');
+    background-color: lighter(@color12);
+    background-image: url('icons/battery-100-hover.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 48px 48px;

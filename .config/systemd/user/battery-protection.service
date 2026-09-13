@@ -1,5 +1,5 @@
 [Unit]
-Description=Battery Protection Daemon (Auto revert 100% to 80% after 3 hours plugged in)
+Description=Battery Protection Daemon (Auto revert 100% to 80% after 2.5 hours plugged in)
 After=graphical-session.target
 
 [Service]

@@ -13,7 +13,7 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 TIMER_FILE="$CACHE_DIR/battery_limit_100_start"
 PERSISTENT_FILE="$STATE_DIR/battery_charge_limit"
 SYS_STATE_FILE="/etc/asus-battery-charge-threshold"
-THREE_HOURS=10800 # 3 jam = 10800 detik
+TIMEOUT_SECONDS=9000 # 2.5 jam = 9000 detik (2 jam 30 menit)
 
 get_threshold() {
     if [ -f "$THRESHOLD_FILE" ]; then
@@ -84,7 +84,7 @@ toggle() {
         # Switch to 100%
         if set_threshold 100; then
             date +%s > "$TIMER_FILE"
-            notify-send -a "Battery" "Battery Limit" "Set to 100% (auto 80% after 3h)"
+            notify-send -a "Battery" "Battery Limit" "Set to 100% (auto 80% after 2.5h)"
         fi
     else
         # Switch to 80%
@@ -121,10 +121,10 @@ check_timer() {
                 if [ -n "$start_time" ]; then
                     now=$(date +%s)
                     elapsed=$((now - start_time))
-                    if [ "$elapsed" -ge "$THREE_HOURS" ]; then
+                    if [ "$elapsed" -ge "$TIMEOUT_SECONDS" ]; then
                         if set_threshold 80; then
                             rm -f "$TIMER_FILE"
-                            notify-send -a "Battery" "Battery Limit" "Reverted to 80% (charger connected for 3h)"
+                            notify-send -a "Battery" "Battery Limit" "Reverted to 80% (charger connected for 2.5h)"
                             local is_open
                             is_open=$(busctl --user call org.erikreider.swaync /org/erikreider/swaync/cc org.erikreider.swaync.cc GetVisibility 2>/dev/null | awk '{print $2}')
                             if [ "$is_open" = "false" ]; then

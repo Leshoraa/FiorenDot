@@ -42,8 +42,30 @@ if [[ -n "$RANDOM_PIC" ]]; then
   fi
   awww img -o "$focused_monitor" "$RANDOM_PIC" $AWWW_PARAMS
   
-  # 3. Update Warna UI lewat Wallust (Otomatis reload Waybar, SwayNC, Rofi, Kitty)
-  "$SCRIPTSDIR/WallustSwww.sh" "$RANDOM_PIC"
+  # 3. Debounce: Jeda sebelum mengeksekusi Wallust dan reload UI
+  # Jika user mengganti wallpaper secara cepat, timer di-reset sampai user berhenti
+  debounce_stamp="/tmp/wallpaper_random_debounce.stamp"
+  debounce_pid="/tmp/wallpaper_random_debounce.pid"
+
+  if [[ -f "$debounce_pid" ]]; then
+    old_pid=$(cat "$debounce_pid" 2>/dev/null || true)
+    if [[ -n "$old_pid" ]]; then
+      kill "$old_pid" 2>/dev/null || true
+    fi
+  fi
+
+  token=$(date +%s%N)
+  echo "$token" > "$debounce_stamp"
+
+  (
+    trap 'exit 0' TERM INT HUP
+    sleep 1.2 || exit 0
+    if [[ "$(cat "$debounce_stamp" 2>/dev/null)" == "$token" ]]; then
+      rm -f "$debounce_stamp" "$debounce_pid"
+      "$SCRIPTSDIR/WallustSwww.sh" "$RANDOM_PIC"
+    fi
+  ) >/dev/null 2>&1 &
+  echo $! > "$debounce_pid"
 else
   notify-send "Error" "Wallpapers nggak ketemu di $wallDIR"
 fi

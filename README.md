@@ -36,7 +36,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 
 ### 4. 2-in-1 Convertible & Touchscreen Integration
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
-* **Custom On-Screen Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`), toggled instantly via `Super + K`.
+* **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
 * **Touchscreen Gestures Daemon**: Custom gesture listener running in background via `touchscreen-gestures.service`.
 
 ### 5. Studio-Grade Audio DSP (EasyEffects)
@@ -102,7 +102,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + T` | Open default file manager (Thunar) |
 | `Super + B` | Open default web browser |
 | `Super + N` | Toggle SwayNC notification center & quick controls |
-| `Super + K` | Toggle on-screen virtual keyboard (`wvkbd`) |
+| `Super + K` | Toggle tablet mode virtual keyboard auto-show |
 | `Super + S` | Quick web search dialog |
 | `Super + Alt + C` | Open Rofi calculator |
 | `Super + Alt + V` | Open clipboard history manager |

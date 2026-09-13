@@ -33,21 +33,28 @@ if [ -n "$TRANSFORM" ]; then
 
     # Kontrol Keyboard Virtual (wvkbd)
     WVKBD_BIN="$HOME/.local/bin/wvkbd-mobintl"
-    STATE_FILE="$HOME/.cache/virtual_keyboard_state"
+    STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+    STATE_FILE="$STATE_DIR/virtual_keyboard_tablet_mode"
+
+    IS_ENABLED=true
+    if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE" 2>/dev/null)" = "disabled" ]; then
+        IS_ENABLED=false
+    fi
 
     if [ "$TRANSFORM" -ne 0 ]; then
-        # Mode Tablet / Vertikal: Munculkan keyboard virtual
-        if pgrep -x wvkbd-mobintl >/dev/null; then
-            pkill -SIGUSR2 wvkbd-mobintl
+        # Mode Tablet / Vertikal: Munculkan hanya jika fitur enabled/active
+        if [ "$IS_ENABLED" = true ]; then
+            if pgrep -x wvkbd-mobintl >/dev/null; then
+                pkill -SIGUSR2 wvkbd-mobintl
+            else
+                hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
+            fi
         else
-            hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
+            # Jika inactive / disabled, pastikan disembunyikan
+            pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
         fi
-        echo "visible" > "$STATE_FILE"
     else
-        # Mode Laptop Biasa: Sembunyikan keyboard virtual
-        if pgrep -x wvkbd-mobintl >/dev/null; then
-            pkill -SIGUSR1 wvkbd-mobintl
-        fi
-        echo "hidden" > "$STATE_FILE"
+        # Mode Laptop Biasa: Selalu sembunyikan keyboard virtual
+        pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
     fi
 fi

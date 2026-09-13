@@ -21,7 +21,7 @@ else
   waybar &
 fi
 
-pkill qs && qs &
+pkill qs || true; qs -c overview >/dev/null 2>&1 &
 
 swaync >/dev/null 2>&1 &
 swaync-client --reload-config

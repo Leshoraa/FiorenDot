@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Cleaning user cache directories..."
+
+# 1. Clean yay build cache
+if [ -d "$HOME/.cache/yay" ]; then
+    echo "Cleaning yay AUR cache..."
+    rm -rf "$HOME/.cache/yay"/*
+fi
+
+# 2. Clean wallust wallpaper cache
+if [ -d "$HOME/.cache/wallust" ]; then
+    echo "Cleaning wallust wallpaper cache..."
+    rm -rf "$HOME/.cache/wallust"/*
+fi
+
+# 3. Clean thumbnail cache
+if [ -d "$HOME/.cache/thumbnails" ]; then
+    echo "Cleaning thumbnail cache..."
+    rm -rf "$HOME/.cache/thumbnails"/*
+fi
+
+# 4. Optional: clean pacman package cache if sudo is accessible
+if command -v paccache >/dev/null 2>&1; then
+    if [ "${1:-}" == "--all" ] || [ "${1:-}" == "-a" ] || sudo -n true 2>/dev/null; then
+        echo "Cleaning pacman package cache (keeping 1 latest version)..."
+        sudo paccache -r -k1
+    else
+        echo "Tip: Run 'clean-cache --all' to also clean /var/cache/pacman/pkg (requires sudo)."
+    fi
+fi
+
+echo "Cache cleanup completed successfully."
+df -h / | awk 'NR==1 || NR==2'

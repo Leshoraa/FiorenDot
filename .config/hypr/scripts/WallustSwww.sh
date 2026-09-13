@@ -33,22 +33,22 @@ wallpaper_path=""
 if [[ -n "$passed_path" && -f "$passed_path" ]]; then
   wallpaper_path="$passed_path"
 else
-  # Try to read from awww cache for the focused monitor, with a short retry loop
-  current_monitor="$(get_focused_monitor)"
-  cache_file="$cache_dir$current_monitor"
+  current_monitor="$(get_focused_monitor 2>/dev/null || echo 'eDP-1')"
+  # Directly query awww for the wallpaper path
+  wallpaper_path=$(awww query 2>/dev/null | grep "$current_monitor" | awk '{print $NF}')
 
-  # Wait briefly for awww to write its cache after an image change
-  for i in {1..10}; do
-    if [[ -f "$cache_file" ]]; then
-      break
+  if [[ -z "${wallpaper_path:-}" || ! -f "$wallpaper_path" ]]; then
+    # Fallback to awww cache file if query did not return a path
+    cache_file=$(find "$cache_dir" -name "$current_monitor" -print -quit 2>/dev/null || true)
+    if [[ -n "${cache_file:-}" && -f "$cache_file" ]]; then
+      wallpaper_path=$(awk '{print $NF}' "$cache_file")
     fi
-    sleep 0.1
-  done
+  fi
 
-  if [[ -f "$cache_file" ]]; then
-    # The first non-filter line is the original wallpaper path
-    # wallpaper_path="$(grep -v 'Lanczos3' "$cache_file" | head -n 1)"
-    wallpaper_path=$(awww query | grep $current_monitor | awk '{print $9}')
+  if [[ -z "${wallpaper_path:-}" || ! -f "$wallpaper_path" ]]; then
+    if [[ -f "$wallpaper_current" ]]; then
+      wallpaper_path="$wallpaper_current"
+    fi
   fi
 fi
 
@@ -62,8 +62,8 @@ ln -sf "$wallpaper_path" "$rofi_link" || true
 mkdir -p "$(dirname "$wallpaper_current")"
 cp -f "$wallpaper_path" "$wallpaper_current" || true
 
-# Generate 1:1 center-cropped square wallpaper for Rofi Fio theme
-magick "$wallpaper_path" -gravity center -crop 1:1 +repage -resize 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" || true
+# Generate 1:1 center-cropped square wallpaper for Rofi asynchronously so it does not block color derivation
+magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 &
 
 # Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
 # -s is used in this repo to keep things quiet and avoid extra prompts

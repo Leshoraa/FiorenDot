@@ -14,7 +14,7 @@ iDIRi="$HOME/.config/swaync/icons"
 
 # awww transition config
 TYPE="none"
-AWWW_PARAMS="--transition-type $TYPE"
+AWWW_PARAMS="--transition-type $TYPE --filter Bilinear"
 
 # Variables
 rofi_theme="$HOME/.config/rofi/config-wallpaper.rasi"
@@ -95,9 +95,6 @@ menu() {
 
 # Offer SDDM Simple Wallpaper Option (only for non-video wallpapers)
 set_sddm_wallpaper() {
-  sleep 1
-
-  # Cek direktori tema SDDM
   local sddm_themes_dir="/usr/share/sddm/themes"
   if [ ! -d "$sddm_themes_dir" ] && [ -d "/run/current-system/sw/share/sddm/themes" ]; then
     sddm_themes_dir="/run/current-system/sw/share/sddm/themes"
@@ -105,34 +102,28 @@ set_sddm_wallpaper() {
 
   local sddm_simple="$sddm_themes_dir/simple_sddm_2"
 
-  if [ -d "$sddm_simple" ]; then
-      # Menjalankan script secara background tanpa terminal dan tanpa password
-      sudo -n /home/hyprlan/.config/hypr/scripts/sddm_wallpaper.sh --normal > /dev/null 2>&1 &
+  if [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ]; then
+    "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &
   fi
 }
 
 modify_startup_config() {
   local selected_file="$1"
-  local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
+  local startup_config="$HOME/.config/hypr/configs/Startup_Apps.conf"
 
   # Check if it's a live wallpaper (video)
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
     # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^/\#/' "$startup_config"
-    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
+    sed -i '/^\s*exec-once\s*=\s*awww-daemon/s/^/\#/' "$startup_config" 2>/dev/null || true
+    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper/s/^#\s*//;' "$startup_config" 2>/dev/null || true
 
     # Update the livewallpaper variable with the selected video path (using $HOME)
-    selected_file="${selected_file/#$HOME/\$HOME}" # Replace /home/user with $HOME
-    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config"
-
-    echo "Configured for live wallpaper (video)."
+    selected_file="${selected_file/#$HOME/\$HOME}"
+    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config" 2>/dev/null || true
   else
     # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
-
-    sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/\#/' "$startup_config"
-
-    echo "Configured for static wallpaper (image)."
+    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon/s/^\s*#\s*//;' "$startup_config" 2>/dev/null || true
+    sed -i '/^\s*exec-once\s*=\s*mpvpaper/s/^/\#/' "$startup_config" 2>/dev/null || true
   fi
 }
 
@@ -145,16 +136,14 @@ apply_image_wallpaper() {
   kill_wallpaper_for_image
 
   if ! pgrep -x "awww-daemon" >/dev/null; then
-    awww-daemon --format xrgb &
+    awww-daemon &
+    sleep 0.1
   fi
 
   awww img -o "$focused_monitor" "$image_path" $AWWW_PARAMS
 
-  # 1. Update warna UI (Sudah otomatis me-reload Waybar berkat perbaikan kita sebelumnya)
+  # 1. Update warna UI (Otomatis reload Waybar, SwayNC, Rofi, Kitty)
   "$SCRIPTSDIR/WallustSwww.sh" "$image_path"
-  
-  # 2. Reload SwayNC secara mandiri (opsional tapi disarankan agar notifikasi ganti warna)
-  swaync-client -rs
 
   set_sddm_wallpaper
 }

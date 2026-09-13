@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import json
 import subprocess
 import libevdev
 
@@ -23,16 +24,28 @@ def find_touchscreen_device():
                         return f"/dev/input/event{m.group(1)}"
     return None
 
-def run_dispatch(cmd_args):
+def get_screen_transform():
     try:
-        subprocess.run(cmd_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        res = subprocess.run(['hyprctl', 'monitors', '-j'], capture_output=True, text=True, timeout=0.3)
+        if res.returncode == 0:
+            data = json.loads(res.stdout)
+            for m in data:
+                if m.get('name') == 'eDP-1':
+                    return int(m.get('transform', 0))
     except Exception:
         pass
+    return 0
+
+def run_dispatch(cmd_args):
+    try:
+        subprocess.Popen(cmd_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as err:
+        print(f"Error executing {cmd_args}: {err}", file=sys.stderr)
 
 def main():
     dev_path = find_touchscreen_device()
     if not dev_path or not os.path.exists(dev_path):
-        print(f"Touchscreen device not found.", file=sys.stderr)
+        print("Touchscreen device not found.", file=sys.stderr)
         sys.exit(1)
 
     fd = open(dev_path, 'rb')
@@ -41,120 +54,194 @@ def main():
     res_x = 109.0
     res_y = 174.0
     if dev.has(libevdev.EV_ABS.ABS_MT_POSITION_X):
-        res_x = float(dev.absinfo[libevdev.EV_ABS.ABS_MT_POSITION_X].resolution or 109.0)
+        info_x = dev.absinfo[libevdev.EV_ABS.ABS_MT_POSITION_X]
+        if info_x and info_x.resolution:
+            res_x = float(info_x.resolution)
     if dev.has(libevdev.EV_ABS.ABS_MT_POSITION_Y):
-        res_y = float(dev.absinfo[libevdev.EV_ABS.ABS_MT_POSITION_Y].resolution or 174.0)
+        info_y = dev.absinfo[libevdev.EV_ABS.ABS_MT_POSITION_Y]
+        if info_y and info_y.resolution:
+            res_y = float(info_y.resolution)
 
-    active_touches = {}
-    start_time = 0
-    start_cx = 0.0
-    start_cy = 0.0
-    max_fingers = 0
-    gesture_done = False
-    last_trigger_time = 0
+    # Session tracking variables
+    active_touches = {}      # tid -> touch info
+    session_touches = {}     # tid -> touch info across current multi-touch sequence
+    session_start_time = 0.0
+    session_max_fingers = 0
+    session_gesture_done = False
+    last_trigger_time = 0.0
+    cached_transform = 0
 
-    THRESHOLD_MM = 12.0  # 12 mm (~1.2 cm) quick and effortless threshold
+    SWIPE_THRESHOLD_MM = 14.0   # ~1.4 cm for intentional swipe
+    MIN_FINGER_SWIPE_MM = 7.0   # each active finger must move at least 7mm in that direction
+    MAX_TAP_DISP_MM = 8.0       # fingers must stay within 8mm for tap detection
 
     while True:
         try:
             for e in dev.events():
-                slot = dev.value(libevdev.EV_ABS.ABS_MT_SLOT) or 0
+                # Process atomic touch frame on EV_SYN.SYN_REPORT
+                if not e.matches(libevdev.EV_SYN.SYN_REPORT):
+                    continue
 
-                if e.matches(libevdev.EV_ABS.ABS_MT_TRACKING_ID):
-                    if e.value != -1:
-                        # Finger down
-                        x = dev.value(libevdev.EV_ABS.ABS_MT_POSITION_X) or 0
-                        y = dev.value(libevdev.EV_ABS.ABS_MT_POSITION_Y) or 0
-                        active_touches[slot] = {'x': float(x), 'y': float(y)}
+                now = time.time()
 
-                        now = time.time()
-                        if len(active_touches) == 1:
-                            start_time = now
-                            start_cx = float(x)
-                            start_cy = float(y)
-                            max_fingers = 1
-                            gesture_done = False
-                        else:
-                            # Update max fingers and calibrate start centroid during initial touch settling (within 180ms)
-                            if (now - start_time) < 0.20:
-                                max_fingers = max(max_fingers, len(active_touches))
-                                start_cx = sum(t['x'] for t in active_touches.values()) / len(active_touches)
-                                start_cy = sum(t['y'] for t in active_touches.values()) / len(active_touches)
-                            else:
-                                max_fingers = max(max_fingers, len(active_touches))
+                # Query current active contacts from libevdev slots
+                current_contacts = {}
+                for slot_idx in range(dev.num_slots):
+                    slot = dev.slots[slot_idx]
+                    tid = slot[libevdev.EV_ABS.ABS_MT_TRACKING_ID]
+                    if tid is not None and tid != -1:
+                        x = slot[libevdev.EV_ABS.ABS_MT_POSITION_X]
+                        y = slot[libevdev.EV_ABS.ABS_MT_POSITION_Y]
+                        if x is not None and y is not None:
+                            current_contacts[tid] = (float(x), float(y))
+
+                num_contacts = len(current_contacts)
+
+                if num_contacts > 0:
+                    # Session initialization if this is the start of a touch sequence
+                    if len(active_touches) == 0:
+                        session_start_time = now
+                        session_max_fingers = num_contacts
+                        session_gesture_done = False
+                        session_touches.clear()
+                        cached_transform = get_screen_transform()
                     else:
-                        # Finger lifted
-                        if slot in active_touches:
-                            del active_touches[slot]
-                        if len(active_touches) == 0:
-                            now = time.time()
-                            duration = now - start_time
-                            # 3-finger single tap:
-                            # - Was not a swipe gesture (not gesture_done)
-                            # - Exactly 3 fingers participated (max_fingers == 3)
-                            # - Quick tap duration (0.05s to 0.45s)
-                            # - Debounced
-                            if not gesture_done and max_fingers == 3 and (0.05 <= duration <= 0.45):
-                                if (now - last_trigger_time) > 0.4:
+                        session_max_fingers = max(session_max_fingers, num_contacts)
+
+                    # Update contact positions and record max displacements
+                    for tid, (x, y) in current_contacts.items():
+                        if tid not in active_touches:
+                            touch_data = {
+                                'start_x': x,
+                                'start_y': y,
+                                'cur_x': x,
+                                'cur_y': y,
+                                'max_disp_mm': 0.0,
+                            }
+                            active_touches[tid] = touch_data
+                            session_touches[tid] = touch_data
+                        else:
+                            touch_data = active_touches[tid]
+                            touch_data['cur_x'] = x
+                            touch_data['cur_y'] = y
+                            dx_mm = (x - touch_data['start_x']) / res_x
+                            dy_mm = (y - touch_data['start_y']) / res_y
+                            disp = (dx_mm * dx_mm + dy_mm * dy_mm) ** 0.5
+                            if disp > touch_data['max_disp_mm']:
+                                touch_data['max_disp_mm'] = disp
+
+                    # Remove lifted contacts from active tracking
+                    for tid in list(active_touches.keys()):
+                        if tid not in current_contacts:
+                            del active_touches[tid]
+
+                    # Detect Multi-Finger Swipes while fingers are in motion
+                    # Triggerable when 3 or 4 fingers participate and at least 2 are moving together
+                    if not session_gesture_done and session_max_fingers in (3, 4) and num_contacts >= 2:
+                        if (now - last_trigger_time) > 0.35 and (now - session_start_time) < 1.5:
+                            displacements = []
+                            for tid, (x, y) in current_contacts.items():
+                                t = session_touches.get(tid)
+                                if t:
+                                    raw_dx = (x - t['start_x']) / res_x
+                                    raw_dy = (y - t['start_y']) / res_y
+
+                                    # Coordinate rotation based on Hyprland transform
+                                    if cached_transform == 1:
+                                        sx, sy = raw_dy, -raw_dx
+                                    elif cached_transform == 2:
+                                        sx, sy = -raw_dx, -raw_dy
+                                    elif cached_transform == 3:
+                                        sx, sy = -raw_dy, raw_dx
+                                    else:
+                                        sx, sy = raw_dx, raw_dy
+                                    displacements.append((sx, sy))
+
+                            if len(displacements) >= 2:
+                                avg_dx = sum(d[0] for d in displacements) / len(displacements)
+                                avg_dy = sum(d[1] for d in displacements) / len(displacements)
+                                abs_avg_x = abs(avg_dx)
+                                abs_avg_y = abs(avg_dy)
+
+                                # Check Vertical Swipe
+                                if abs_avg_y >= SWIPE_THRESHOLD_MM and abs_avg_y > abs_avg_x * 1.2:
+                                    if avg_dy < 0 and all(d[1] <= -MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe UP
+                                        session_gesture_done = True
+                                        last_trigger_time = now
+                                        if session_max_fingers == 3:
+                                            run_dispatch(['hyprctl', 'dispatch', 'global', 'quickshell:overviewToggle'])
+                                        elif session_max_fingers == 4:
+                                            run_dispatch(['swaync-client', '-t', '-sw'])
+                                    elif avg_dy > 0 and all(d[1] >= MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe DOWN
+                                        session_gesture_done = True
+                                        last_trigger_time = now
+                                        if session_max_fingers == 3:
+                                            run_dispatch(['hyprctl', 'dispatch', 'togglespecialworkspace'])
+                                        elif session_max_fingers == 4:
+                                            run_dispatch(['bash', '-c', 'pkill -x rofi || rofi -show drun'])
+
+                                # Check Horizontal Swipe
+                                elif abs_avg_x >= SWIPE_THRESHOLD_MM and abs_avg_x > abs_avg_y * 1.2:
+                                    if avg_dx < 0 and all(d[0] <= -MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe LEFT
+                                        session_gesture_done = True
+                                        last_trigger_time = now
+                                        if session_max_fingers == 3:
+                                            run_dispatch(['hyprctl', 'dispatch', 'workspace', '+1'])
+                                        elif session_max_fingers == 4:
+                                            run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '+1'])
+                                    elif avg_dx > 0 and all(d[0] >= MIN_FINGER_SWIPE_MM for d in displacements):
+                                        # Swipe RIGHT
+                                        session_gesture_done = True
+                                        last_trigger_time = now
+                                        if session_max_fingers == 3:
+                                            run_dispatch(['hyprctl', 'dispatch', 'workspace', '-1'])
+                                        elif session_max_fingers == 4:
+                                            run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '-1'])
+
+                else:
+                    # All fingers have lifted (num_contacts == 0)
+                    if len(active_touches) > 0 or len(session_touches) > 0:
+                        duration = now - session_start_time
+
+                        # Check 3-finger single tap
+                        # Requirements:
+                        # - Exactly 3 fingers engaged at peak
+                        # - No swipe gesture triggered
+                        # - Natural tap duration: 0.05s <= duration <= 0.65s
+                        # - Stationary touch: max_disp < 8.0 mm across all contacts
+                        # - Debounce interval satisfied
+                        if (not session_gesture_done and
+                            session_max_fingers == 3 and
+                            len(session_touches) in (3, 4) and
+                            0.05 <= duration <= 0.65):
+
+                            max_disp = max((t['max_disp_mm'] for t in session_touches.values()), default=0.0)
+                            if max_disp < MAX_TAP_DISP_MM:
+                                if (now - last_trigger_time) > 0.35:
                                     last_trigger_time = now
                                     run_dispatch([os.path.expanduser('~/.config/hypr/UserScripts/VirtualKeyboardVisibility.sh')])
-                            gesture_done = False
-                            max_fingers = 0
 
-                elif e.matches(libevdev.EV_ABS.ABS_MT_POSITION_X):
-                    if slot in active_touches:
-                        active_touches[slot]['x'] = float(e.value)
-                elif e.matches(libevdev.EV_ABS.ABS_MT_POSITION_Y):
-                    if slot in active_touches:
-                        active_touches[slot]['y'] = float(e.value)
+                        # Reset session tracking
+                        active_touches.clear()
+                        session_touches.clear()
+                        session_max_fingers = 0
+                        session_gesture_done = False
 
-                # Check gesture while fingers are in motion
-                if not gesture_done and max_fingers in (3, 4) and len(active_touches) >= 2:
-                    now = time.time()
-                    if (now - last_trigger_time) > 0.35 and (now - start_time) < 1.2:
-                        cur_cx = sum(t['x'] for t in active_touches.values()) / len(active_touches)
-                        cur_cy = sum(t['y'] for t in active_touches.values()) / len(active_touches)
-
-                        dx_mm = (cur_cx - start_cx) / res_x
-                        dy_mm = (cur_cy - start_cy) / res_y
-
-                        abs_x = abs(dx_mm)
-                        abs_y = abs(dy_mm)
-
-                        if abs_x >= THRESHOLD_MM or abs_y >= THRESHOLD_MM:
-                            gesture_done = True
-                            last_trigger_time = now
-
-                            if abs_y > abs_x:
-                                # Vertical swipe
-                                if dy_mm < 0:
-                                    # Swipe UP
-                                    if max_fingers == 3:
-                                        run_dispatch(['hyprctl', 'dispatch', 'global', 'quickshell:overviewToggle'])
-                                    elif max_fingers == 4:
-                                        run_dispatch(['swaync-client', '-t', '-sw'])
-                                else:
-                                    # Swipe DOWN
-                                    if max_fingers == 3:
-                                        run_dispatch(['hyprctl', 'dispatch', 'togglespecialworkspace'])
-                                    elif max_fingers == 4:
-                                        run_dispatch(['bash', '-c', 'pkill -x rofi || rofi -show drun'])
-                            else:
-                                # Horizontal swipe
-                                if dx_mm < 0:
-                                    # Swipe LEFT
-                                    if max_fingers == 3:
-                                        run_dispatch(['hyprctl', 'dispatch', 'workspace', '+1'])
-                                    elif max_fingers == 4:
-                                        run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '+1'])
-                                else:
-                                    # Swipe RIGHT
-                                    if max_fingers == 3:
-                                        run_dispatch(['hyprctl', 'dispatch', 'workspace', '-1'])
-                                    elif max_fingers == 4:
-                                        run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '-1'])
-        except Exception:
-            time.sleep(0.02)
+        except libevdev.EventsDroppedException:
+            try:
+                dev.sync()
+            except Exception:
+                pass
+            active_touches.clear()
+            session_touches.clear()
+            session_max_fingers = 0
+            session_gesture_done = False
+        except Exception as err:
+            print(f"Unexpected error in gesture loop: {err}", file=sys.stderr)
+            time.sleep(0.05)
 
 if __name__ == '__main__':
     main()

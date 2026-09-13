@@ -18,6 +18,7 @@ fi
 
 # Detect current screen orientation (0: normal laptop mode, != 0: tablet/tent mode)
 TRANSFORM=$(hyprctl monitors -j | jq -r '.[] | select(.name=="eDP-1") | .transform' 2>/dev/null || echo 0)
+V_STATE="${XDG_RUNTIME_DIR:-/tmp}/wvkbd_visible"
 
 if [ "$IS_ENABLED" = true ]; then
     # Toggle to Disabled / Deactivated
@@ -26,6 +27,7 @@ if [ "$IS_ENABLED" = true ]; then
 
     # If currently running in tablet mode, hide it
     pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
+    echo 0 > "$V_STATE"
 else
     # Toggle to Enabled / Activated
     echo "enabled" > "$STATE_FILE"
@@ -38,5 +40,6 @@ else
         else
             hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
         fi
+        echo 1 > "$V_STATE"
     fi
 fi

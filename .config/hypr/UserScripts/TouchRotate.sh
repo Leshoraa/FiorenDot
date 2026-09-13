@@ -41,6 +41,7 @@ if [ -n "$TRANSFORM" ]; then
         IS_ENABLED=false
     fi
 
+    V_STATE="${XDG_RUNTIME_DIR:-/tmp}/wvkbd_visible"
     if [ "$TRANSFORM" -ne 0 ]; then
         # Mode Tablet / Vertikal: Munculkan hanya jika fitur enabled/active
         if [ "$IS_ENABLED" = true ]; then
@@ -49,12 +50,15 @@ if [ -n "$TRANSFORM" ]; then
             else
                 hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
             fi
+            echo 1 > "$V_STATE"
         else
             # Jika inactive / disabled, pastikan disembunyikan
             pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
+            echo 0 > "$V_STATE"
         fi
     else
         # Mode Laptop Biasa: Selalu sembunyikan keyboard virtual
         pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
+        echo 0 > "$V_STATE"
     fi
 fi

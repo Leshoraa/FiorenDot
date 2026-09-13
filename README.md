@@ -124,6 +124,17 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + Alt + Scroll Up` | Zoom out desktop viewport |
 | `Super + Alt + Middle Click`| Reset desktop zoom to 1.0x |
 
+### Touchscreen Gestures
+| Gesture | Action |
+| :--- | :--- |
+| `3-Finger Single Tap` | Open / close on-screen virtual keyboard (wvkbd) |
+| `3-Finger Swipe Up` | Toggle Quickshell desktop overview |
+| `3-Finger Swipe Down` | Toggle special workspace (scratchpad) |
+| `3-Finger Swipe Left / Right`| Switch workspace (+1 / -1) |
+| `4-Finger Swipe Up` | Open SwayNC notification center |
+| `4-Finger Swipe Down` | Open Rofi application launcher |
+| `4-Finger Swipe Left / Right`| Move active window to next / previous workspace |
+
 ---
 
 ## Installation

@@ -4,7 +4,7 @@
     "equalizer#0": {
       "balance": 0.0,
       "bypass": false,
-      "input-gain": -1.0,
+      "input-gain": -1.5,
       "left": {
         "band0": {
           "frequency": 32.0,
@@ -30,7 +30,7 @@
         },
         "band2": {
           "frequency": 125.0,
-          "gain": 4.5,
+          "gain": 5.0,
           "mode": "APO (DR)",
           "mute": false,
           "q": 1.1,
@@ -147,7 +147,7 @@
         },
         "band2": {
           "frequency": 125.0,
-          "gain": 4.5,
+          "gain": 5.0,
           "mode": "APO (DR)",
           "mute": false,
           "q": 1.1,
@@ -266,12 +266,13 @@
     "plugins_order": [
       "equalizer#0",
       "bass_enhancer#0",
+      "stereo_tools#0",
       "limiter#0"
     ],
     "stereo_tools#0": {
       "balance-in": 0.0,
       "balance-out": 0.0,
-      "bypass": true,
+      "bypass": false,
       "delay": 0.0,
       "dry": 0.0,
       "input-gain": 0.0,
@@ -287,20 +288,20 @@
       "side-balance": 0.0,
       "side-level": 0.0,
       "softclip": false,
-      "stereo-base": 0.0,
+      "stereo-base": 0.25,
       "stereo-phase": 0.0,
       "wet": 0.0
     },
     "bass_enhancer#0": {
-      "amount": 3.5,
+      "amount": 5.5,
       "blend": 0.0,
       "bypass": false,
-      "floor": 70.0,
+      "floor": 65.0,
       "floor-active": true,
-      "harmonics": 6.5,
+      "harmonics": 7.0,
       "input-gain": 0.0,
       "output-gain": 0.0,
-      "scope": 140.0
+      "scope": 130.0
     },
     "loudness#0": {
       "bypass": true,

@@ -79,3 +79,12 @@ preview.target = '~/.config/wallust/preview-theme.conf'
 
 #zathura.template = 'colors-zathura'
 #zathura.target = '~/.config/zathura/zathurarc'
+
+[hooks]
+waybar = 'pkill -x waybar; waybar >/dev/null 2>&1 &'
+kitty = 'touch ~/.config/kitty/kitty.conf; pkill -USR1 kitty 2>/dev/null || true'
+swaync = 'swaync-client -rs 2>/dev/null || true'
+hyprland = 'hyprctl reload 2>/dev/null || true'
+cava = 'pkill -USR1 cava 2>/dev/null || true'
+rofi = 'pkill -x rofi 2>/dev/null || true'
+

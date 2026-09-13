@@ -37,6 +37,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 ### 4. 2-in-1 Convertible & Touchscreen Integration
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
 * **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
+* **3-Finger Tap Gesture**: Tap with 3 fingers once anywhere on the touchscreen to instantly open or close the virtual keyboard.
 * **Touchscreen Gestures Daemon**: Custom gesture listener running in background via `touchscreen-gestures.service`.
 
 ### 5. Studio-Grade Audio DSP (EasyEffects)

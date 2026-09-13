@@ -87,6 +87,17 @@ def main():
                         if slot in active_touches:
                             del active_touches[slot]
                         if len(active_touches) == 0:
+                            now = time.time()
+                            duration = now - start_time
+                            # 3-finger single tap:
+                            # - Was not a swipe gesture (not gesture_done)
+                            # - Exactly 3 fingers participated (max_fingers == 3)
+                            # - Quick tap duration (0.05s to 0.45s)
+                            # - Debounced
+                            if not gesture_done and max_fingers == 3 and (0.05 <= duration <= 0.45):
+                                if (now - last_trigger_time) > 0.4:
+                                    last_trigger_time = now
+                                    run_dispatch([os.path.expanduser('~/.config/hypr/UserScripts/VirtualKeyboardVisibility.sh')])
                             gesture_done = False
                             max_fingers = 0
 

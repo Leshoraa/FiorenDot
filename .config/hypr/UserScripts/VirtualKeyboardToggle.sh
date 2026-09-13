@@ -22,14 +22,14 @@ TRANSFORM=$(hyprctl monitors -j | jq -r '.[] | select(.name=="eDP-1") | .transfo
 if [ "$IS_ENABLED" = true ]; then
     # Toggle to Disabled / Deactivated
     echo "disabled" > "$STATE_FILE"
-    send_notify "Virtual Keyboard" "Tablet auto-show disabled."
+    send_notify "Virtual Keyboard" "Tablet virtual keyboard disabled."
 
     # If currently running in tablet mode, hide it
     pkill -SIGUSR1 wvkbd-mobintl 2>/dev/null || true
 else
     # Toggle to Enabled / Activated
     echo "enabled" > "$STATE_FILE"
-    send_notify "Virtual Keyboard" "Tablet auto-show enabled."
+    send_notify "Virtual Keyboard" "Tablet virtual keyboard enabled."
 
     # If currently in tablet mode, show the keyboard immediately
     if [ "$TRANSFORM" -ne 0 ]; then

@@ -287,7 +287,7 @@
       "side-balance": 0.0,
       "side-level": 0.0,
       "softclip": false,
-      "stereo-base": 4.0,
+      "stereo-base": 2.0,
       "stereo-phase": 0.0,
       "wet": 0.0
     }

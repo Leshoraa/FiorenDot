@@ -9,6 +9,8 @@ set -euo pipefail
 hyprctl keyword unbind SUPER,J || true
 hyprctl keyword unbind SUPER,K || true
 
-# Cycle windows globally: J = next, K = previous
+# Cycle windows globally: J = next
 hyprctl keyword bind SUPER,J,cyclenext
-hyprctl keyword bind SUPER,K,cyclenext,prev
+
+# Super + K is reserved for toggling on-screen virtual keyboard
+hyprctl keyword bindd "SUPER,K,Toggle virtual keyboard on/off,exec,$HOME/.config/hypr/UserScripts/VirtualKeyboardToggle.sh"

@@ -2,7 +2,7 @@
   "output": {
     "blocklist": [],
     "equalizer#0": {
-      "balance": 0.0,
+      "balance": 0.08,
       "bypass": false,
       "input-gain": -1.5,
       "left": {

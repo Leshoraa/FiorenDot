@@ -2,8 +2,8 @@
  /* wallust template - colors-waybar */
 
  @define-color foreground {{foreground}};
- @define-color background {{color0}};
- @define-color background-alt rgba({{color0 | rgb}},0.25);
+ @define-color background {{background}};
+ @define-color background-alt rgba({{background | rgb}},0.25);
  @define-color cursor {{cursor}};
  
  @define-color primary {{color9}};

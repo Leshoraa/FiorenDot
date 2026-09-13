@@ -21,16 +21,16 @@ window#waybar.hidden {
 }
 
 tooltip {
-    background: alpha(@color0, 0.90);
+    background: alpha(@background, 0.90);
     border-radius: 8px;
     border-width: 1px;
     border-style: solid;
-    border-color: mix(@color0, @foreground, 1.15);
-    color: mix(@color0, @foreground, 1.15);
+    border-color: mix(@background, @foreground, 1.15);
+    color: mix(@background, @foreground, 1.15);
 }
 
 .modules-center {
-    background-color: alpha(@color0, 0.80);
+    background-color: alpha(@background, 0.80);
     border-radius: 16px;
     padding: 1px 3px;
 }

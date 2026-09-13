@@ -86,6 +86,4 @@ if [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ] && [ -w "$sddm_theme_conf" ]; 
     if [ -e "$sddm_simple/Backgrounds/default.png" ]; then
         cp -f "$wallpaper_path" "$sddm_simple/Backgrounds/default.png"
     fi
-
-    notify-send -i "$iDIR/ja.png" "SDDM" "Background SET"
 fi

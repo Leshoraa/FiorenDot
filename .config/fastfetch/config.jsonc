@@ -7,7 +7,7 @@
             "right": 6
         },
         "color": {
-            "1": "blue" 
+            "1": "bright_cyan" 
         }
     },
     "display": {
@@ -16,7 +16,7 @@
     "modules": [
         {
             "type": "custom",
-            "format": " \u001b[38;5;15m : I am ...\u001b[0m"
+            "format": " \u001b[38;5;14m : I am ...\u001b[0m"
         },
         {
             "type": "custom",
@@ -24,34 +24,34 @@
         },
         {
             "type": "os",
-            "key": "  \u001b[38;5;15m󰣇 OS\u001b[0m",
-            "keyColor": "bright_white"
+            "key": "  󰣇 OS",
+            "keyColor": "cyan"
         },
         {
             "type": "kernel",
             "key": "  󰒋 Kernel",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "packages",
             "key": "  󰏖 Packages",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "display",
             "key": "  󰹑 Display",
             "format": "{1}x{2}, {3} Hz",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "terminal",
             "key": "  󰆍 Terminal",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "wm",
             "key": "  󱂬 WM",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "custom",
@@ -60,8 +60,8 @@
         "break",
         {
             "type": "title",
-            "key": "  \u001b[38;5;15m\u001b[0m",
-            "format": "\u001b[38;5;15m{1} @ {2}\u001b[0m"
+            "key": "  \u001b[38;5;13m\u001b[0m",
+            "format": "\u001b[38;5;13m{1} @ {2}\u001b[0m"
         },
         {
             "type": "custom",
@@ -70,23 +70,23 @@
         {
             "type": "cpu",
             "key": "  󰻠 CPU",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "custom",
             "key": "  󰢮 GPU",
-            "keyColor": "white",
+            "keyColor": "cyan",
             "format": "Radeon Vega Series"
         },
         {
             "type": "memory",
             "key": "  󰍛 Memory",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "uptime",
             "key": "  󰔟 Uptime",
-            "keyColor": "white"
+            "keyColor": "cyan"
         },
         {
             "type": "custom",
@@ -95,7 +95,7 @@
         "break",
         {
             "type": "custom",
-            "format": "  \u001b[38;5;0m● \u001b[38;5;2m● \u001b[38;5;10m● \u001b[38;5;4m● \u001b[38;5;12m● \u001b[38;5;13m● \u001b[38;5;14m● \u001b[38;5;15m●\u001b[0m"
+            "format": "  \u001b[38;5;14m● \u001b[38;5;10m● \u001b[38;5;12m● \u001b[38;5;13m● \u001b[38;5;6m● \u001b[38;5;2m● \u001b[38;5;4m● \u001b[38;5;7m●\u001b[0m"
         }
     ]
 }

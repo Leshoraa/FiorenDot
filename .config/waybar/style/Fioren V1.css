@@ -12,7 +12,7 @@
 window#waybar {
     background: transparent;
     border-radius: 0px;
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 window#waybar.hidden {
@@ -48,12 +48,11 @@ tooltip {
 
 #taskbar button,
 #workspaces button {
-    color: mix(@color12, @color8, 0.24);
+    color: alpha(@foreground, 0.45);
     box-shadow: none;
     text-shadow: none;
     border-radius: 6px;
     padding: 1px 0px;
-    animation: gradient_f 20s ease infinite;
     transition: padding 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -63,7 +62,6 @@ tooltip {
     background-color: @primary;
     border-radius: 12px;
     padding: 1px 12px;
-    animation: gradient_f 20s ease infinite;
     transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
@@ -132,7 +130,7 @@ tooltip {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.sunnyDay {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
     padding: 1px 5px;
 }
 
@@ -145,12 +143,12 @@ tooltip {
 #custom-reboot,
 #custom-power {
     padding: 1px 5px;
-     color: @primary;
+    color: @foreground;
 }
 
 #custom-swaync {
     padding: 1px 5px;
-     color: @primary;
+    color: @foreground;
 }
 
 #backlight-slider slider,
@@ -173,14 +171,14 @@ tooltip {
     min-width: 70px;
     min-height: 4px;
     border-radius: 4px;
-    background-color: mix(@color0, @foreground, 1.15);
+    background-color: alpha(@color12, 0.3);
 }
 
 #backlight-slider highlight,
 #pulseaudio-slider highlight {
     min-height: 4px;
     border-radius: 4px;
-    background-color: @primary;
+    background-color: @color12;
 }
 
 #custom-title, 
@@ -190,7 +188,7 @@ tooltip {
     font-weight: 600;
     padding: 0px 1px;
     margin: 0px;
-    color: @primary;
+    color: @foreground;
     transition: all 0.3s ease;
 }
 
@@ -220,19 +218,19 @@ tooltip {
 
 #pulseaudio,
 #pulseaudio-slider {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #pulseaudio.muted {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #memory {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #cpu {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #group-mobo_drawer {
@@ -240,16 +238,16 @@ tooltip {
 }
 
 #battery {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
     padding: 1px 3px;
 }
 
 #disk {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #battery.critical:not(.charging) {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
     animation-name: blink;
     animation-duration: 3s;
     animation-iteration-count: infinite;
@@ -258,24 +256,24 @@ tooltip {
 
 #custom-hypridle,
 #idle_inhibitor {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #clock {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
     padding: 1px 8px;
 }
 
 #custom-updates {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 #swaync {
-    color: mix(@color0, @foreground, 1.15);
+    color: @foreground;
 }
 
 @keyframes blink {
     to {
-        color: mix(@color0, @foreground, 1.15);
+        color: @foreground;
     }
 }

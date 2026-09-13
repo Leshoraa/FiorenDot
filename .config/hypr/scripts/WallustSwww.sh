@@ -58,9 +58,13 @@ cp -f "$wallpaper_path" "$wallpaper_current" || true
 # Generate 1:1 center-cropped square wallpaper for Rofi asynchronously so it does not block color derivation
 magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 &
 
-# Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
-# -s is used in this repo to keep things quiet and avoid extra prompts
-wallust run -s "$wallpaper_path" || true
+# Run smart tonal extractor (Material You inspired) with wallust cs
+smart_script="$HOME/.config/hypr/scripts/smart_wallust.py"
+if [[ -x "$smart_script" ]]; then
+  "$smart_script" "$wallpaper_path" || wallust run -s -w "$wallpaper_path" || true
+else
+  wallust run -s -w "$wallpaper_path" || true
+fi
 pkill -USR1 kitty || true
 pkill -USR1 cava || true
 pkill -USR2 waybar || true

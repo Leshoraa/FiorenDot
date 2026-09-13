@@ -12,7 +12,7 @@
 window#waybar {
     background: transparent;
     border-radius: 0px;
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
     min-height: 24px;
 }
 
@@ -46,39 +46,37 @@ tooltip {
     text-shadow: none;
     border-radius: 6px;
     padding: 1px 3px;
-    animation: gradient_f 20s ease infinite;
     transition: padding 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, color 0.3s ease;
 }
 
 #taskbar button.active,
 #workspaces button.active {
-    color: mix(@color0, black, 0.66);
-    background-color: lighter(@color12);
+    color: @color0;
+    background-color: @primary;
     border-radius: 8px;
     padding: 1px 8px;
-    animation: gradient_f 20s ease infinite;
     transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #workspaces button.urgent {
-    color: mix(@color1, @foreground, 0.3);
-    background-color: mix(@color0, @foreground, 1.15);
+    color: @color0;
+    background-color: @secondary;
     border-radius: 6px;
 }
 
 #taskbar button:hover,
 #workspaces button:hover {
-    color: mix(@color0, black, 0.66);
+    color: @color0;
     padding: 1px 10px;
     margin: 0px 1px;
     border-radius: 8px;
-    background-color: lighter(@color12);
+    background-color: @secondary;
     background-image: none;
     box-shadow: none;
 }
 
 #clock {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
     font-weight: 700; /* Diturunkan dari bold tebal agar lebih halus */
     font-size: 132%;
     letter-spacing: 0.4px; /* Memberi ruang napas antar angka */
@@ -132,7 +130,7 @@ tooltip {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.sunnyDay {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
     padding: 1px 4px;
 }
 
@@ -151,12 +149,12 @@ tooltip {
 #custom-reboot,
 #custom-power {
     padding: 1px 4px;
-    color: lighter(@color12);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #custom-swaync {
     padding: 1px 4px;
-    color: lighter(@color12);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #backlight-slider slider,
@@ -171,7 +169,7 @@ tooltip {
     font-size: 84%;
     letter-spacing: 3px;
     padding: 1px 6px;
-    color: lighter(@color12);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #backlight-slider trough,
@@ -179,14 +177,14 @@ tooltip {
     min-width: 55px;
     min-height: 4px;
     border-radius: 4px;
-    background-color: mix(@color0, @foreground, 1.15);
+    background-color: alpha(@color12, 0.3);
 }
 
 #backlight-slider highlight,
 #pulseaudio-slider highlight {
     min-height: 4px;
     border-radius: 4px;
-    background-color: mix(@color0, @foreground, 1.15);
+    background-color: @color12;
 }
 
 #custom-title, 
@@ -196,7 +194,7 @@ tooltip {
     font-weight: 600;
     padding: 0px 1px;
     margin: 0px;
-    color: lighter(@color12);
+    color: mix(@color0, @color12, 1.15);
     transition: all 0.3s ease;
 }
 
@@ -226,11 +224,11 @@ tooltip {
 
 #pulseaudio,
 #pulseaudio-slider {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #pulseaudio.muted {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #memory,
@@ -240,7 +238,7 @@ tooltip {
 #custom-updates,
 #custom-hypridle,
 #idle_inhibitor {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
 }
 
 #group-mobo_drawer {
@@ -248,12 +246,12 @@ tooltip {
 }
 
 #battery {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
     padding: 1px 4px;
 }
 
 #battery.critical:not(.charging) {
-    color: mix(@color0, @foreground, 1.15);
+    color: mix(@color0, @color12, 1.15);
     animation-name: blink;
     animation-duration: 3s;
     animation-iteration-count: infinite;
@@ -262,6 +260,6 @@ tooltip {
 
 @keyframes blink {
     to {
-        color: mix(@color0, @foreground, 1.15);
+        color: mix(@color0, @color12, 1.15);
     }
 }

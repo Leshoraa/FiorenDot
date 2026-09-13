@@ -12,6 +12,7 @@ configuration {
     display-window:             "  Window";
     drun-display-format:        "{name}";
     hover-select:               true;
+    click-to-exit:              true;
     me-select-entry:            "MouseSecondary";
     me-accept-entry:            "MousePrimary";
     window-format:              "{w} · {c} · {t}";

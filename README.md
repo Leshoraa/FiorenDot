@@ -36,6 +36,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 
 ### 4. 2-in-1 Convertible & Touchscreen Integration
 * **Touchscreen On-Demand**: Touchscreen input is disabled by default on startup to avoid accidental touches, and can be toggled manually at any time via `Super + Shift + T`.
+* **Touchscreen Rofi Input**: Patched Rofi (`system/rofi/patch-rofi.sh`) with on-demand keyboard interactivity so that on-screen virtual keyboards (`wvkbd`) can receive touches and type directly into the app launcher without exclusive grab conflicts.
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
 * **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
 * **Multi-Finger Touchscreen Gestures**: Hardware-level atomic multi-touch gestures running in background via `touchscreen-gestures.service`:

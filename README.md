@@ -35,6 +35,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 * **System-wide Theme Propagation**: Synchronously updates Hyprland borders, Waybar, SwayNC, Rofi, Kitty, Ghostty, and Starship prompt.
 
 ### 4. 2-in-1 Convertible & Touchscreen Integration
+* **Touchscreen On-Demand**: Touchscreen input is disabled by default on startup to avoid accidental touches, and can be toggled manually at any time via `Super + Shift + T`.
 * **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
 * **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
 * **Multi-Finger Touchscreen Gestures**: Hardware-level atomic multi-touch gestures running in background via `touchscreen-gestures.service`:
@@ -110,6 +111,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + B` | Open default web browser |
 | `Super + N` | Toggle SwayNC notification center & quick controls |
 | `Super + K` | Toggle tablet mode virtual keyboard auto-show |
+| `Super + Shift + T` | Toggle touchscreen input on / off |
 | `Super + S` | Quick web search dialog |
 | `Super + Alt + C` | Open Rofi calculator |
 | `Super + Alt + V` | Open clipboard history manager |

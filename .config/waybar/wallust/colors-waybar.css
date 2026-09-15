@@ -6,23 +6,23 @@
  @define-color background-alt rgba(27,28,32,0.45);
  @define-color cursor #E7E8EB;
  
- @define-color primary #7F8CD4;
- @define-color secondary #DC93B0;
+ @define-color primary #7F8CD5;
+ @define-color secondary #E886A7;
  @define-color yellow #929DDD;
 
  @define-color color0 #212226;
- @define-color color1 #C9BB70;
- @define-color color2 #C9638B;
+ @define-color color1 #C9BC70;
+ @define-color color2 #D9517F;
  @define-color color3 #BD7AC9;
- @define-color color4 #5F6EBE;
- @define-color color5 #D1847B;
+ @define-color color4 #5F6DBE;
+ @define-color color5 #E07F6C;
  @define-color color6 #AAB2DF;
  @define-color color7 #E7E8EB;
  @define-color color8 #646777;
- @define-color color9 #D7CC91;
- @define-color color10 #5866B2;
- @define-color color11 #CE99D8;
- @define-color color12 #6B77BA;
- @define-color color13 #DA8EAC;
+ @define-color color9 #D7CD90;
+ @define-color color10 #5865B2;
+ @define-color color11 #CF99D8;
+ @define-color color12 #6B76BA;
+ @define-color color13 #E781A3;
  @define-color color14 #929DDD;
  @define-color color15 #E7E8EB; 

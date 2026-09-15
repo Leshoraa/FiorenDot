@@ -111,6 +111,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + T` | Open default file manager (Thunar) |
 | `Super + B` | Open default web browser |
 | `Super + N` | Toggle SwayNC notification center & quick controls |
+| `Super + Shift + N` | Toggle Do Not Disturb (DND) for notifications / gaming |
 | `Super + K` | Toggle tablet mode virtual keyboard auto-show |
 | `Super + Shift + T` | Toggle touchscreen input on / off |
 | `Super + S` | Quick web search dialog |

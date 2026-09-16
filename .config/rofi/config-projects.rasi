@@ -7,6 +7,8 @@ configuration {
     click-to-exit:              true;
     me-select-entry:            "MouseSecondary";
     me-accept-entry:            "MousePrimary";
+    kb-accept-alt:              "";
+    kb-custom-1:                "Shift+Return";
 }
 
 @theme "~/.config/rofi/wallust/colors-rofi.rasi"

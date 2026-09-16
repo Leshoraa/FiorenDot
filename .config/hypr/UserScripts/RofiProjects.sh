@@ -51,7 +51,6 @@ fi
 CHOSEN=$(echo "$PROJECT_LIST" | rofi -dmenu \
     -config "$rofi_theme" \
     -i \
-    -kb-custom-1 "Alt+Return" \
     -p "Projects"
 )
 
@@ -74,13 +73,11 @@ fi
 
 case $ROFI_STATUS in
     0)
-        kitty --directory "$TARGET_DIR" &
+        # Enter -> Codium
+        codium "$TARGET_DIR" &
         ;;
     10)
-        if command -v antigravity >/dev/null 2>&1; then
-            antigravity "$TARGET_DIR" &
-        elif command -v codium >/dev/null 2>&1; then
-            codium "$TARGET_DIR" &
-        fi
+        # Shift + Enter -> Terminal
+        kitty --directory "$TARGET_DIR" &
         ;;
 esac

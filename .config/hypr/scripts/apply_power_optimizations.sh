@@ -134,6 +134,12 @@ EOF
 systemctl restart systemd-zram-setup@zram0.service 2>/dev/null || true
 echo "  ✓ ZRAM dikonfigurasi ke 50% RAM (~7.5GB) dengan kompresi cepat zstd."
 
+# AMD P-State EPP Rule (Balance Performance)
+cat << 'EOF' > /etc/udev/rules.d/50-amd-epp.rules
+ACTION=="add", SUBSYSTEM=="cpu", ATTR{cpufreq/energy_performance_preference}!="", ATTR{cpufreq/energy_performance_preference}="balance_performance"
+EOF
+echo "  ✓ AMD P-State EPP balance_performance dikonfigurasi ke udev rules."
+
 # PCIe ASPM powersave policy
 cat << 'EOF' > /etc/udev/rules.d/99-powersave.rules
 # Audio power save
@@ -151,6 +157,11 @@ if [ -f /sys/module/pcie_aspm/parameters/policy ]; then
     echo powersave > /sys/module/pcie_aspm/parameters/policy 2>/dev/null || true
 fi
 
+# Terapkan EPP langsung jika saat ini sudah aktif
+if [ -f /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
+    echo "balance_performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference >/dev/null 2>&1 || true
+fi
+
 echo ""
 echo "======================================================================"
 echo "✨ SEMUA OPTIMASI SISTEM SELESAI DITERAPKAN!"
@@ -159,6 +170,7 @@ echo "Pemeriksaan driver CPU saat ini:"
 if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver ]; then
     echo "Driver: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver)"
     echo "Governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
+    echo "EPP Preference: $(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo 'N/A')"
 else
     echo "Driver cpufreq akan aktif penuh setelah sistem di-reboot."
 fi

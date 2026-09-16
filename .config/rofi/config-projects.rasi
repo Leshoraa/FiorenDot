@@ -1,8 +1,6 @@
 /* =======================================================
- *   FiorenDot — Project Switcher Interface
+ *   FiorenDot — Project Launcher
  *   Author: Fioren (@Leshoraa)
- *   Device: ASUS Vivobook S 14 Flip
- *   Style: Modern Glass / Touch-Friendly
  * ======================================================= */
 
 configuration {
@@ -33,19 +31,19 @@ window {
     cursor:                     "default";
     spacing:                    0px;
     border:                     2px;
-    border-radius:              18px;
+    border-radius:              14px;
     border-color:               @selected;
     location:                   center;
     anchor:                     center;
-    width:                      640px;
-    background-color:           rgba(15, 15, 23, 0.85);
+    width:                      620px;
+    background-color:           rgba(15, 15, 23, 0.90);
 }
 
 mainbox {
     enabled:                    true;
     orientation:                vertical;
-    spacing:                    14px;
-    padding:                    20px;
+    spacing:                    12px;
+    padding:                    18px;
     background-color:           transparent;
     children:                   [ "inputbar", "message", "listview" ];
 }
@@ -55,7 +53,7 @@ inputbar {
     spacing:                    12px;
     padding:                    12px 16px;
     border:                     1.5px;
-    border-radius:              12px;
+    border-radius:              10px;
     border-color:               @selected;
     background-color:           rgba(15, 15, 23, 0.6);
     children:                   [ "entry" ];
@@ -66,7 +64,7 @@ entry {
     background-color:           transparent;
     text-color:                 @foreground;
     cursor:                     text;
-    placeholder:                " 󰘐  Pilih Project (~/Projects)...";
+    placeholder:                " 󰘐  Search projects (~/Projects)...";
     placeholder-color:          rgba(255, 255, 255, 0.4);
     vertical-align:             0.5;
 }
@@ -79,7 +77,7 @@ message {
 
 textbox {
     padding:                    8px 12px;
-    border-radius:              10px;
+    border-radius:              8px;
     background-color:           rgba(255, 255, 255, 0.05);
     text-color:                 @color11;
     vertical-align:             0.5;
@@ -97,7 +95,7 @@ listview {
     reverse:                    false;
     fixed-height:               true;
     fixed-columns:              true;
-    spacing:                    8px;
+    spacing:                    6px;
     padding:                    2px 0px;
     background-color:           transparent;
     border:                     0px;
@@ -105,9 +103,9 @@ listview {
 
 element {
     enabled:                    true;
-    spacing:                    14px;
-    padding:                    10px 16px;
-    border-radius:              10px;
+    spacing:                    12px;
+    padding:                    8px 14px;
+    border-radius:              8px;
     background-color:           transparent;
     cursor:                     pointer;
 }

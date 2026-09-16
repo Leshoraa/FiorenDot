@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
-# /* ---- 💫 FiorenDot - ASUS Vivobook S 14 Flip 💫 ---- */
+# /* ---- 💫 FiorenDot 💫 ---- */
 # Author: Fioren (@Leshoraa)
-# Description: Quick Project Switcher for Rofi with 0 MB standby RAM footprint.
-# Shortcuts in Menu:
-#   Enter       -> Buka di GUI Editor (Antigravity / Codium)
-#   Alt + Enter -> Buka di Terminal (Kitty)
-#   Alt + F     -> Buka di File Manager (Thunar)
-#   Alt + B     -> Buka Keduanya (Editor + Terminal)
+# Description: Quick project launcher for Rofi.
+# Shortcuts:
+#   Enter       -> Open in Editor (Antigravity / Codium)
+#   Alt + Enter -> Open in Terminal (Kitty)
+#   Alt + F     -> Open in File Manager (Thunar)
+#   Alt + B     -> Open Both (Editor + Terminal)
 
 rofi_theme="$HOME/.config/rofi/config-projects.rasi"
 PROJECTS_DIR="$HOME/Projects"
 
-# Tutup rofi jika sudah berjalan
 if pgrep -x "rofi" >/dev/null; then
     pkill rofi
 fi
 
 if [ ! -d "$PROJECTS_DIR" ]; then
-    notify-send -u critical "Project Switcher" "Direktori $PROJECTS_DIR tidak ditemukan!" -a "FiorenDot Projects"
+    notify-send -u critical "Project Launcher" "Directory $PROJECTS_DIR not found" -a "Projects"
     exit 1
 fi
 
-# Pindai project secara cerdas & cepat menggunakan Python (eksekusi < 15ms)
 PROJECT_LIST=$(python3 - <<EOF
 import os
 
@@ -33,12 +31,10 @@ for item in sorted(os.listdir(projects_dir)):
     if not os.path.isdir(p1) or item.startswith("."):
         continue
     
-    # Repository git tingkat 1
     if os.path.exists(os.path.join(p1, ".git")):
         projects.add(item)
         continue
     
-    # Subfolder di dalam kategori (misal CLI/..., Web/..., Readme/...)
     subdirs = [d for d in os.listdir(p1) if os.path.isdir(os.path.join(p1, d)) and not d.startswith(".") and d not in ("node_modules", "dist", "build", ".git", "assets", "__pycache__")]
     if not subdirs:
         projects.add(item)
@@ -55,24 +51,22 @@ EOF
 )
 
 if [ -z "$PROJECT_LIST" ]; then
-    notify-send "Project Switcher" "Tidak ada proyek yang ditemukan di ~/Projects" -a "FiorenDot Projects"
+    notify-send "Project Launcher" "No projects found in ~/Projects" -a "Projects"
     exit 0
 fi
 
-# Tampilkan Rofi menu
 CHOSEN=$(echo "$PROJECT_LIST" | rofi -dmenu \
     -config "$rofi_theme" \
     -i \
     -kb-custom-1 "Alt+Return" \
     -kb-custom-2 "Alt+f" \
     -kb-custom-3 "Alt+b" \
-    -mesg "󰌌 <b>Enter</b>: Editor | <b>Alt+Enter</b>: Kitty | <b>Alt+F</b>: Thunar | <b>Alt+B</b>: Keduanya" \
+    -mesg "󰌌 <b>Enter</b>: Editor | <b>Alt+Enter</b>: Kitty | <b>Alt+F</b>: Thunar | <b>Alt+B</b>: Both" \
     -p "Projects"
 )
 
 ROFI_STATUS=$?
 
-# Batalkan jika user menekan Esc
 if [ $ROFI_STATUS -ne 0 ] && [ $ROFI_STATUS -ne 10 ] && [ $ROFI_STATUS -ne 11 ] && [ $ROFI_STATUS -ne 12 ]; then
     exit 0
 fi
@@ -81,7 +75,6 @@ if [ -z "$CHOSEN" ]; then
     exit 0
 fi
 
-# Bersihkan icon dari nama project
 REL_PATH=$(echo "$CHOSEN" | sed -e 's/^󰘐[[:space:]]*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 TARGET_DIR="$PROJECTS_DIR/$REL_PATH"
 
@@ -95,7 +88,7 @@ OPEN_EDITOR() {
     elif command -v codium >/dev/null 2>&1; then
         codium "$TARGET_DIR" &
     else
-        notify-send -u critical "Project Switcher" "Editor GUI tidak ditemukan!" -a "FiorenDot Projects"
+        notify-send -u critical "Project Launcher" "No GUI editor found" -a "Projects"
     fi
 }
 
@@ -109,24 +102,20 @@ OPEN_FILES() {
 
 case $ROFI_STATUS in
     0)
-        # Enter -> Default: Editor
         OPEN_EDITOR
-        notify-send -i "applications-development" "Project Dibuka" "Membuka $REL_PATH di Editor" -a "FiorenDot Projects"
+        notify-send -i "applications-development" "Project Launcher" "Opened $REL_PATH in Editor" -a "Projects"
         ;;
     10)
-        # Alt + Enter -> Terminal Kitty
         OPEN_TERMINAL
-        notify-send -i "terminal" "Project Terminal" "Membuka terminal di $REL_PATH" -a "FiorenDot Projects"
+        notify-send -i "terminal" "Project Launcher" "Opened terminal in $REL_PATH" -a "Projects"
         ;;
     11)
-        # Alt + F -> Thunar File Manager
         OPEN_FILES
-        notify-send -i "system-file-manager" "Project Files" "Membuka $REL_PATH di Thunar" -a "FiorenDot Projects"
+        notify-send -i "system-file-manager" "Project Launcher" "Opened $REL_PATH in Thunar" -a "Projects"
         ;;
     12)
-        # Alt + B -> Keduanya (Editor + Terminal)
         OPEN_EDITOR
         OPEN_TERMINAL
-        notify-send -i "applications-development" "Workspace Siap" "Membuka $REL_PATH di Editor & Terminal" -a "FiorenDot Projects"
+        notify-send -i "applications-development" "Project Launcher" "Opened $REL_PATH in Editor & Terminal" -a "Projects"
         ;;
 esac

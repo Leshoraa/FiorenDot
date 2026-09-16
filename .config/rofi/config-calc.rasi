@@ -1,17 +1,12 @@
 /* =======================================================
- *   FiorenDot — Calculator Interface
+ *   FiorenDot — Calculator
  *   Author: Fioren (@Leshoraa)
- *   Device: ASUS Vivobook S 14 Flip
- *   Style: Modern Glass / Touch-Friendly
  * ======================================================= */
 
 configuration {
     modi:                       "dmenu";
     show-icons:                 false;
-    hover-select:               true;
     click-to-exit:              true;
-    me-select-entry:            "MouseSecondary";
-    me-accept-entry:            "MousePrimary";
 }
 
 @theme "~/.config/rofi/wallust/colors-rofi.rasi"
@@ -19,8 +14,6 @@ configuration {
 * {
     font:                       "JetBrainsMono Nerd Font 11";
     selected:                   @color12;
-    active:                     @color11;
-    urgent:                     @color13;
     text-selected:              @background;
     text-color:                 @foreground;
     border-color:               @selected;
@@ -33,29 +26,29 @@ window {
     cursor:                     "default";
     spacing:                    0px;
     border:                     2px;
-    border-radius:              18px;
+    border-radius:              14px;
     border-color:               @selected;
     location:                   center;
     anchor:                     center;
-    width:                      520px;
-    background-color:           rgba(15, 15, 23, 0.88);
+    width:                      500px;
+    background-color:           rgba(15, 15, 23, 0.90);
 }
 
 mainbox {
     enabled:                    true;
     orientation:                vertical;
-    spacing:                    12px;
-    padding:                    18px;
+    spacing:                    10px;
+    padding:                    16px;
     background-color:           transparent;
-    children:                   [ "inputbar", "message", "listview" ];
+    children:                   [ "inputbar", "message" ];
 }
 
 inputbar {
     enabled:                    true;
     spacing:                    10px;
-    padding:                    12px 16px;
+    padding:                    12px 14px;
     border:                     1.5px;
-    border-radius:              12px;
+    border-radius:              10px;
     border-color:               @selected;
     background-color:           rgba(15, 15, 23, 0.6);
     children:                   [ "entry" ];
@@ -66,7 +59,7 @@ entry {
     background-color:           transparent;
     text-color:                 @foreground;
     cursor:                     text;
-    placeholder:                "   Ketik operasi matematika...";
+    placeholder:                " 󰃬  Calculate...";
     placeholder-color:          rgba(255, 255, 255, 0.4);
     vertical-align:             0.5;
 }
@@ -79,58 +72,9 @@ message {
 
 textbox {
     padding:                    8px 12px;
-    border-radius:              10px;
-    background-color:           rgba(255, 255, 255, 0.06);
+    border-radius:              8px;
+    background-color:           rgba(255, 255, 255, 0.05);
     text-color:                 @color11;
     vertical-align:             0.5;
     horizontal-align:           0.0;
-}
-
-listview {
-    enabled:                    true;
-    columns:                    1;
-    lines:                      5;
-    cycle:                      true;
-    dynamic:                    true;
-    scrollbar:                  false;
-    layout:                     vertical;
-    reverse:                    false;
-    fixed-height:               false;
-    fixed-columns:              true;
-    spacing:                    6px;
-    padding:                    4px 0px 0px 0px;
-    background-color:           transparent;
-    border:                     0px;
-}
-
-element {
-    enabled:                    true;
-    spacing:                    10px;
-    padding:                    9px 14px;
-    border-radius:              8px;
-    background-color:           transparent;
-    cursor:                     pointer;
-}
-
-element normal.normal {
-    background-color:           transparent;
-    text-color:                 @foreground;
-}
-
-element selected.normal {
-    background-color:           @selected;
-    text-color:                 @background;
-}
-
-element-text {
-    background-color:           transparent;
-    text-color:                 inherit;
-    cursor:                     inherit;
-    vertical-align:             0.5;
-    horizontal-align:           0.0;
-}
-
-element-text selected {
-    background-color:           transparent;
-    text-color:                 @background;
 }

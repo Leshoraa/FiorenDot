@@ -58,9 +58,9 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 * **Quickshell Workspace Overview**: Instant native overview with live window previews (`Super + A`).
 
 ### 7. Offline Productivity Suite (Zero Standby RAM)
-* **Screen OCR / Snip-to-Text (`Super + Shift + O`)**: Select any rectangular region on screen with `slurp` + `grim` to instantly extract text via Tesseract OCR (`eng+ind`) directly to the Wayland clipboard (`wl-copy`), accompanied by an on-screen notification preview. 100% offline and zero persistent RAM usage.
-* **Quick Project Switcher (`Super + Shift + P`)**: High-speed, touch-friendly Rofi switcher that dynamically indexes all repositories and development directories in `~/Projects`. Launch into your IDE (`Antigravity` / `Codium`) on `Enter`, terminal (`Kitty`) on `Alt + Enter`, or file manager (`Thunar`) on `Alt + F`.
-* **Smart Tape Calculator (`Super + Alt + C`)**: Upgraded Qalculate-powered modal with persistent calculation history, one-tap history re-copy, zero-lag input, and notification feedback.
+* **Screen OCR / Snip-to-Text (`Super + Shift + O`)**: Select any rectangular region on screen with `slurp` + `grim` to instantly extract text via Tesseract OCR (`eng+ind`) directly to clipboard (`wl-copy`), accompanied by a desktop notification preview. 100% offline and zero persistent RAM usage.
+* **Quick Project Switcher (`Super + Shift + P`)**: Fast Rofi switcher that dynamically indexes all repositories and directories in `~/Projects`. Open in editor (`Antigravity` / `Codium`) on `Enter`, terminal (`Kitty`) on `Alt + Enter`, file manager (`Thunar`) on `Alt + F`, or both on `Alt + B`.
+* **Calculator (`Super + Alt + C`)**: Qalculate-powered modal with auto-copy and notification feedback.
 
 ---
 
@@ -238,8 +238,6 @@ FiorenDot/
 ---
 
 ## License & Credits
-
 - Designed and maintained by **Fioren (@Leshoraa)**.
-- Tailored and optimized for **ASUS Vivobook S 14 Flip** (AMD Ryzen, 2-in-1 convertible touchscreen).
-- Base structure inspired by JaKooLit and the Arch-Hyprland community.
+- Configured for **ASUS Vivobook S 14 Flip**.
 

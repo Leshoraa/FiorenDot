@@ -30,23 +30,23 @@ window {
     border-color:               @selected;
     location:                   center;
     anchor:                     center;
-    width:                      500px;
+    width:                      460px;
     background-color:           rgba(15, 15, 23, 0.90);
 }
 
 mainbox {
     enabled:                    true;
     orientation:                vertical;
-    spacing:                    10px;
-    padding:                    16px;
+    spacing:                    0px;
+    padding:                    14px;
     background-color:           transparent;
-    children:                   [ "inputbar", "message" ];
+    children:                   [ "inputbar" ];
 }
 
 inputbar {
     enabled:                    true;
     spacing:                    10px;
-    padding:                    12px 14px;
+    padding:                    10px 14px;
     border:                     1.5px;
     border-radius:              10px;
     border-color:               @selected;
@@ -65,16 +65,9 @@ entry {
 }
 
 message {
-    enabled:                    true;
-    background-color:           transparent;
-    border:                     0px;
+    enabled:                    false;
 }
 
-textbox {
-    padding:                    8px 12px;
-    border-radius:              8px;
-    background-color:           rgba(255, 255, 255, 0.05);
-    text-color:                 @color11;
-    vertical-align:             0.5;
-    horizontal-align:           0.0;
+listview {
+    enabled:                    false;
 }

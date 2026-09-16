@@ -1,7 +1,4 @@
-/* =======================================================
- *   FiorenDot — Project Launcher
- *   Author: Fioren (@Leshoraa)
- * ======================================================= */
+/* Project Launcher - Author: Fioren (@Leshoraa) */
 
 configuration {
     modi:                       "dmenu";

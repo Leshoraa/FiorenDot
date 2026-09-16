@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# /* ---- 💫 FiorenDot 💫 ---- */
+# Screen OCR
 # Author: Fioren (@Leshoraa)
-# Description: Screen OCR (Snip-to-Text) with zero persistent RAM footprint.
-# Dependencies: grim, slurp, tesseract, wl-clipboard, libnotify
 
 if ! command -v tesseract >/dev/null 2>&1; then
     notify-send -u critical -i "dialog-warning" \

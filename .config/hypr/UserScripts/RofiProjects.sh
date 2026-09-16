@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
-# /* ---- 💫 FiorenDot 💫 ---- */
+# Project Launcher
 # Author: Fioren (@Leshoraa)
-# Description: Quick project launcher for Rofi.
-# Shortcuts:
-#   Enter       -> Open in Editor (Antigravity / Codium)
-#   Alt + Enter -> Open in Terminal (Kitty)
-#   Alt + F     -> Open in File Manager (Thunar)
-#   Alt + B     -> Open Both (Editor + Terminal)
 
 rofi_theme="$HOME/.config/rofi/config-projects.rasi"
 PROJECTS_DIR="$HOME/Projects"

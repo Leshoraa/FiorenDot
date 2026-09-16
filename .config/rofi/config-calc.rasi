@@ -1,7 +1,4 @@
-/* =======================================================
- *   FiorenDot — Calculator
- *   Author: Fioren (@Leshoraa)
- * ======================================================= */
+/* Calculator - Author: Fioren (@Leshoraa) */
 
 configuration {
     modi:                       "dmenu";

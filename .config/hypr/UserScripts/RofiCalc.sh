@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# /* ---- 💫 FiorenDot 💫 ---- */
+# FiorenDot - Calculator
 # Author: Fioren (@Leshoraa)
-# Description: Minimal calculator with auto-copy and notification feedback.
-# Dependencies: qalc, rofi, wl-clipboard, libnotify
 
 rofi_theme="$HOME/.config/rofi/config-calc.rasi"
 

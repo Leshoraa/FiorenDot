@@ -32,23 +32,23 @@ window {
     border-color:               @selected;
     location:                   center;
     anchor:                     center;
-    width:                      620px;
+    width:                      600px;
     background-color:           rgba(15, 15, 23, 0.90);
 }
 
 mainbox {
     enabled:                    true;
     orientation:                vertical;
-    spacing:                    12px;
-    padding:                    18px;
+    spacing:                    10px;
+    padding:                    16px;
     background-color:           transparent;
-    children:                   [ "inputbar", "message", "listview" ];
+    children:                   [ "inputbar", "listview" ];
 }
 
 inputbar {
     enabled:                    true;
-    spacing:                    12px;
-    padding:                    12px 16px;
+    spacing:                    10px;
+    padding:                    10px 14px;
     border:                     1.5px;
     border-radius:              10px;
     border-color:               @selected;
@@ -61,24 +61,13 @@ entry {
     background-color:           transparent;
     text-color:                 @foreground;
     cursor:                     text;
-    placeholder:                " 󰘐  Search projects (~/Projects)...";
+    placeholder:                " 󰘐  Search projects...";
     placeholder-color:          rgba(255, 255, 255, 0.4);
     vertical-align:             0.5;
 }
 
 message {
-    enabled:                    true;
-    background-color:           transparent;
-    border:                     0px;
-}
-
-textbox {
-    padding:                    8px 12px;
-    border-radius:              8px;
-    background-color:           rgba(255, 255, 255, 0.05);
-    text-color:                 @color11;
-    vertical-align:             0.5;
-    horizontal-align:           0.0;
+    enabled:                    false;
 }
 
 listview {

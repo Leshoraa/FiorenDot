@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Project Launcher
+# FiorenDot - Project Launcher
 # Author: Fioren (@Leshoraa)
 
 rofi_theme="$HOME/.config/rofi/config-projects.rasi"
@@ -10,7 +10,7 @@ if pgrep -x "rofi" >/dev/null; then
 fi
 
 if [ ! -d "$PROJECTS_DIR" ]; then
-    notify-send -u critical "Project Launcher" "Directory $PROJECTS_DIR not found" -a "Projects"
+    notify-send -u critical "Projects" "Directory $PROJECTS_DIR not found" -a "Projects"
     exit 1
 fi
 
@@ -45,7 +45,6 @@ EOF
 )
 
 if [ -z "$PROJECT_LIST" ]; then
-    notify-send "Project Launcher" "No projects found in ~/Projects" -a "Projects"
     exit 0
 fi
 
@@ -53,15 +52,12 @@ CHOSEN=$(echo "$PROJECT_LIST" | rofi -dmenu \
     -config "$rofi_theme" \
     -i \
     -kb-custom-1 "Alt+Return" \
-    -kb-custom-2 "Alt+f" \
-    -kb-custom-3 "Alt+b" \
-    -mesg "󰌌 <b>Enter</b>: Editor | <b>Alt+Enter</b>: Kitty | <b>Alt+F</b>: Thunar | <b>Alt+B</b>: Both" \
     -p "Projects"
 )
 
 ROFI_STATUS=$?
 
-if [ $ROFI_STATUS -ne 0 ] && [ $ROFI_STATUS -ne 10 ] && [ $ROFI_STATUS -ne 11 ] && [ $ROFI_STATUS -ne 12 ]; then
+if [ $ROFI_STATUS -ne 0 ] && [ $ROFI_STATUS -ne 10 ]; then
     exit 0
 fi
 
@@ -76,40 +72,15 @@ if [ ! -d "$TARGET_DIR" ]; then
     exit 1
 fi
 
-OPEN_EDITOR() {
-    if command -v antigravity >/dev/null 2>&1; then
-        antigravity "$TARGET_DIR" &
-    elif command -v codium >/dev/null 2>&1; then
-        codium "$TARGET_DIR" &
-    else
-        notify-send -u critical "Project Launcher" "No GUI editor found" -a "Projects"
-    fi
-}
-
-OPEN_TERMINAL() {
-    kitty --directory "$TARGET_DIR" &
-}
-
-OPEN_FILES() {
-    thunar "$TARGET_DIR" &
-}
-
 case $ROFI_STATUS in
     0)
-        OPEN_EDITOR
-        notify-send -i "applications-development" "Project Launcher" "Opened $REL_PATH in Editor" -a "Projects"
+        if command -v antigravity >/dev/null 2>&1; then
+            antigravity "$TARGET_DIR" &
+        elif command -v codium >/dev/null 2>&1; then
+            codium "$TARGET_DIR" &
+        fi
         ;;
     10)
-        OPEN_TERMINAL
-        notify-send -i "terminal" "Project Launcher" "Opened terminal in $REL_PATH" -a "Projects"
-        ;;
-    11)
-        OPEN_FILES
-        notify-send -i "system-file-manager" "Project Launcher" "Opened $REL_PATH in Thunar" -a "Projects"
-        ;;
-    12)
-        OPEN_EDITOR
-        OPEN_TERMINAL
-        notify-send -i "applications-development" "Project Launcher" "Opened $REL_PATH in Editor & Terminal" -a "Projects"
+        kitty --directory "$TARGET_DIR" &
         ;;
 esac

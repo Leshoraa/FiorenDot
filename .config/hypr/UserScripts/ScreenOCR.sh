@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Screen OCR
+# FiorenDot - Screen OCR
 # Author: Fioren (@Leshoraa)
 
 if ! command -v tesseract >/dev/null 2>&1; then

@@ -57,6 +57,11 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 * **Hardware Udev Rules**: Passwordless user control for charging thresholds (`99-battery-charge-threshold.rules`).
 * **Quickshell Workspace Overview**: Instant native overview with live window previews (`Super + A`).
 
+### 7. Offline Productivity Suite (Zero Standby RAM)
+* **Screen OCR / Snip-to-Text (`Super + Shift + O`)**: Select any rectangular region on screen with `slurp` + `grim` to instantly extract text via Tesseract OCR (`eng+ind`) directly to the Wayland clipboard (`wl-copy`), accompanied by an on-screen notification preview. 100% offline and zero persistent RAM usage.
+* **Quick Project Switcher (`Super + Shift + P`)**: High-speed, touch-friendly Rofi switcher that dynamically indexes all repositories and development directories in `~/Projects`. Launch into your IDE (`Antigravity` / `Codium`) on `Enter`, terminal (`Kitty`) on `Alt + Enter`, or file manager (`Thunar`) on `Alt + F`.
+* **Smart Tape Calculator (`Super + Alt + C`)**: Upgraded Qalculate-powered modal with persistent calculation history, one-tap history re-copy, zero-lag input, and notification feedback.
+
 ---
 
 ## System Stack & Components
@@ -112,10 +117,12 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + B` | Open default web browser |
 | `Super + N` | Toggle SwayNC notification center & quick controls |
 | `Super + Shift + N` | Toggle Do Not Disturb (DND) for notifications / gaming |
+| `Super + Shift + O` | Screen OCR / Snip-to-Text directly to clipboard |
+| `Super + Shift + P` | Quick Project Switcher (open in editor/terminal/files) |
 | `Super + K` | Toggle tablet mode virtual keyboard auto-show |
 | `Super + Shift + T` | Toggle touchscreen input on / off |
 | `Super + S` | Quick web search dialog |
-| `Super + Alt + C` | Open Rofi calculator |
+| `Super + Alt + C` | Open smart Rofi calculator with history tape |
 | `Super + Alt + V` | Open clipboard history manager |
 | `Super + Alt + E` | Open emoji picker |
 | `Super + Shift + M` | Online streaming music player (RofiBeats) |
@@ -180,7 +187,7 @@ The included `install.sh` script backs up existing configurations in `~/.config`
 
 #### Arch Linux (Official Repositories)
 ```bash
-sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct easyeffects jq python
+sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct easyeffects jq python tesseract tesseract-data-eng tesseract-data-ind
 ```
 
 #### AUR Packages
@@ -214,7 +221,7 @@ FiorenDot/
 │   ├── swaync/             # Notification daemon, custom CSS & button grid
 │   ├── waybar/             # Status bar modules, layouts, and styles
 │   ├── wallust/            # Dynamic palette templates & configuration
-│   ├── rofi/               # Application menus, beats, themes, calculator
+│   ├── rofi/               # Application menus, beats, themes, calculator, projects
 │   ├── kitty/              # Kitty terminal configuration & wallust themes
 │   ├── ghostty/            # Ghostty modern terminal configuration
 │   ├── quickshell/         # Workspace overview QML definitions
@@ -232,6 +239,7 @@ FiorenDot/
 
 ## License & Credits
 
-- Maintained by [Leshoraa](https://github.com/Leshoraa).
-- Base structure inspired by the Arch-Hyprland community.
+- Designed and maintained by **Fioren (@Leshoraa)**.
+- Tailored and optimized for **ASUS Vivobook S 14 Flip** (AMD Ryzen, 2-in-1 convertible touchscreen).
+- Base structure inspired by JaKooLit and the Arch-Hyprland community.
 

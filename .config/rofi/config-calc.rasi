@@ -34,10 +34,10 @@ window {
 mainbox {
     enabled:                    true;
     orientation:                vertical;
-    spacing:                    0px;
+    spacing:                    10px;
     padding:                    14px;
     background-color:           transparent;
-    children:                   [ "inputbar" ];
+    children:                   [ "inputbar", "message" ];
 }
 
 inputbar {
@@ -62,7 +62,18 @@ entry {
 }
 
 message {
-    enabled:                    false;
+    enabled:                    true;
+    background-color:           transparent;
+    border:                     0px;
+}
+
+textbox {
+    padding:                    8px 12px;
+    border-radius:              8px;
+    background-color:           rgba(255, 255, 255, 0.05);
+    text-color:                 @color11;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
 }
 
 listview {

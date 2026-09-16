@@ -9,13 +9,12 @@
 	"format": "{}",
 	"format-alt": "{alt}: {}",
 	"format-alt-click": "click",
-	"interval": 3600,
+	"interval": 1800,
 	"return-type": "json",
-	//"exec": "$HOME/.config/hypr/UserScripts/Weather.py",
-	//"exec": "$HOME/.config/hypr/UserScripts/Weather.sh",
 	"exec": "$HOME/.config/hypr/UserScripts/WeatherWrap.sh",
-	//"exec-if": "ping wttr.in -c1",
-	"tooltip": true,
+	"on-click-right": "$HOME/.config/hypr/UserScripts/WeatherWrap.sh && pkill -RTMIN+8 waybar",
+	"signal": 8,
+	"tooltip": true
 },
 
 "custom/emptyLeft": {

@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import html
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union, cast
 from typing import NamedTuple
@@ -71,6 +72,9 @@ ENV_PLACE = os.getenv("WEATHER_PLACE")
 # and, if coordinates are not provided, will be used to geocode latitude/longitude.
 # Example: MANUAL_PLACE = "Concord, NH, US"
 MANUAL_PLACE: Optional[str] = "" #Set your city HERE
+DEFAULT_LAT = -7.7680
+DEFAULT_LON = 110.3918
+DEFAULT_PLACE = "Yogyakarta, Indonesia"
 
 # Location icon in tooltip (default to a standard emoji to avoid missing glyphs)
 LOC_ICON = os.getenv("WEATHER_LOC_ICON", "")
@@ -84,7 +88,7 @@ UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 )
-TIMEOUT = 8
+TIMEOUT = 4
 
 SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": UA})
@@ -216,14 +220,23 @@ def coerce_number(value: Any) -> Union[int, float, None]:
     return None
 
 
-def read_api_cache() -> Optional[Dict[str, Any]]:
+def read_raw_cache() -> Optional[Dict[str, Any]]:
     try:
         if not API_CACHE_PATH.exists():
             return None
         with API_CACHE_PATH.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        # Use ensure_dict for safety
-        data_dict = ensure_dict(data)
+        return ensure_dict(data)
+    except Exception as e:
+        log_debug(f"Error reading raw cache: {e}")
+        return None
+
+
+def read_api_cache() -> Optional[Dict[str, Any]]:
+    try:
+        data_dict = read_raw_cache()
+        if not data_dict:
+            return None
 
         # Invalidate cache if units mismatch
         if data_dict.get("units") != UNITS:
@@ -236,7 +249,7 @@ def read_api_cache() -> Optional[Dict[str, Any]]:
             return data_dict
         return None
     except Exception as e:
-        print(f"Error reading cache: {e}", file=sys.stderr)
+        log_debug(f"Error reading cache: {e}")
         return None
 
 
@@ -245,8 +258,10 @@ def write_api_cache(payload: Dict[str, Any]) -> None:
         ensure_cache_dir()
         payload["timestamp"] = time.time()
         payload["units"] = UNITS
-        with API_CACHE_PATH.open("w", encoding="utf-8") as f:
-            json.dump(payload, f)
+        with tempfile.NamedTemporaryFile("w", dir=CACHE_DIR, delete=False, encoding="utf-8") as tf:
+            json.dump(payload, tf)
+            temp_name = tf.name
+        os.replace(temp_name, API_CACHE_PATH)
     except Exception as e:
         print(f"Error writing API cache: {e}", file=sys.stderr)
 
@@ -254,8 +269,10 @@ def write_api_cache(payload: Dict[str, Any]) -> None:
 def write_simple_text_cache(text: str) -> None:
     try:
         ensure_cache_dir()
-        with SIMPLE_TEXT_CACHE_PATH.open("w", encoding="utf-8") as f:
-            f.write(text)
+        with tempfile.NamedTemporaryFile("w", dir=CACHE_DIR, delete=False, encoding="utf-8") as tf:
+            tf.write(text)
+            temp_name = tf.name
+        os.replace(temp_name, SIMPLE_TEXT_CACHE_PATH)
     except Exception as e:
         print(f"Error writing simple cache: {e}", file=sys.stderr)
 
@@ -271,21 +288,18 @@ def get_coords_from_env() -> Optional[Tuple[float, float]]:
 
 def get_coords_from_cache() -> Optional[Tuple[float, float]]:
     try:
-        cached = read_api_cache()
+        # Check raw cache regardless of timestamp so coordinates persist across reboots/suspends
+        cached = read_raw_cache()
         if cached:
             fc = ensure_dict(cached.get("forecast"))
             lat_raw = safe_get(fc, "latitude")
             lon_raw = safe_get(fc, "longitude")
             lat = coerce_float(lat_raw)
             lon = coerce_float(lon_raw)
-            if lat is None:
-                log_debug(f"Unexpected type for cached latitude: {type(lat_raw)}")
-            if lon is None:
-                log_debug(f"Unexpected type for cached longitude: {type(lon_raw)}")
-            if lat is not None and lon is not None:
+            if lat is not None and lon is not None and (lat != 0.0 or lon != 0.0):
                 return lat, lon
     except Exception as e:
-        print(f"Reading cached coords failed: {e}", file=sys.stderr)
+        log_debug(f"Reading cached coords failed: {e}")
     return None
 
 
@@ -300,21 +314,7 @@ def get_coords_from_ipwho() -> Optional[Tuple[float, float]]:
             if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
                 return float(lat), float(lon)
     except Exception as e:
-        print(f"ipwho.is failed: {e}", file=sys.stderr)
-    return None
-
-
-def get_coords_from_ipapi() -> Optional[Tuple[float, float]]:
-    try:
-        resp = SESSION.get("https://ipapi.co/json", timeout=TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
-        lat = data.get("latitude")
-        lon = data.get("longitude")
-        if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
-            return float(lat), float(lon)
-    except Exception as e:
-        print(f"ipapi.co failed: {e}", file=sys.stderr)
+        log_debug(f"ipwho.is failed: {e}")
     return None
 
 
@@ -328,7 +328,21 @@ def get_coords_from_ipinfo() -> Optional[Tuple[float, float]]:
             lat_s, lon_s = loc.split(",", 1)
             return float(lat_s), float(lon_s)
     except Exception as e:
-        print(f"ipinfo.io failed: {e}", file=sys.stderr)
+        log_debug(f"ipinfo.io failed: {e}")
+    return None
+
+
+def get_coords_from_ipapi() -> Optional[Tuple[float, float]]:
+    try:
+        resp = SESSION.get("https://ipapi.co/json", timeout=TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        lat = data.get("latitude")
+        lon = data.get("longitude")
+        if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+            return float(lat), float(lon)
+    except Exception as e:
+        log_debug(f"ipapi.co failed: {e}")
     return None
 
 
@@ -356,7 +370,7 @@ def get_coords_from_place_name(name: str) -> Optional[Tuple[float, float]]:
             if lat is not None and lon is not None:
                 return float(lat), float(lon)
     except Exception as e:
-        print(f"Place geocoding failed: {e}", file=sys.stderr)
+        log_debug(f"Place geocoding failed: {e}")
     return None
 
 
@@ -386,13 +400,12 @@ def get_coords() -> Tuple[float, float]:
         return coords
 
     # 5) IP-based geolocation
-    coords = get_coords_from_ipwho() or get_coords_from_ipapi() or get_coords_from_ipinfo()
+    coords = get_coords_from_ipwho() or get_coords_from_ipinfo() or get_coords_from_ipapi()
     if coords:
         return coords
 
-    # 6) Last resort
-    print("IP geolocation failed: no providers succeeded", file=sys.stderr)
-    return 0.0, 0.0
+    # 6) Default to user's known city coordinates
+    return DEFAULT_LAT, DEFAULT_LON
 
 
 def units_params(units: str) -> Dict[str, str]:
@@ -699,6 +712,8 @@ def build_place_str(lat: float, lon: float, place: Optional[str]) -> str:
     effective_place = MANUAL_PLACE or ENV_PLACE or place
     if effective_place:
         return effective_place
+    if abs(lat - DEFAULT_LAT) < 0.1 and abs(lon - DEFAULT_LON) < 0.1:
+        return DEFAULT_PLACE
     return f"{lat:.3f}, {lon:.3f}"
 
 
@@ -857,15 +872,17 @@ def fetch_fresh_weather(lat: float, lon: float) -> Optional[Tuple[Dict[str, str]
 
 def try_stale_weather(lat: float, lon: float) -> Optional[Tuple[Dict[str, str], str]]:
     try:
-        if API_CACHE_PATH.exists():
-            with API_CACHE_PATH.open("r", encoding="utf-8") as f:
-                stale = json.load(f)
-            stale_dict = ensure_dict(stale)
+        stale_dict = read_raw_cache()
+        if stale_dict:
             place_val = stale_dict.get("place")
             place = place_val if isinstance(place_val, str) else None
             forecast = cast(Optional[Dict[str, Any]], stale_dict.get("forecast"))
             aqi = cast(Optional[Dict[str, Any]], stale_dict.get("aqi"))
-            return build_output(Location(lat, lon, place), forecast, aqi)
+            if forecast:
+                out_data, simple_weather = build_output(Location(lat, lon, place), forecast, aqi)
+                if "tooltip" in out_data and isinstance(out_data["tooltip"], str):
+                    out_data["tooltip"] += "\n(Offline / Cached)"
+                return out_data, simple_weather
     except Exception as e2:
         print(f"Failed to use stale cache: {e2}", file=sys.stderr)
     return None
@@ -906,6 +923,7 @@ def main() -> None:
         "class": "unavailable",
     }
     print(json.dumps(fallback, ensure_ascii=False))
+    sys.exit(1)
 
 
 def test_coerce_functions():

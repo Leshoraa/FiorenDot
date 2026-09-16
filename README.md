@@ -59,7 +59,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 
 ### 7. Offline Productivity Suite (Zero Standby RAM)
 * **Screen OCR / Snip-to-Text (`Super + Shift + O`)**: Select any rectangular region on screen with `slurp` + `grim` to instantly extract text via Tesseract OCR (`eng+ind`) directly to clipboard (`wl-copy`), accompanied by a desktop notification preview. 100% offline and zero persistent RAM usage.
-* **Quick Project Switcher (`Super + Shift + P`)**: Fast Rofi switcher that dynamically indexes all repositories and directories in `~/Projects`. Open in editor (`Antigravity` / `Codium`) on `Enter`, terminal (`Kitty`) on `Alt + Enter`, file manager (`Thunar`) on `Alt + F`, or both on `Alt + B`.
+* **Quick Project Switcher (`Super + Shift + P`)**: Fast Rofi switcher that dynamically indexes all repositories and directories in `~/Projects`. Open in terminal (`Kitty`) on `Enter`, or editor (`Antigravity` / `Codium`) on `Alt + Enter`.
 * **Calculator (`Super + Alt + C`)**: Qalculate-powered modal with auto-copy and notification feedback.
 
 ---
@@ -118,7 +118,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + N` | Toggle SwayNC notification center & quick controls |
 | `Super + Shift + N` | Toggle Do Not Disturb (DND) for notifications / gaming |
 | `Super + Shift + O` | Screen OCR / Snip-to-Text directly to clipboard |
-| `Super + Shift + P` | Quick Project Switcher (open in editor/terminal/files) |
+| `Super + Shift + P` | Quick Project Launcher (open in terminal) |
 | `Super + K` | Toggle tablet mode virtual keyboard auto-show |
 | `Super + Shift + T` | Toggle touchscreen input on / off |
 | `Super + S` | Quick web search dialog |

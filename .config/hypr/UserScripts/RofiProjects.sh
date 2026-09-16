@@ -74,13 +74,13 @@ fi
 
 case $ROFI_STATUS in
     0)
+        kitty --directory "$TARGET_DIR" &
+        ;;
+    10)
         if command -v antigravity >/dev/null 2>&1; then
             antigravity "$TARGET_DIR" &
         elif command -v codium >/dev/null 2>&1; then
             codium "$TARGET_DIR" &
         fi
-        ;;
-    10)
-        kitty --directory "$TARGET_DIR" &
         ;;
 esac

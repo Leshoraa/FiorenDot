@@ -1,7 +1,9 @@
 {
   "$schema": "/etc/xdg/swaync/configSchema.json",
   "positionX": "right",
-  "positionY": "bottom",
+  "positionY": "top",
+  "control-center-positionX": "right",
+  "control-center-positionY": "bottom",
   "layer": "overlay",
   "control-center-layer": "top",
   "layer-shell": true,
@@ -21,6 +23,7 @@
   "control-center-height": 740,
   "keyboard-shortcuts": true,
   "image-visibility": false,
+  "notification-grouping": false,
   "transition-time": 500,
   "hide-on-clear": false,
   "hide-on-action": true,
@@ -114,6 +117,9 @@
     "backlight": {
       "label": "󰃟",
       "device": "amdgpu_bl1"
+    },
+    "notifications": {
+      "vexpand": true
     }
   }
 }

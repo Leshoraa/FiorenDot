@@ -98,7 +98,7 @@ def get_monitor_center():
 
 def get_floating_windows(workspace_id):
     with cache_lock:
-        return [w for w in cached_clients if w.get('floating') and w.get('workspace', {}).get('id') == workspace_id]
+        return [w for w in cached_clients if w.get('floating') and (w.get('workspace', {}).get('id') == workspace_id or w.get('pinned', False))]
 
 def is_protected_app(window):
     if not window:
@@ -138,6 +138,9 @@ def pan_to_window(floating_windows, target_addr, center_x, center_y):
             window_positions[w['address']]['target_y'] += dy
             window_positions[w['address']]['sx'] += dx
             window_positions[w['address']]['sy'] += dy
+            if 'base_x' in window_positions[w['address']]:
+                window_positions[w['address']]['base_x'] += dx
+                window_positions[w['address']]['base_y'] += dy
     subprocess.Popen(['hyprctl', '--batch', ';'.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if not is_protected_app(target_window):
         subprocess.Popen(['hyprctl', 'dispatch', 'focuswindow', f'address:{target_addr}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -392,30 +395,47 @@ def sync_positions(floating_windows):
                 'sy': ay,
                 'w': aw,
                 'h': ah,
-                'fullscreen': fs
+                'fullscreen': fs,
+                'base_x': ax,
+                'base_y': ay
             }
         else:
             window_positions[addr]['w'] = aw
             window_positions[addr]['h'] = ah
             window_positions[addr]['fullscreen'] = fs
+            if 'base_x' not in window_positions[addr]:
+                window_positions[addr]['base_x'] = ax
+                window_positions[addr]['base_y'] = ay
             dev_x = abs(ax - window_positions[addr]['sx'])
             dev_y = abs(ay - window_positions[addr]['sy'])
             if dev_x > 5.0 or dev_y > 5.0:
                 is_anim = abs(window_positions[addr]['target_x'] - window_positions[addr]['sx']) > 1.0 or \
                           abs(window_positions[addr]['target_y'] - window_positions[addr]['sy']) > 1.0
-                if not is_anim or (btn_left and (addr == dragged_window_addr or w.get('focused', False))):
+                is_user_drag = btn_left and (addr == dragged_window_addr or w.get('focused', False))
+                if not is_anim or is_user_drag:
                     window_positions[addr]['target_x'] = ax
                     window_positions[addr]['target_y'] = ay
                     window_positions[addr]['sx'] = ax
                     window_positions[addr]['sy'] = ay
+                    if is_user_drag or abs(window_positions[addr].get('target_x', ax) - window_positions[addr].get('base_x', ax)) < 1.0:
+                        window_positions[addr]['base_x'] = ax
+                        window_positions[addr]['base_y'] = ay
 
 def resolve_collisions(tracked, active_addr):
+    for addr, w in tracked.items():
+        if 'base_x' not in w:
+            w['base_x'] = w['target_x']
+            w['base_y'] = w['target_y']
+        if addr != active_addr:
+            w['target_x'] = w['base_x']
+            w['target_y'] = w['base_y']
+
+    keys = list(tracked.keys())
     for _ in range(8):
         moved = False
-        for addr1 in list(tracked.keys()):
-            for addr2 in list(tracked.keys()):
-                if addr1 == addr2:
-                    continue
+        for i in range(len(keys)):
+            for j in range(i + 1, len(keys)):
+                addr1, addr2 = keys[i], keys[j]
                 w1 = tracked[addr1]
                 w2 = tracked[addr2]
                 if w1.get('fullscreen') or w2.get('fullscreen'):
@@ -475,7 +495,7 @@ def update_cache():
             if workspace_id != last_workspace_id:
                 window_positions.clear()
                 last_workspace_id = workspace_id
-            floating_windows = [w for w in clients if w.get('floating') and w.get('workspace', {}).get('id') == workspace_id]
+            floating_windows = [w for w in clients if w.get('floating') and (w.get('workspace', {}).get('id') == workspace_id or w.get('pinned', False))]
             sync_positions(floating_windows)
     except:
         pass
@@ -488,7 +508,8 @@ def cache_manager():
             skip = panning
         if not skip:
             update_cache()
-            time.sleep(0.1)
+            wakeup_event.set()
+            time.sleep(0.05)
 
 def hyprland_event_listener():
     xdg_runtime = os.environ.get("XDG_RUNTIME_DIR")
@@ -592,7 +613,7 @@ while True:
                     dragged_window_addr = focused['address']
         else:
             dragged_window_addr = None
-        floating_windows = [w for w in clients if w.get('floating') and w.get('workspace', {}).get('id') == workspace_id]
+        floating_windows = [w for w in clients if w.get('floating') and (w.get('workspace', {}).get('id') == workspace_id or w.get('pinned', False))]
         if not floating_windows:
             wakeup_event.clear()
             wakeup_event.wait(timeout=0.2)
@@ -636,6 +657,9 @@ while True:
                 window_positions[addr]['target_y'] += idy
                 window_positions[addr]['sx'] += idx
                 window_positions[addr]['sy'] += idy
+                if 'base_x' in window_positions[addr]:
+                    window_positions[addr]['base_x'] += idx
+                    window_positions[addr]['base_y'] += idy
                 batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
         elif (idx != 0 or idy != 0) and (super_pressed and alt_pressed):
             for w in floating_windows:
@@ -645,6 +669,9 @@ while True:
                     window_positions[addr]['target_y'] += idy
                     window_positions[addr]['sx'] += idx
                     window_positions[addr]['sy'] += idy
+                    if 'base_x' in window_positions[addr]:
+                        window_positions[addr]['base_x'] += idx
+                        window_positions[addr]['base_y'] += idy
                 batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
         if active:
             resolve_collisions(window_positions, active_addr=active['address'])

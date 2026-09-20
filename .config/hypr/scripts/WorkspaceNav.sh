@@ -13,17 +13,19 @@ direction="${1:-next}"
 
 active_ws=$(hyprctl activeworkspace -j 2>/dev/null)
 curr_id=$(jq -r '.id // empty' <<< "$active_ws")
-curr_windows=$(jq -r '.windows // 0' <<< "$active_ws")
 
 # Ignore special workspaces (e.g. scratchpad with negative IDs)
 if [[ -z "$curr_id" || "$curr_id" -lt 1 ]]; then
     exit 0
 fi
 
-workspaces_json=$(hyprctl workspaces -j 2>/dev/null)
+clients_json=$(hyprctl clients -j 2>/dev/null)
 
-# Occupied workspaces strictly within the A-Z alphabet range (1 to 26)
-occupied_list=($(jq -r '[.[] | select(.id >= 1 and .id <= 26 and .windows > 0) | .id] | sort | unique | .[]' <<< "$workspaces_json"))
+# Count real windows on current workspace excluding pinned windows
+curr_windows=$(jq -r --argjson id "$curr_id" '[.[] | select(.workspace.id == $id and (.pinned // false) != true)] | length' <<< "$clients_json" 2>/dev/null || echo 0)
+
+# Occupied workspaces strictly within the A-Z alphabet range (1 to 26), excluding pinned windows
+occupied_list=($(jq -r '[.[] | select(.workspace.id >= 1 and .workspace.id <= 26 and (.pinned // false) != true) | .workspace.id] | sort | unique | .[]' <<< "$clients_json" 2>/dev/null))
 
 # If no occupied workspaces exist in 1..26 (e.g. fresh boot), cycle across persistent 1..5
 if [[ ${#occupied_list[@]} -eq 0 ]]; then

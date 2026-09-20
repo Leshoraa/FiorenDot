@@ -62,6 +62,7 @@ last_nav_time = 0
 NAV_COOLDOWN = 0.2
 
 window_positions = {}
+displaced = {}
 last_workspace_id = None
 auto_floated_windows = set()
 
@@ -138,9 +139,9 @@ def pan_to_window(floating_windows, target_addr, center_x, center_y):
             window_positions[w['address']]['target_y'] += dy
             window_positions[w['address']]['sx'] += dx
             window_positions[w['address']]['sy'] += dy
-            if 'base_x' in window_positions[w['address']]:
-                window_positions[w['address']]['base_x'] += dx
-                window_positions[w['address']]['base_y'] += dy
+    for info in displaced.values():
+        info['home_x'] += dx
+        info['home_y'] += dy
     subprocess.Popen(['hyprctl', '--batch', ';'.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if not is_protected_app(target_window):
         subprocess.Popen(['hyprctl', 'dispatch', 'focuswindow', f'address:{target_addr}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -379,9 +380,19 @@ def get_active_window(clients):
     return None
 
 def sync_positions(floating_windows):
-    global window_positions
+    global window_positions, displaced
     current_addresses = {w['address'] for w in floating_windows}
     window_positions = {addr: pos for addr, pos in window_positions.items() if addr in current_addresses}
+
+    for addr, info in list(displaced.items()):
+        if info['pusher'] not in current_addresses:
+            if addr in window_positions:
+                window_positions[addr]['target_x'] = info['home_x']
+                window_positions[addr]['target_y'] = info['home_y']
+            del displaced[addr]
+        elif addr not in current_addresses:
+            del displaced[addr]
+
     for w in floating_windows:
         addr = w['address']
         ax, ay = float(w['at'][0]), float(w['at'][1])
@@ -395,17 +406,12 @@ def sync_positions(floating_windows):
                 'sy': ay,
                 'w': aw,
                 'h': ah,
-                'fullscreen': fs,
-                'base_x': ax,
-                'base_y': ay
+                'fullscreen': fs
             }
         else:
             window_positions[addr]['w'] = aw
             window_positions[addr]['h'] = ah
             window_positions[addr]['fullscreen'] = fs
-            if 'base_x' not in window_positions[addr]:
-                window_positions[addr]['base_x'] = ax
-                window_positions[addr]['base_y'] = ay
             dev_x = abs(ax - window_positions[addr]['sx'])
             dev_y = abs(ay - window_positions[addr]['sy'])
             if dev_x > 5.0 or dev_y > 5.0:
@@ -417,18 +423,17 @@ def sync_positions(floating_windows):
                     window_positions[addr]['target_y'] = ay
                     window_positions[addr]['sx'] = ax
                     window_positions[addr]['sy'] = ay
-                    if is_user_drag or abs(window_positions[addr].get('target_x', ax) - window_positions[addr].get('base_x', ax)) < 1.0:
-                        window_positions[addr]['base_x'] = ax
-                        window_positions[addr]['base_y'] = ay
+                    displaced.pop(addr, None)
 
 def resolve_collisions(tracked, active_addr):
-    for addr, w in tracked.items():
-        if 'base_x' not in w:
-            w['base_x'] = w['target_x']
-            w['base_y'] = w['target_y']
-        if addr != active_addr:
-            w['target_x'] = w['base_x']
-            w['target_y'] = w['base_y']
+    global displaced
+
+    def get_pusher(addr):
+        if addr == active_addr:
+            return active_addr
+        if addr in displaced:
+            return displaced[addr]['pusher']
+        return None
 
     keys = list(tracked.keys())
     for _ in range(8):
@@ -447,15 +452,21 @@ def resolve_collisions(tracked, active_addr):
                 overlap_x = min(x1_2, x2_2) - max(x1_1, x2_1) + GAP
                 overlap_y = min(y1_2, y2_2) - max(y1_1, y2_1) + GAP
                 if overlap_x > 0 and overlap_y > 0:
+                    pusher1 = get_pusher(addr1)
+                    pusher2 = get_pusher(addr2)
                     if overlap_x < overlap_y:
                         cx1 = x1_1 + w1['w'] / 2.0
                         cx2 = x2_1 + w2['w'] / 2.0
                         dx = overlap_x
                         if cx2 < cx1:
                             dx = -dx
-                        if addr1 == active_addr:
+                        if pusher1 and not pusher2:
+                            if addr2 not in displaced:
+                                displaced[addr2] = {'pusher': pusher1, 'home_x': w2['target_x'], 'home_y': w2['target_y']}
                             w2['target_x'] += dx
-                        elif addr2 == active_addr:
+                        elif pusher2 and not pusher1:
+                            if addr1 not in displaced:
+                                displaced[addr1] = {'pusher': pusher2, 'home_x': w1['target_x'], 'home_y': w1['target_y']}
                             w1['target_x'] -= dx
                         else:
                             w1['target_x'] -= dx * 0.5
@@ -466,9 +477,13 @@ def resolve_collisions(tracked, active_addr):
                         dy = overlap_y
                         if cy2 < cy1:
                             dy = -dy
-                        if addr1 == active_addr:
+                        if pusher1 and not pusher2:
+                            if addr2 not in displaced:
+                                displaced[addr2] = {'pusher': pusher1, 'home_x': w2['target_x'], 'home_y': w2['target_y']}
                             w2['target_y'] += dy
-                        elif addr2 == active_addr:
+                        elif pusher2 and not pusher1:
+                            if addr1 not in displaced:
+                                displaced[addr1] = {'pusher': pusher2, 'home_x': w1['target_x'], 'home_y': w1['target_y']}
                             w1['target_y'] -= dy
                         else:
                             w1['target_y'] -= dy * 0.5
@@ -478,7 +493,7 @@ def resolve_collisions(tracked, active_addr):
             break
 
 def update_cache():
-    global cached_workspace_id, cached_clients, cached_monitors, last_workspace_id, window_positions
+    global cached_workspace_id, cached_clients, cached_monitors, last_workspace_id, window_positions, displaced
     try:
         r = subprocess.run(['hyprctl', 'activeworkspace', '-j'], capture_output=True, text=True, timeout=0.1)
         ws = json.loads(r.stdout)
@@ -487,6 +502,15 @@ def update_cache():
         clients = json.loads(r.stdout)
         r = subprocess.run(['hyprctl', 'monitors', '-j'], capture_output=True, text=True, timeout=0.1)
         monitors = json.loads(r.stdout)
+        active_addr = None
+        try:
+            r_act = subprocess.run(['hyprctl', 'activewindow', '-j'], capture_output=True, text=True, timeout=0.05)
+            if r_act.stdout.strip():
+                active_addr = json.loads(r_act.stdout).get('address')
+        except:
+            pass
+        for c in clients:
+            c['focused'] = bool((active_addr and c.get('address') == active_addr) or (c.get('focusHistoryID') == 0))
         with cache_lock:
             cached_workspace_id = workspace_id
             cached_clients = clients
@@ -494,6 +518,7 @@ def update_cache():
         with lock:
             if workspace_id != last_workspace_id:
                 window_positions.clear()
+                displaced.clear()
                 last_workspace_id = workspace_id
             floating_windows = [w for w in clients if w.get('floating') and (w.get('workspace', {}).get('id') == workspace_id or w.get('pinned', False))]
             sync_positions(floating_windows)
@@ -607,10 +632,9 @@ while True:
             workspace_id = cached_workspace_id
             clients = cached_clients
         if btn_left:
-            if not dragged_window_addr:
-                focused = next((w for w in clients if w.get('focused', False)), None)
-                if focused:
-                    dragged_window_addr = focused['address']
+            focused = next((w for w in clients if w.get('focused', False)), None)
+            if focused:
+                dragged_window_addr = focused['address']
         else:
             dragged_window_addr = None
         floating_windows = [w for w in clients if w.get('floating') and (w.get('workspace', {}).get('id') == workspace_id or w.get('pinned', False))]
@@ -657,9 +681,7 @@ while True:
                 window_positions[addr]['target_y'] += idy
                 window_positions[addr]['sx'] += idx
                 window_positions[addr]['sy'] += idy
-                if 'base_x' in window_positions[addr]:
-                    window_positions[addr]['base_x'] += idx
-                    window_positions[addr]['base_y'] += idy
+                displaced.pop(addr, None)
                 batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
         elif (idx != 0 or idy != 0) and (super_pressed and alt_pressed):
             for w in floating_windows:
@@ -669,10 +691,10 @@ while True:
                     window_positions[addr]['target_y'] += idy
                     window_positions[addr]['sx'] += idx
                     window_positions[addr]['sy'] += idy
-                    if 'base_x' in window_positions[addr]:
-                        window_positions[addr]['base_x'] += idx
-                        window_positions[addr]['base_y'] += idy
-                batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
+            for info in displaced.values():
+                info['home_x'] += idx
+                info['home_y'] += idy
+            batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
         if active:
             resolve_collisions(window_positions, active_addr=active['address'])
         else:

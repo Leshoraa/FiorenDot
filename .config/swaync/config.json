@@ -22,7 +22,7 @@
   "control-center-width": 420,
   "control-center-height": 740,
   "keyboard-shortcuts": true,
-  "image-visibility": false,
+  "image-visibility": "never",
   "notification-grouping": false,
   "transition-time": 500,
   "hide-on-clear": false,

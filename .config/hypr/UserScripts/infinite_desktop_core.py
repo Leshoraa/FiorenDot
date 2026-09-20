@@ -64,7 +64,6 @@ NAV_COOLDOWN = 0.2
 window_positions = {}
 displaced = {}
 last_workspace_id = None
-auto_floated_windows = set()
 
 cached_workspace_id = 1
 cached_clients = []
@@ -649,30 +648,6 @@ while True:
         native_drag = False
         if active and btn_left and not (super_pressed and alt_pressed):
             native_drag = True
-        if not active and btn_left:
-            try:
-                focused_client = next((w for w in clients if w.get('focused', False)), None)
-                if focused_client and not focused_client.get('floating', False):
-                    addr = focused_client['address']
-                    if addr not in auto_floated_windows:
-                        auto_floated_windows.add(addr)
-                        with cache_lock:
-                            monitors = cached_monitors
-                        mon = next((m for m in monitors if m.get('id') == focused_client.get('monitor', 0)), monitors[0])
-                        scale = mon.get('scale', 1.0)
-                        full_w = int(mon['width'] / scale) - 2
-                        full_h = int(mon['height'] / scale) - 2
-                        def float_and_resize():
-                            subprocess.run(['hyprctl', 'dispatch', 'togglefloating', f'address:{addr}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                            time.sleep(0.1)
-                            cmds = [
-                                f"dispatch resizewindowpixel exact {full_w} {full_h},address:{addr}",
-                                f"dispatch centerwindow"
-                            ]
-                            subprocess.run(['hyprctl', '--batch', ';'.join(cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        threading.Thread(target=float_and_resize, daemon=True).start()
-            except:
-                pass
         batch_cmds = []
         if (idx != 0 or idy != 0) and (super_pressed and alt_pressed):
             for w in floating_windows:

@@ -608,6 +608,23 @@ threading.Thread(target=hotplug_monitor, daemon=True).start()
 threading.Thread(target=cache_manager, daemon=True).start()
 threading.Thread(target=hyprland_event_listener, daemon=True).start()
 
+def auto_reload_monitor():
+    script_path = os.path.realpath(__file__)
+    try:
+        last_mtime = os.path.getmtime(script_path)
+    except:
+        return
+    while True:
+        time.sleep(1.0)
+        try:
+            mtime = os.path.getmtime(script_path)
+            if mtime > last_mtime:
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+        except:
+            pass
+
+threading.Thread(target=auto_reload_monitor, daemon=True).start()
+
 was_active_or_animating = False
 
 while True:

@@ -22,7 +22,7 @@
  @define-color color9 {{color9 | lighten(0.08)}};
  @define-color color10 {{color10 | lighten(0.08)}};
  @define-color color11 {{color11 | lighten(0.08)}};
- @define-color color12 {{color10 | lighten(0.18)}};
+ @define-color color12 {{color12 | lighten(0.08)}};
  @define-color color13 {{color13 | lighten(0.08)}};
  @define-color color14 {{color14}};
  @define-color color15 {{color15}}; 

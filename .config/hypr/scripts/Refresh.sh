@@ -26,8 +26,10 @@ pkill qs || true; qs -c overview >/dev/null 2>&1 &
 swaync >/dev/null 2>&1 &
 swaync-client --reload-config
 
-# Restart WirePlumber audio session manager (auto-fixes audio desync/dummy output without reboot)
-systemctl --user restart wireplumber 2>/dev/null || true
+# Reset and balance audio channels (fixes one-sided audio bug in Zen Browser & other apps)
+if [ -x "${SCRIPTSDIR}/FixAudioBalance.sh" ]; then
+  "${SCRIPTSDIR}/FixAudioBalance.sh" &
+fi
 
 # Relaunching rainbow borders if the script exists
 #if file_exists "${UserScripts}/RainbowBorders.sh"; then

@@ -55,19 +55,29 @@ ln -sf "$wallpaper_path" "$rofi_link" || true
 mkdir -p "$(dirname "$wallpaper_current")"
 cp -f "$wallpaper_path" "$wallpaper_current" || true
 
-# Generate 1:1 center-cropped square wallpaper for Rofi asynchronously so it does not block color derivation
-magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 &
-
-# Run smart tonal extractor (Material You inspired) with wallust cs
-smart_script="$HOME/.config/hypr/scripts/smart_wallust.py"
-if [[ -x "$smart_script" ]]; then
-  "$smart_script" "$wallpaper_path" || wallust run -s -w "$wallpaper_path" || true
-else
-  wallust run -s -w "$wallpaper_path" || true
+# Generate 1:1 center-cropped square wallpaper for Rofi only if source changed
+rofi_source="$HOME/.config/rofi/.current_wallpaper_square.source"
+if [[ ! -f "$rofi_source" || "$(< "$rofi_source")" != "$wallpaper_path" ]]; then
+  echo "$wallpaper_path" > "$rofi_source"
+  pkill -f "current_wallpaper_square.png" 2>/dev/null || true
+  magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 &
 fi
-pkill -USR1 kitty || true
-pkill -USR1 cava || true
-pkill -USR2 waybar || true
+
+# Derive colors prioritizing largest pixel area (warna paling banyak)
+dominant_script="$HOME/.config/hypr/scripts/extract_dominant.py"
+if [[ -x "$dominant_script" ]]; then
+  "$dominant_script" "$wallpaper_path" || wallust run -s "$wallpaper_path" || true
+else
+  wallust run -s "$wallpaper_path" || true
+fi
+
+# Reload UI components with fresh colors
+touch ~/.config/kitty/kitty.conf; pkill -USR1 kitty 2>/dev/null || true
+pkill -USR2 waybar 2>/dev/null || true
+hyprctl reload 2>/dev/null || true
+swaync-client -rs 2>/dev/null || true
+pkill -USR1 cava 2>/dev/null || true
+pkill -x rofi 2>/dev/null || true
 
 # Reload quickshell overview if running so launcher picks up new colors
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
@@ -75,10 +85,3 @@ if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x quickshell 2>/dev/null || true
   qs -c overview -d >/dev/null 2>&1 &
 fi
-
-# Close any running rofi instances to load fresh colors on next open
-pkill -x rofi 2>/dev/null || true
-
-# Reload Hyprland borders and SwayNC notification center
-hyprctl reload 2>/dev/null || true
-swaync-client -rs 2>/dev/null || true

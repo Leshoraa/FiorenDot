@@ -273,10 +273,10 @@ scale:hover slider {
     border: 1px solid alpha(@primary, 0.3);
     box-shadow: none;
     color: @primary;
-    font-size: 10.5px;
+    font-size: 8px;
     font-weight: bold;
-    padding: 2px 9px;
-    border-radius: 9px;
+    padding: 2px 7px;
+    border-radius: 8px;
     transition: all 0.2s ease;
 }
 

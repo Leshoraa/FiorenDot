@@ -181,7 +181,7 @@ scale:hover slider {
     min-width: 0px;
     margin: 5px 6px;
     padding-left: 16px;
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: bold;
     color: @foreground;
     border: none;
@@ -313,6 +313,7 @@ scale:hover slider {
     background: transparent;
     border: none;
     outline: none;
+    min-height: 380px;
 }
 
 .control-center-list {
@@ -320,6 +321,7 @@ scale:hover slider {
     border: none;
     outline: none;
     margin-top: 0px;
+    min-height: 380px;
 }
 
 .control-center-list row,
@@ -332,6 +334,16 @@ scale:hover slider {
 .notification-content {
     background-image: none;
     outline: none;
+}
+
+.notification-row {
+    margin: 0px;
+    padding: 0px;
+}
+
+.notification-row .notification-background {
+    margin: 0px;
+    padding: 0px 12px;
 }
 
 .control-center-list row:hover,
@@ -396,9 +408,9 @@ scale:hover slider {
     background: alpha(mix(@background, #080814, 0.75), 0.97);
     border: 1px solid alpha(@primary, 0.3);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    padding: 10px 14px;
+    padding: 8px 14px;
     border-radius: 14px;
-    margin-bottom: 8px;
+    margin: 2px 0px;
     min-width: 0px;
     min-height: 32px;
     background-image: none;
@@ -413,7 +425,7 @@ scale:hover slider {
 
 .notification-content .summary {
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     color: @primary;
 }
 
@@ -427,10 +439,10 @@ scale:hover slider {
 }
 
 .notification-content .body {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: normal;
     color: alpha(@foreground, 0.9);
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 /* Tombol close notifikasi (Silang di kanan atas, terlihat halus dan menyala saat hover) */

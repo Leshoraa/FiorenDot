@@ -2,7 +2,7 @@
 Description=Easy Effects Audio DSP Service
 Documentation=https://github.com/wwmm/easyeffects
 After=pipewire.service wireplumber.service
-PartOf=pipewire.service
+PartOf=pipewire.service wireplumber.service
 
 [Service]
 Type=simple

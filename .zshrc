@@ -7,6 +7,11 @@ export DOTNET_ROOT=/usr/share/dotnet
 export PATH=$PATH:$DOTNET_ROOT:$HOME/.dotnet/tools
 export PATH="$HOME/.local/bin:$PATH"
 
+# Flutter, Android SDK, and Java
+export ANDROID_HOME="$HOME/Android/Sdk"
+export PATH="$HOME/.local/share/flutter/bin:/opt/android-studio/jbr/bin:$PATH"
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+
 # Disable compfix check for instantaneous startup (~320ms saved)
 export ZSH_DISABLE_COMPFIX="true"
 

@@ -30,7 +30,7 @@ tooltip {
 
 
 .modules-center {
-    background-color: alpha(@background, 0.75);
+    background-color: alpha(mix(@background, #000000, 0.88), 0.96);
     border-radius: 12px;
     padding: 1px 4px;
 }

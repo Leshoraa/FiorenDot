@@ -22,7 +22,7 @@
   "control-center-width": 430,
   "control-center-height": 780,
   "keyboard-shortcuts": false,
-  "image-visibility": "when-available",
+  "image-visibility": "never",
   "notification-icon-size": 52,
   "notification-grouping": false,
   "transition-time": 300,

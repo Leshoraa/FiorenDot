@@ -20,7 +20,7 @@
   "timeout-critical": 0,
   "fit-to-screen": false,
   "control-center-width": 430,
-  "control-center-height": -1,
+  "control-center-height": 780,
   "keyboard-shortcuts": false,
   "image-visibility": "when-available",
   "notification-icon-size": 52,
@@ -88,7 +88,7 @@
           "update-command": "swaync-client -D"
         },
         {
-          "label": "󰖚  Hyprsunset",
+          "label": "  Hyprsunset",
           "type": "toggle",
           "command": "$HOME/.config/hypr/scripts/Hyprsunset.sh toggle",
           "update-command": "sh -c 'pgrep -x hyprsunset >/dev/null && echo true || echo false'"

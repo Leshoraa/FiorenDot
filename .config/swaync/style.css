@@ -506,14 +506,20 @@ scrolledwindow scrollbar slider {
 /* 9. FLOATING NOTIFICATION POPUP (Seperti Semula) */
 .notification-window {
     background: transparent;
-    margin: 8px;
+    margin: 12px;
 }
 
 .notification-window .notification {
     background: @noti-bg;
     border: 1.5px solid @primary;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-radius: 14px;
+    padding: 18px 20px;
     margin: 6px 8px;
+    min-height: 64px;
+}
+
+.notification-window .notification progressbar {
+    margin-top: 12px;
+    margin-bottom: 2px;
 }

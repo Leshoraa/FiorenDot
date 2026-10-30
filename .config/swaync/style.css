@@ -273,16 +273,26 @@ scale:hover slider {
     border: 1px solid alpha(@primary, 0.3);
     box-shadow: none;
     color: @primary;
-    font-size: 8px;
-    font-weight: bold;
-    padding: 2px 7px;
-    border-radius: 8px;
+    padding: 5px 12px;
+    border-radius: 12px;
     transition: all 0.2s ease;
+}
+
+.widget-title button label {
+    font-size: 11px;
+    font-weight: bold;
+    color: @primary;
+    padding: 0;
+    margin: 0;
 }
 
 .widget-title button:hover {
     background: alpha(@primary, 0.25);
     border-color: @primary;
+    color: @foreground;
+}
+
+.widget-title button:hover label {
     color: @foreground;
 }
 

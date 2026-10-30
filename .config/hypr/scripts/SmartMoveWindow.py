@@ -4,22 +4,52 @@
 # Sequence: Left (1) <-> Top (2) <-> Right (3), with full Up/Down/Stack support.
 
 import sys
+import os
 import json
-import subprocess
+import time
+import socket
+
+def hypr_cmd(cmd):
+    sig = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE')
+    if not sig:
+        import subprocess
+        if cmd.startswith('j/'):
+            return subprocess.check_output(['hyprctl', cmd[2:], '-j']).decode('utf-8')
+        elif cmd.startswith('[[BATCH]]'):
+            batch_cmd = cmd[9:]
+            return subprocess.run(['hyprctl', '--batch', batch_cmd], stdout=subprocess.PIPE, text=True).stdout
+        elif cmd.startswith('dispatch '):
+            parts = cmd.split(' ', 2)
+            disp = parts[1]
+            args = parts[2] if len(parts) > 2 else ''
+            return subprocess.run(['hyprctl', 'dispatch', disp, args], stdout=subprocess.PIPE, text=True).stdout
+        return ''
+
+    sock_path = f"/run/user/{os.getuid()}/hypr/{sig}/.socket.sock"
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+        s.connect(sock_path)
+        s.sendall(cmd.encode('utf-8'))
+        res = b''
+        while True:
+            chunk = s.recv(8192)
+            if not chunk:
+                break
+            res += chunk
+    return res.decode('utf-8', errors='replace')
 
 def get_hypr_data():
-    active = json.loads(subprocess.check_output(['hyprctl', 'activewindow', '-j']))
-    clients = json.loads(subprocess.check_output(['hyprctl', 'clients', '-j']))
-    layout_data = json.loads(subprocess.check_output(['hyprctl', 'getoption', 'general:layout', '-j']))
+    active = json.loads(hypr_cmd('j/activewindow'))
+    clients = json.loads(hypr_cmd('j/clients'))
+    layout_data = json.loads(hypr_cmd('j/getoption general:layout'))
     return active, clients, layout_data.get('str', 'dwindle')
 
 def fallback_move(direction, is_floating):
     if is_floating:
-        deltas = {'l': (-40, 0), 'r': (40, 0), 'u': (0, -20), 'd': (0, 20)}
+        deltas = {'l': (-40, 0), 'r': (40, 0), 'u': (0, -30), 'd': (0, 30)}
         dx, dy = deltas.get(direction, (0, 0))
-        subprocess.run(['hyprctl', 'dispatch', 'moveactive', f'{dx} {dy}'])
+        hypr_cmd(f'dispatch moveactive {dx} {dy}')
     else:
-        subprocess.run(['hyprctl', 'dispatch', 'movewindow', direction])
+        hypr_cmd(f'dispatch movewindow {direction}')
 
 def classify_3windows(tiled_windows, active_addr):
     min_x = min(w['at'][0] for w in tiled_windows)
@@ -197,7 +227,7 @@ def execute_3win_target(target, active_addr, active_ws, others):
     else:
         return
         
-    subprocess.run(['hyprctl', '--batch', batch])
+    hypr_cmd(f'[[BATCH]]{batch}')
 
 def main():
     if len(sys.argv) < 2:
@@ -226,6 +256,19 @@ def main():
     active_ws = active.get('workspace', {}).get('id')
     active_addr = active['address']
     
+    # Debounce for tiled movement so holding key doesn't spin layout out of control
+    now = time.time()
+    last_file = f"/tmp/smart_move_tiled_last_{active_ws}"
+    try:
+        with open(last_file, 'r') as f:
+            last_time = float(f.read().strip())
+    except Exception:
+        last_time = 0.0
+    if now - last_time < 0.22:
+        sys.exit(0)
+    with open(last_file, 'w') as f:
+        f.write(str(now))
+
     # Filter tiled windows on current workspace
     tiled_windows = [
         c for c in clients 
@@ -255,23 +298,23 @@ def main():
         if is_vert_split:
             is_left = active['at'][0] < mid_x
             if (direction == 'r' and is_left) or (direction == 'l' and not is_left):
-                subprocess.run(['hyprctl', 'dispatch', 'swapwindow', direction])
+                hypr_cmd(f'dispatch swapwindow {direction}')
             elif direction == 'u':
                 batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect d ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                subprocess.run(['hyprctl', '--batch', batch])
+                hypr_cmd(f'[[BATCH]]{batch}')
             elif direction == 'd':
                 batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect u ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                subprocess.run(['hyprctl', '--batch', batch])
+                hypr_cmd(f'[[BATCH]]{batch}')
         else: # Horizontal split
             is_top = active['at'][1] < mid_y
             if (direction == 'd' and is_top) or (direction == 'u' and not is_top):
-                subprocess.run(['hyprctl', 'dispatch', 'swapwindow', direction])
+                hypr_cmd(f'dispatch swapwindow {direction}')
             elif direction == 'l':
                 batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect r ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                subprocess.run(['hyprctl', '--batch', batch])
+                hypr_cmd(f'[[BATCH]]{batch}')
             elif direction == 'r':
                 batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect l ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                subprocess.run(['hyprctl', '--batch', batch])
+                hypr_cmd(f'[[BATCH]]{batch}')
         sys.exit(0)
         
     # Handle 3 windows
@@ -285,7 +328,7 @@ def main():
         sys.exit(0)
     elif action.startswith('swap_'):
         swap_dir = action.split('_')[1]
-        subprocess.run(['hyprctl', 'dispatch', 'swapwindow', swap_dir])
+        hypr_cmd(f'dispatch swapwindow {swap_dir}')
     elif action.startswith('target_'):
         execute_3win_target(action, active_addr, active_ws, others)
     else:

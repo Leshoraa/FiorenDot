@@ -4,7 +4,7 @@
 
 @import '../../.config/waybar/wallust/colors-waybar.css';
 
-@define-color noti-bg alpha(mix(@background, #2C2C2C, 0.6), 0.75);
+@define-color noti-bg alpha(mix(@background, #2C2C2C, 0.6), 0.94);
 @define-color text-color @foreground;
 
 /* PENGATURAN FONT GLOBAL */
@@ -79,24 +79,56 @@ button {
     color: @background;
 }
 
-/* 2. BAGIAN TENGAH: GRID TOMBOL AKSI (Kotak-kotak 3x2 M3 Squircles) */
+/* 2. BAGIAN TENGAH: GRID TOMBOL AKSI (3 Baris x 2 Kolom - Wide Tiles ala One UI / Android M3) */
 .widget-buttons-grid {
-    margin: 2px 8px 6px 8px;
+    margin: 4px 4px 6px 4px;
+}
+
+.widget-buttons-grid>flowbox {
+    margin: 0;
+    padding: 0;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild {
+    margin: 0;
+    padding: 0;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild>button {
     background: mix(@background, #383838, 0.6);
-    border-radius: 14px;
-    min-height: 48px;
-    min-width: 48px;
-    margin: 4px;
-    font-size: 18px;
+    border-radius: 16px;
+    -gtk-outline-radius: 16px;
+    min-height: 50px;
+    min-width: 170px;
+    margin: 3px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: bold;
     color: @foreground;
-    border: 1px solid alpha(@foreground, 0.06);
+    border: 1px solid alpha(@foreground, 0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s cubic-bezier(0.2, 0.0, 0, 1.0), color 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
+}
+
+/* KUNCI RADIUS: Menjamin bentuk tetap rounded rectangle (squircle) dan TIDAK PERNAH berubah jadi oval saat diklik/checked */
+.widget-buttons-grid>flowbox>flowboxchild>button,
+.widget-buttons-grid>flowbox>flowboxchild>button:hover,
+.widget-buttons-grid>flowbox>flowboxchild>button:active,
+.widget-buttons-grid>flowbox>flowboxchild>button:checked,
+.widget-buttons-grid>flowbox>flowboxchild>button:checked:hover,
+.widget-buttons-grid>flowbox>flowboxchild>button:checked:active,
+.widget-buttons-grid>flowbox>flowboxchild>button:focus {
+    border-radius: 16px !important;
+    -gtk-outline-radius: 16px !important;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild>button:hover {
     background-color: @secondary;
+    color: @background;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button:active {
+    background-color: alpha(@primary, 0.85);
     color: @background;
 }
 
@@ -105,26 +137,9 @@ button {
     color: @background;
 }
 
-/* Tombol Batas Baterai (80% vs 100%) */
-.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button {
-    background-color: @primary;
-    background-image: url('icons/battery-100-hover.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 48px 48px;
-    font-size: 0px;
-    color: transparent;
-}
-
-.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:hover {
-    background-image: url('icons/battery-100-hover.svg');
+.widget-buttons-grid>flowbox>flowboxchild>button:checked:hover {
     background-color: @secondary;
-}
-
-.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked,
-.widget-buttons-grid>flowbox>flowboxchild:nth-child(4)>button:checked:hover {
-    background-image: url('icons/battery-80.svg');
-    background-color: @primary;
+    color: @background;
 }
 
 /* 3. BAGIAN SLIDER (Volume dan Brightness - Dynamic Hover Expand) */

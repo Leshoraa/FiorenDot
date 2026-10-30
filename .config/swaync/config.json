@@ -64,35 +64,35 @@
       }
     },
     "buttons-grid": {
-      "buttons-per-row": 3,
+      "buttons-per-row": 2,
       "actions": [
         {
-          "label": "󰈊",
+          "label": "󰈊  Color Picker",
           "command": "hyprpicker -a"
         },
         {
-          "label": "",
+          "label": "  Screenshot",
           "command": "$HOME/.config/hypr/scripts/ScreenShot.sh --now"
         },
         {
-          "label": "󰤄",
+          "label": "󰤄  Do Not Disturb",
           "command": "swaync-client -d -sw",
           "type": "toggle",
           "update-command": "swaync-client -D"
         },
         {
-          "label": " ",
+          "label": "󱐋  Battery Limit",
           "type": "toggle",
           "command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh toggle",
           "update-command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh status"
         },
         {
-          "label": "󰝟",
+          "label": "󰝟  Mute Audio",
           "type": "toggle",
           "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
         },
         {
-          "label": "󰂯",
+          "label": "󰂯  Bluetooth",
           "command": "blueman-manager"
         }
       ]

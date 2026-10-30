@@ -151,6 +151,12 @@ ACTION=="add", SUBSYSTEM=="module", KERNEL=="pcie_aspm", ATTR{parameters/policy}
 
 # Runtime PM for PCI devices
 ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+
+# Ensure CPU boost sysfs permission allows non-root user control
+SUBSYSTEM=="cpu", RUN+="/usr/bin/chmod 0666 /sys/devices/system/cpu/cpufreq/boost"
+
+# Dynamic CPU Turbo Boost and NVMe Disk Flush Sleep Optimization on Battery vs AC
+SUBSYSTEM=="power_supply", KERNEL=="ACAD", RUN+="/usr/local/bin/power-state-sync.sh"
 EOF
 
 if [ -f /sys/module/pcie_aspm/parameters/policy ]; then

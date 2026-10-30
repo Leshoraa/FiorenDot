@@ -519,23 +519,21 @@ scrolledwindow scrollbar slider {
     background: transparent;
 }
 
-/* 9. FLOATING NOTIFICATION POPUP (Seperti Semula) */
-.notification-window {
+/* 9. FLOATING NOTIFICATION POPUP */
+.floating-notifications {
     background: transparent;
-    margin: 12px;
 }
 
-.notification-window .notification {
-    background: @noti-bg;
-    border: 1.5px solid @primary;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    border-radius: 14px;
-    padding: 18px 20px;
-    margin: 6px 8px;
-    min-height: 64px;
+.floating-notifications .notification-row {
+    margin: 0px 0px 0px 10px;
+    padding: 0px;
 }
 
-.notification-window .notification progressbar {
-    margin-top: 12px;
-    margin-bottom: 2px;
+.floating-notifications .notification-row:last-child {
+    margin-bottom: 12px;
 }
+
+.floating-notifications .notification {
+    margin: 2px 0px;
+}
+

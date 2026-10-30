@@ -9,8 +9,8 @@
   "layer-shell": true,
   "cssPriority": "user",
   "control-center-margin-top": 0,
-  "control-center-margin-bottom": 0,
-  "control-center-margin-right": 0,
+  "control-center-margin-bottom": 8,
+  "control-center-margin-right": 8,
   "control-center-margin-left": 0,
   "notification-2fa-action": true,
   "notification-inline-replies": false,
@@ -19,12 +19,12 @@
   "timeout-low": 3,
   "timeout-critical": 0,
   "fit-to-screen": false,
-  "control-center-width": 420,
-  "control-center-height": 740,
-  "keyboard-shortcuts": true,
+  "control-center-width": 430,
+  "control-center-height": 780,
+  "keyboard-shortcuts": false,
   "image-visibility": "never",
   "notification-grouping": false,
-  "transition-time": 500,
+  "transition-time": 300,
   "hide-on-clear": false,
   "hide-on-action": true,
   "script-fail-notify": true,
@@ -67,43 +67,40 @@
       "buttons-per-row": 2,
       "actions": [
         {
+          "label": "󰤨  Wi-Fi",
+          "type": "toggle",
+          "active": true,
+          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && nmcli radio wifi on || nmcli radio wifi off'",
+          "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
+        },
+        {
+          "label": "󰂯  Bluetooth",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && bluetoothctl power on || bluetoothctl power off'",
+          "update-command": "bluetoothctl show | grep -q 'Powered: yes' && echo true || echo false"
+        },
+        {
+          "label": "󰤄  Do Not Disturb",
+          "type": "toggle",
+          "command": "swaync-client -d -sw",
+          "update-command": "swaync-client -D"
+        },
+        {
+          "label": "󰃌  Hyprsunset",
+          "type": "toggle",
+          "command": "$HOME/.config/hypr/scripts/Hyprsunset.sh toggle",
+          "update-command": "sh -c 'pgrep -x hyprsunset >/dev/null && echo true || echo false'"
+        },
+        {
           "label": "󰈊  Color Picker",
           "command": "hyprpicker -a"
         },
         {
           "label": "  Screenshot",
           "command": "$HOME/.config/hypr/scripts/ScreenShot.sh --now"
-        },
-        {
-          "label": "󰤄  Do Not Disturb",
-          "command": "swaync-client -d -sw",
-          "type": "toggle",
-          "update-command": "swaync-client -D"
-        },
-        {
-          "label": "󱐋  Battery Limit",
-          "type": "toggle",
-          "command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh toggle",
-          "update-command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh status"
-        },
-        {
-          "label": "󰝟  Mute Audio",
-          "type": "toggle",
-          "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
-        },
-        {
-          "label": "󰂯  Bluetooth",
-          "command": "blueman-manager"
         }
       ]
-    },
-    "title": {
-      "text": "Notifications",
-      "clear-all-button": true,
-      "button-text": ""
-    },
-    "mpris": {
-      "autohide": true
     },
     "volume": {
       "label": "󰕾",
@@ -117,6 +114,14 @@
     "backlight": {
       "label": "󰃟",
       "device": "amdgpu_bl1"
+    },
+    "mpris": {
+      "autohide": true
+    },
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": ""
     },
     "notifications": {
       "vexpand": true

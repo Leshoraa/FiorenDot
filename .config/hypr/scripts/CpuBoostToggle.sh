@@ -39,7 +39,7 @@ send_notification() {
     local desc="$1"
     local icon="$2"
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -e -u low -h string:x-canonical-private-synchronous:cpuboost -i "$icon" "CPU Turbo Boost" "$desc"
+        notify-send -e -u normal -h string:x-canonical-private-synchronous:cpuboost -h boolean:SWAYNC_BYPASS_DND:true -i "$icon" "CPU Turbo Boost" "$desc"
     fi
 }
 

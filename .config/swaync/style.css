@@ -273,7 +273,7 @@ scale:hover slider {
     border: 1px solid alpha(@primary, 0.3);
     box-shadow: none;
     color: @primary;
-    padding: 4px 10px;
+    padding: 2px 12px;
     border-radius: 8px;
     transition: all 0.2s ease;
 }
@@ -301,7 +301,7 @@ scale:hover slider {
     color: @background;
 }
 
-/* 7. GAYA KARTU NOTIFIKASI INDIVIDUAL */
+/* 7. GAYA KARTU NOTIFIKASI INDIVIDUAL (Sesuai Lampiran 1) */
 .control-center-list,
 .widget-notifications,
 .notification-row {
@@ -345,68 +345,92 @@ scale:hover slider {
     outline: none;
 }
 
-/* Hide notification profile images and icons */
+/* Gambar album art / preview foto notifikasi */
 .notification-content .image,
-.notification-content .app-icon,
-.notification-row .image,
-.notification-row .app-icon,
-.notification .image,
-.notification .app-icon {
-    opacity: 0;
-    margin: 0;
-    padding: 0;
-    min-width: 0;
-    min-height: 0;
+.notification .image {
+    opacity: 1;
+    border-radius: 10px;
+    margin-right: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    min-width: 48px;
+    min-height: 48px;
+    -gtk-icon-size: 48px;
 }
 
-/* Bentuk kotak tiap notifikasi */
+/* Ikon aplikasi di samping judul */
+.notification-content .app-icon,
+.notification .app-icon {
+    opacity: 1;
+    margin-right: 6px;
+    min-width: 16px;
+    min-height: 16px;
+    -gtk-icon-size: 16px;
+    border-radius: 100%;
+}
+
+/* Bentuk kartu tiap notifikasi (Sleek dark card, no border) */
 .notification {
-    background: alpha(mix(@background, #050507, 0.8), 0.98);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1.4px solid @color4;
-    margin-bottom: 6px;
+    background: alpha(mix(@background, #080814, 0.75), 0.97);
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: none;
+    margin-bottom: 8px;
     min-width: 0px;
     min-height: 32px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    transition: border-color 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: background 0.2s ease;
 }
 
 .notification:hover {
-    background: alpha(mix(@background, #050507, 0.9), 0.98);
-    border-color: @secondary;
+    background: alpha(mix(@background, #080814, 0.65), 0.98);
 }
 
 .notification-content .summary {
-    font-weight: 800;
-    font-size: 14px;
-    color: @text-color;
+    font-weight: bold;
+    font-size: 13px;
+    color: @primary;
 }
 
 .notification-content .time {
-    font-size: 11px;
-    font-weight: normal;
-    color: alpha(@foreground, 0.5);
-    margin-bottom: 2px;
+    opacity: 0;
+    min-width: 0;
+    min-height: 0;
+    font-size: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 .notification-content .body {
     font-size: 12px;
     font-weight: normal;
-    color: alpha(@foreground, 0.85);
-    margin-top: 4px;
+    color: alpha(@foreground, 0.9);
+    margin-top: 3px;
 }
 
-/* Tombol close notifikasi */
+/* Tombol close notifikasi (Silang di kanan atas, terlihat halus dan menyala saat hover) */
+.notification-background .close-button,
+.close-button,
 .notification-close-button {
+    opacity: 0.6;
     background: transparent;
-    color: alpha(@foreground, 0.5);
+    color: alpha(@foreground, 0.7);
     border-radius: 6px;
-    padding: 4px;
-    margin: 2px;
+    padding: 2px 4px;
+    margin-top: 8px;
+    margin-right: 8px;
+    box-shadow: none;
+    border: none;
+    min-width: 16px;
+    min-height: 16px;
+    transition: all 0.2s ease;
 }
 
+.notification-background:hover .close-button,
+.notification:hover .close-button,
+.close-button:hover,
 .notification-close-button:hover {
+    opacity: 1;
     background: alpha(@foreground, 0.15);
     color: @foreground;
 }

@@ -10,7 +10,7 @@
 
 /* PENGATURAN FONT GLOBAL */
 * {
-    font-family: "MonoLisaFreezed Nerd Font", "MonoLisa Nerd Font", "Rubik", sans-serif;
+    font-family: "JetBrains Mono Nerd Font", "Rubik", sans-serif;
     font-weight: bold;
     font-size: 13px;
     outline: none;
@@ -103,8 +103,7 @@ button {
     margin-right: 18px;
 }
 
-.widget-volume button,
-.widget-title button {
+.widget-volume button {
     background: transparent;
     border: none;
     box-shadow: none;
@@ -178,7 +177,7 @@ scale:hover slider {
 .widget-buttons-grid button {
     background: mix(@background, #383838, 0.6);
     border-radius: 18px;
-    min-height: 58px;
+    min-height: 52px;
     min-width: 0px;
     margin: 5px 6px;
     padding-left: 16px;
@@ -265,22 +264,30 @@ scale:hover slider {
 /* 6. JUDUL NOTIFIKASI */
 .widget-title {
     color: @text-color;
-    margin: 4px 16px;
-    font-size: 12px;
+    margin: 8px 16px 4px 16px;
+    font-size: 13px;
 }
 
 .widget-title button {
-    background: transparent;
-    border: none;
+    background: alpha(@primary, 0.1);
+    border: 1px solid alpha(@primary, 0.3);
     box-shadow: none;
-    color: @text-color;
-    font-size: 13px;
-    padding: 2px 6px;
-    border-radius: 6px;
+    color: @primary;
+    font-size: 10.5px;
+    font-weight: bold;
+    padding: 2px 9px;
+    border-radius: 9px;
+    transition: all 0.2s ease;
 }
 
 .widget-title button:hover {
-    background-color: @secondary;
+    background: alpha(@primary, 0.25);
+    border-color: @primary;
+    color: @foreground;
+}
+
+.widget-title button:active {
+    background: @primary;
     color: @background;
 }
 

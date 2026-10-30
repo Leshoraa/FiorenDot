@@ -121,7 +121,7 @@
     "title": {
       "text": "Notifications",
       "clear-all-button": true,
-      "button-text": ""
+      "button-text": "Clear "
     },
     "notifications": {
       "vexpand": true

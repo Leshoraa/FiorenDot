@@ -302,9 +302,20 @@ scale:hover slider {
 }
 
 /* 7. GAYA KARTU NOTIFIKASI INDIVIDUAL (Sesuai Lampiran 1) */
-.control-center-list,
-.widget-notifications,
-.notification-row {
+.widget-notifications {
+    background: transparent;
+    border: none;
+    outline: none;
+    margin: 2px 4px;
+}
+
+.widget-notifications scrolledwindow {
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.control-center-list {
     background: transparent;
     border: none;
     outline: none;
@@ -314,11 +325,12 @@ scale:hover slider {
 .control-center-list row,
 .widget-notifications row,
 .notification-row,
-.notification-group {
-    background: transparent;
-    background-color: transparent;
-    box-shadow: none;
-    border: none;
+.notification-group,
+.notification-background,
+.notification-default-action,
+.notification-action,
+.notification-content {
+    background-image: none;
     outline: none;
 }
 
@@ -337,7 +349,17 @@ scale:hover slider {
 .notification-group:hover,
 .notification-group:focus,
 .notification-group:selected,
-.notification-group:active {
+.notification-group:active,
+.notification-background:hover,
+.notification-default-action:hover,
+.notification-default-action:focus,
+.notification-default-action:active,
+.notification-action:hover,
+.notification-action:focus,
+.notification-action:active,
+.notification-content:hover,
+.notification:focus {
+    background-image: none;
     background: transparent;
     background-color: transparent;
     box-shadow: none;
@@ -369,21 +391,24 @@ scale:hover slider {
     border-radius: 100%;
 }
 
-/* Bentuk kartu tiap notifikasi (Sleek dark card, no border) */
+/* Bentuk kartu tiap notifikasi */
 .notification {
     background: alpha(mix(@background, #080814, 0.75), 0.97);
+    border: 1px solid alpha(@primary, 0.3);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     padding: 10px 14px;
     border-radius: 14px;
-    border: none;
     margin-bottom: 8px;
     min-width: 0px;
     min-height: 32px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    transition: background 0.2s ease;
+    background-image: none;
+    transition: all 0.2s ease;
 }
 
 .notification:hover {
     background: alpha(mix(@background, #080814, 0.65), 0.98);
+    border-color: @primary;
+    background-image: none;
 }
 
 .notification-content .summary {
@@ -417,8 +442,8 @@ scale:hover slider {
     color: alpha(@foreground, 0.7);
     border-radius: 6px;
     padding: 2px 4px;
-    margin-top: 8px;
-    margin-right: 8px;
+    margin-top: 6px;
+    margin-right: 6px;
     box-shadow: none;
     border: none;
     min-width: 16px;

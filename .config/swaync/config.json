@@ -20,7 +20,7 @@
   "timeout-critical": 0,
   "fit-to-screen": false,
   "control-center-width": 430,
-  "control-center-height": 780,
+  "control-center-height": -1,
   "keyboard-shortcuts": false,
   "image-visibility": "when-available",
   "notification-icon-size": 52,

@@ -97,7 +97,7 @@ def generate_palette(img_path):
         sec_h = None
         for cnt, _, h_deg, s_pct, _ in clusters:
             diff = min(abs(h_deg - dom_h), 360 - abs(h_deg - dom_h))
-            if diff >= 40 and s_pct >= 18.0 and (cnt / total_px) >= 0.003:
+            if diff >= 40 and s_pct >= 18.0 and (cnt / total_px) >= 0.0005:
                 sec_h = h_deg
                 break
         if sec_h is None:

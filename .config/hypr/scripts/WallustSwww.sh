@@ -11,6 +11,7 @@ passed_path="${1:-}"
 cache_dir="$HOME/.cache/awww/"
 rofi_link="$HOME/.config/rofi/.current_wallpaper"
 wallpaper_current="$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
+SCRIPTSDIR="$HOME/.config/hypr/scripts"
 
 # Helper: get focused monitor name (prefer JSON)
 get_focused_monitor() {
@@ -85,3 +86,6 @@ if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x quickshell 2>/dev/null || true
   qs -c overview -d >/dev/null 2>&1 &
 fi
+
+# Update SDDM wallpaper and theme colors
+"$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &

@@ -102,7 +102,9 @@ set_sddm_wallpaper() {
 
   local sddm_simple="$sddm_themes_dir/simple_sddm_2"
 
-  if [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ]; then
+  local sddm_pixie="$sddm_themes_dir/pixie"
+
+  if { [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ]; } || { [ -d "$sddm_pixie" ] && [ -w "$sddm_pixie" ]; }; then
     "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &
   fi
 }

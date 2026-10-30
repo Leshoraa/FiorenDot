@@ -87,3 +87,13 @@ if [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ] && [ -w "$sddm_theme_conf" ]; 
         cp -f "$wallpaper_path" "$sddm_simple/Backgrounds/default.png"
     fi
 fi
+
+# Apply changes to pixie theme if accessible
+sddm_pixie="$sddm_themes_dir/pixie"
+if [ -d "$sddm_pixie" ] && [ -w "$sddm_pixie" ]; then
+    if [ -f "$HOME/.config/wallust/sddm-theme.conf" ]; then
+        cp -f "$HOME/.config/wallust/sddm-theme.conf" "$sddm_pixie/theme.conf" || true
+    fi
+    mkdir -p "$sddm_pixie/assets"
+    cp -f "$wallpaper_path" "$sddm_pixie/assets/background.jpg" || true
+fi

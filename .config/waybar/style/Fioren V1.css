@@ -139,11 +139,6 @@ tooltip {
     color: mix(@color2, @foreground, 0.3);
 }
 
-#bluetooth.off,
-#bluetooth.disabled {
-    color: alpha(@foreground, 0.45);
-}
-
 #bluetooth.connected {
     color: @primary;
 }

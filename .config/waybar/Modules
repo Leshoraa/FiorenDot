@@ -147,8 +147,8 @@
 "bluetooth": {
 	"format": "",
 	"format-on": "",
-	"format-off": "󰂲",
-	"format-disabled": "󰂲",
+	"format-off": "",
+	"format-disabled": "",
 	"format-connected": "󰂱",
 	"tooltip-format": " {device_alias}",
 	"tooltip-format-connected": "{device_enumerate}",
@@ -161,8 +161,8 @@
 "bluetooth#2": {
 	"format": "",
 	"format-on": "",
-	"format-off": "󰂲",
-	"format-disabled": "󰂲",
+	"format-off": "",
+	"format-disabled": "",
 	"format-connected": "󰂱",
 	"tooltip-format": " {device_alias}",
 	"tooltip-format-connected": "{device_enumerate}",

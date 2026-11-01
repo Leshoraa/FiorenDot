@@ -145,25 +145,27 @@
 },
 
 "bluetooth": {
-	"format": "",
-	"format-disabled": "",
+	"format": "",
+	"format-disabled": "󰂲",
 	"format-connected": "󰂱",
 	"tooltip-format": " {device_alias}",
 	"tooltip-format-connected": "{device_enumerate}",
 	"tooltip-format-enumerate-connected": " {device_alias} 󰂄{device_battery_percentage}%",
 	"tooltip": true,
-	"on-click": "blueman-manager",
+	"on-click": "$HOME/.config/hypr/scripts/Bluetooth.sh toggle",
+	"on-click-right": "blueman-manager",
 },
 
 "bluetooth#2": {
 	"format": "",
-	"format-disabled": "",
-	"format-connected": "",
+	"format-disabled": "󰂲",
+	"format-connected": "󰂱",
 	"tooltip-format": " {device_alias}",
 	"tooltip-format-connected": "{device_enumerate}",
 	"tooltip-format-enumerate-connected": " {device_alias} 󰂄{device_battery_percentage}%",
 	"tooltip": false,
-	"on-click": "blueman-manager",
+	"on-click": "$HOME/.config/hypr/scripts/Bluetooth.sh toggle",
+	"on-click-right": "blueman-manager",
 },
 
 "clock": {

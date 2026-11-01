@@ -78,8 +78,8 @@
           "label": "󰂯  Bluetooth",
           "type": "toggle",
           "active": false,
-          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && bluetoothctl power on || bluetoothctl power off'",
-          "update-command": "bluetoothctl show | grep -q 'Powered: yes' && echo true || echo false"
+          "command": "$HOME/.config/hypr/scripts/Bluetooth.sh toggle",
+          "update-command": "$HOME/.config/hypr/scripts/Bluetooth.sh status"
         },
         {
           "label": "󰤄  Do Not Disturb",

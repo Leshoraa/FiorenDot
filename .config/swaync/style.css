@@ -429,7 +429,7 @@ scale:hover slider {
 
 .notification-content .summary {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 13px;
     color: @primary;
 }
 
@@ -536,4 +536,6 @@ scrolledwindow scrollbar slider {
 .floating-notifications .notification {
     margin: 2px 0px;
 }
+
+
 

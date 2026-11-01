@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# Bluetooth Manager & SwayNC Toggle Script
+# FiorenDot - Bluetooth Manager & SwayNC Toggle Script
+# Author: Fioren (@Leshoraa)
 
 get_status() {
     if rfkill list bluetooth 2>/dev/null | grep -q "Soft blocked: yes"; then

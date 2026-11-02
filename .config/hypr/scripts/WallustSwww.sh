@@ -6,6 +6,10 @@
 set -euo pipefail
 
 
+# Prevent overlapping executions of WallustSwww
+exec 200>/tmp/wallust_swww.lock
+flock -n 200 || exit 0
+
 # Inputs and paths
 passed_path="${1:-}"
 cache_dir="$HOME/.cache/awww/"
@@ -72,22 +76,6 @@ else
   wallust run -s "$wallpaper_path" || true
 fi
 
-# Reload UI components with fresh colors
-pkill -USR2 waybar 2>/dev/null || true
-hyprctl reload 2>/dev/null || true
-swaync-client -rs 2>/dev/null || true
-pkill -USR1 cava 2>/dev/null || true
-pkill -x rofi 2>/dev/null || true
-
-# Reload kitty safely via socket to prevent OpenGL font atlas corruption
-sleep 0.05
-for sock in /tmp/mykitty*; do
-  if [[ -S "$sock" ]]; then
-    kitty @ --to "unix:$sock" load-config 2>/dev/null || true
-  fi
-done || pkill -USR1 kitty 2>/dev/null || true
-
-
 # Reload quickshell overview if running so launcher picks up new colors
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x qs 2>/dev/null || true
@@ -95,5 +83,5 @@ if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   qs -c overview -d >/dev/null 2>&1 &
 fi
 
-# Update SDDM wallpaper and theme colors
-"$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &
+# Update SDDM wallpaper and theme colors in background with low CPU priority
+nice -n 19 "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &

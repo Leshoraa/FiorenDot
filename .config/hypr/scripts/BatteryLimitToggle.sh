@@ -19,9 +19,11 @@ AC_ONLINE_FILE="$AC_DIR/online"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 TIMER_FILE="$CACHE_DIR/battery_limit_100_start"
+OVERRIDE_FILE="$CACHE_DIR/battery_override_start"
 PERSISTENT_FILE="$STATE_DIR/battery_charge_limit"
 SYS_STATE_FILE="/etc/asus-battery-charge-threshold"
-SOAK_SECONDS=3600 # 1 hour soak time after reaching 100%
+SOAK_SECONDS=3600         # 1 hour soak time after reaching 100%
+MAX_OVERRIDE_SECONDS=7200 # 2 hours max time in 100% mode
 
 NOTIFY_ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/battery_limit_notify_id"
 
@@ -110,6 +112,12 @@ save_limit_state() {
     if [ -w "$SYS_STATE_FILE" ]; then
         echo "$val" > "$SYS_STATE_FILE" 2>/dev/null || true
     fi
+    if [ "$val" -ge 100 ]; then
+        date +%s > "$OVERRIDE_FILE" 2>/dev/null || true
+        rm -f "$TIMER_FILE" 2>/dev/null || true
+    else
+        rm -f "$TIMER_FILE" "$OVERRIDE_FILE" 2>/dev/null || true
+    fi
 }
 
 set_threshold() {
@@ -160,7 +168,6 @@ toggle() {
     fi
 
     if set_threshold "$target"; then
-        rm -f "$TIMER_FILE"
         if [ "$target" -eq 100 ]; then
             send_notify "Battery Limit" "100%"
         else
@@ -184,6 +191,20 @@ status() {
 restore() {
     local target
     target=$(get_saved_limit)
+
+    # If saved target was 100, check if override has expired (e.g. across reboots)
+    if [ "$target" -ge 100 ] && [ -f "$OVERRIDE_FILE" ]; then
+        local o_start now elapsed
+        o_start=$(cat "$OVERRIDE_FILE" 2>/dev/null || echo "")
+        if [ -n "$o_start" ]; then
+            now=$(date +%s)
+            elapsed=$((now - o_start))
+            if [ "$elapsed" -ge "$MAX_OVERRIDE_SECONDS" ]; then
+                target="80"
+            fi
+        fi
+    fi
+
     local current
     current=$(get_threshold)
     if [ "$current" -ne "$target" ]; then
@@ -214,7 +235,15 @@ daemon_loop() {
         prev_ac=0
     fi
 
+    local loop_prev_time
+    loop_prev_time=$(date +%s)
+
     while true; do
+        local loop_now
+        loop_now=$(date +%s)
+        local time_gap=$((loop_now - loop_prev_time))
+        loop_prev_time=$loop_now
+
         local current_ac=0
         if is_charger_plugged; then
             current_ac=1
@@ -226,28 +255,63 @@ daemon_loop() {
         thresh=$(get_threshold)
         local saved_target
         saved_target=$(get_saved_limit)
+        local st
+        st=$(get_battery_status)
+
+        # 0. Resume from Sleep / Suspend Detection
+        if [ "$time_gap" -gt 30 ]; then
+            if [ "$thresh" -ge 100 ] && [ "$current_ac" -eq 1 ]; then
+                if [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; then
+                    # Suspended >= 1 hour: battery was already full/soaking overnight
+                    if [ "$time_gap" -ge "$SOAK_SECONDS" ]; then
+                        set_threshold 80
+                        send_notify "Battery Limit" "80%"
+                        thresh=80
+                    elif [ "$time_gap" -ge 1800 ]; then
+                        # Suspended >= 30m: credit suspend time toward soak timer
+                        local credited=$((time_gap - 1800))
+                        local soak_start=$((loop_now - credited))
+                        echo "$soak_start" > "$TIMER_FILE"
+                    fi
+                fi
+            fi
+        fi
+
+        # 0.1 Max Override Timeout Check (2h total limit)
+        if [ "$thresh" -ge 100 ] && [ "$current_ac" -eq 1 ] && [ -f "$OVERRIDE_FILE" ]; then
+            local o_start
+            o_start=$(cat "$OVERRIDE_FILE" 2>/dev/null || echo "")
+            if [ -n "$o_start" ]; then
+                local o_elapsed=$((loop_now - o_start))
+                if [ "$o_elapsed" -ge "$MAX_OVERRIDE_SECONDS" ] && [ "$cap" -ge 80 ]; then
+                    set_threshold 80
+                    send_notify "Battery Limit" "80%"
+                    thresh=80
+                fi
+            fi
+        fi
 
         # 1. AC Plug / Unplug Transition Detection
         if [ -n "$prev_ac" ] && [ "$current_ac" -ne "$prev_ac" ]; then
             if [ "$current_ac" -eq 1 ]; then
                 # Charger connected
                 if [ "$cap" -ge "$thresh" ]; then
-                    send_notify "Charging Paused" "Battery at limit (${cap}%)."
+                    send_notify "Battery" "Plugged in (${cap}%)"
                     notified_limit=true
                 else
-                    send_notify "Charging" "Battery is charging (${cap}%)."
+                    send_notify "Battery" "Charging (${cap}%)"
                     notified_limit=false
                 fi
                 notified_low=false
                 notified_crit=false
             else
                 # Charger disconnected
-                send_notify "Discharging" "Running on battery (${cap}%)."
+                send_notify "Battery" "Discharging (${cap}%)"
                 notified_limit=false
                 # Auto revert 100% override to 80% on unplug to protect battery health
-                rm -f "$TIMER_FILE"
                 if [ "$thresh" -ne 80 ]; then
                     set_threshold 80
+                    thresh=80
                 fi
             fi
             prev_ac="$current_ac"
@@ -256,11 +320,11 @@ daemon_loop() {
         # 2. Low Battery Warning while discharging
         if [ "$current_ac" -eq 0 ]; then
             if [ "$cap" -le 5 ] && [ "$notified_crit" = false ]; then
-                send_notify "Critical Battery" "Battery is at ${cap}%. Connect charger now." "critical"
+                send_notify "Battery" "Critical (${cap}%)" "critical"
                 notified_crit=true
                 notified_low=true
             elif [ "$cap" -lt 15 ] && [ "$notified_low" = false ]; then
-                send_notify "Low Battery" "Battery is below 15% (${cap}% remaining)." "critical"
+                send_notify "Battery" "Low (${cap}%)" "critical"
                 notified_low=true
             elif [ "$cap" -ge 20 ]; then
                 notified_low=false
@@ -277,7 +341,7 @@ daemon_loop() {
         # 3. Charging Limit Reached Notification
         if [ "$current_ac" -eq 1 ]; then
             if [ "$cap" -ge "$thresh" ] && [ "$notified_limit" = false ]; then
-                send_notify "Charge Limit Reached" "Battery reached ${thresh}%."
+                send_notify "Battery Limit" "Reached ${thresh}%"
                 notified_limit=true
             elif [ "$cap" -lt "$((thresh - 4))" ]; then
                 notified_limit=false
@@ -292,14 +356,12 @@ daemon_loop() {
         fi
 
         # 5. Timer for 100% Full Charge Override (soak timer starts AFTER reaching 100%)
-        if [ "$thresh" -eq 100 ]; then
+        if [ "$thresh" -ge 100 ]; then
             if [ "$current_ac" -eq 1 ]; then
-                local st
-                st=$(get_battery_status)
-                if [ "$cap" -ge 100 ] || [ "$st" = "Full" ]; then
+                if [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; then
                     if [ ! -f "$TIMER_FILE" ]; then
                         date +%s > "$TIMER_FILE"
-                        send_notify "Battery Full" "Battery reached 100% (auto 80% in 1h)."
+                        send_notify "Battery" "100%"
                     else
                         local start_time now elapsed
                         start_time=$(cat "$TIMER_FILE" 2>/dev/null || echo "")
@@ -308,7 +370,6 @@ daemon_loop() {
                             elapsed=$((now - start_time))
                             if [ "$elapsed" -ge "$SOAK_SECONDS" ]; then
                                 if set_threshold 80; then
-                                    rm -f "$TIMER_FILE"
                                     send_notify "Battery Limit" "80%"
                                 fi
                             fi
@@ -339,12 +400,10 @@ case "$1" in
         ;;
     80)
         set_threshold 80
-        rm -f "$TIMER_FILE"
         send_notify "Battery Limit" "80%"
         ;;
     100)
         set_threshold 100
-        rm -f "$TIMER_FILE"
         send_notify "Battery Limit" "100%"
         ;;
     *)

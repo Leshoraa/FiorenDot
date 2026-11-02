@@ -162,9 +162,9 @@ toggle() {
     if set_threshold "$target"; then
         rm -f "$TIMER_FILE"
         if [ "$target" -eq 100 ]; then
-            send_notify "Charge Limit" "Mode 100% aktif (Pengisian penuh)"
+            send_notify "Battery Limit" "100%"
         else
-            send_notify "Charge Limit" "Mode 80% aktif (Proteksi baterai)"
+            send_notify "Battery Limit" "80%"
         fi
     fi
 }
@@ -309,7 +309,7 @@ daemon_loop() {
                             if [ "$elapsed" -ge "$SOAK_SECONDS" ]; then
                                 if set_threshold 80; then
                                     rm -f "$TIMER_FILE"
-                                    send_notify "Charge Limit" "Limit restored to 80%."
+                                    send_notify "Battery Limit" "80%"
                                 fi
                             fi
                         else
@@ -340,12 +340,12 @@ case "$1" in
     80)
         set_threshold 80
         rm -f "$TIMER_FILE"
-        send_notify "Charge Limit" "Limit set to 80%."
+        send_notify "Battery Limit" "80%"
         ;;
     100)
         set_threshold 100
         rm -f "$TIMER_FILE"
-        send_notify "Charge Limit" "Limit set to 100%."
+        send_notify "Battery Limit" "100%"
         ;;
     *)
         echo "Usage: $0 {toggle|status|restore|daemon|80|100}"

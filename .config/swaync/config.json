@@ -88,11 +88,11 @@
           "update-command": "swaync-client -D"
         },
         {
-          "label": "  Hypridle",
+          "label": "󰂄  Charge 100%",
           "type": "toggle",
-          "active": true,
-          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && $HOME/.config/hypr/scripts/Hypridle.sh on || $HOME/.config/hypr/scripts/Hypridle.sh off'",
-          "update-command": "sh -c 'pgrep -x hypridle >/dev/null && echo true || echo false'"
+          "active": false,
+          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && $HOME/.config/hypr/scripts/BatteryLimitToggle.sh 100 || $HOME/.config/hypr/scripts/BatteryLimitToggle.sh 80'",
+          "update-command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh status"
         },
         {
           "label": "󰈊  Color Picker",

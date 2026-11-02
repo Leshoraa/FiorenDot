@@ -147,8 +147,8 @@ status() {
     local current
     current=$(get_threshold)
 
-    # 80%: active (true), 100%: inactive (false)
-    if [ "$current" -eq 80 ]; then
+    # 100%: active (true), 80%: inactive (false)
+    if [ "$current" -ge 100 ]; then
         echo "true"
     else
         echo "false"

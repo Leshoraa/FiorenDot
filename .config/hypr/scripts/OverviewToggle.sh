@@ -4,19 +4,9 @@
 
 set -euo pipefail
 
-# 1) Try Quickshell via IPC directly (instant if running)
-if qs ipc -c overview call overview toggle >/dev/null 2>&1; then
-  exit 0
-fi
-
-# If QS isn't running, but the CLI exists, try starting it and retry once
-if command -v qs >/dev/null 2>&1; then
-  qs -c overview >/dev/null 2>&1 &
-  sleep 0.6
-  if qs ipc -c overview call overview toggle >/dev/null 2>&1; then
-    exit 0
-  fi
-fi
+# Quickshell overview is disabled to save RAM
+notify-send "Overview" "Fitur Quickshell overview dinonaktifkan untuk menghemat RAM" -u low 2>/dev/null || true
+exit 0
 
 # 2) Fall back to AGS template
 if command -v ags >/dev/null 2>&1; then

@@ -93,15 +93,26 @@ def generate_palette(img_path):
         raw_s = (dom_sat_sum / dom_cnt_sum) if dom_cnt_sum > 0 else 20.0
         ui_s = max(38.0, min(75.0, raw_s * 1.35))
 
-        # Check for secondary accent if present
-        sec_h = None
-        for cnt, _, h_deg, s_pct, _ in clusters:
+        # Check for genuine secondary accent if present in wallpaper (must be visible and meaningful)
+        sec_candidates = []
+        for cnt, _, h_deg, s_pct, l_pct in clusters:
             diff = min(abs(h_deg - dom_h), 360 - abs(h_deg - dom_h))
-            if diff >= 40 and s_pct >= 18.0 and (cnt / total_px) >= 0.0005:
-                sec_h = h_deg
-                break
-        if sec_h is None:
-            sec_h = (dom_h + 30) % 360
+            # Must be clearly visible (not dark shadow, not blown white), saturated, and distinct
+            if diff >= 45 and 18.0 <= l_pct <= 82.0 and s_pct >= 22.0:
+                if (cnt / chroma_px >= 0.08) or (cnt / total_px >= 0.025):
+                    sec_candidates.append((cnt, h_deg, s_pct, l_pct))
+
+        if sec_candidates:
+            sec_candidates.sort(key=lambda x: x[0], reverse=True)
+            sec_h = sec_candidates[0][1]
+            has_real_sec = True
+        else:
+            has_real_sec = False
+            # When image is monochromatic/duotone, use harmonious analogous tone (no random green or noise!)
+            if dom_h >= 320 or dom_h <= 30:
+                sec_h = (dom_h + 20) % 360  # Warm coral / crimson rose
+            else:
+                sec_h = (dom_h + 25) % 360
 
         # Check if there is a prominent dark cluster (shadow/background of wallpaper)
         dark_clusters = [
@@ -150,15 +161,28 @@ def generate_palette(img_path):
         c10 = hsl_to_hex(dom_h, ui_s * 0.90, l_pill)
         c6  = hsl_to_hex(dom_h, ui_s * 0.95, l_keys)
         c8  = hsl_to_hex(dark_h, max(16.0, min(28.0, bg_sat * 0.8)), 32.0)
-        c13 = hsl_to_hex(sec_h, max(36.0, min(65.0, raw_s * 1.1)), 62.0)
+        
+        sec_sat = max(32.0, min(65.0, raw_s * 1.05)) if has_real_sec else min(48.0, ui_s * 0.95)
+        c13 = hsl_to_hex(sec_h, sec_sat, 62.0)
+        c5  = hsl_to_hex(sec_h, sec_sat * 0.85, 56.0)
 
-        c1  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 55.0, 54.0)
-        c9  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 65.0, 62.0)
+        if has_real_sec and (340 <= sec_h or sec_h <= 25):
+            c1  = hsl_to_hex(sec_h, 55.0, 54.0)
+            c9  = hsl_to_hex(sec_h, 65.0, 62.0)
+        else:
+            c1  = hsl_to_hex(dom_h if (dom_h >= 330 or dom_h <= 20) else 4, 55.0, 54.0)
+            c9  = hsl_to_hex(dom_h if (dom_h >= 330 or dom_h <= 20) else 4, 65.0, 62.0)
+
         c2  = hsl_to_hex(dom_h, ui_s * 0.80, l_shade)
-        c3  = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 60.0, 56.0)
-        c11 = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 70.0, 64.0)
+
+        if has_real_sec and 25 <= sec_h <= 65:
+            c3  = hsl_to_hex(sec_h, 60.0, 56.0)
+            c11 = hsl_to_hex(sec_h, 70.0, 64.0)
+        else:
+            c3  = hsl_to_hex(42, 55.0, 56.0)
+            c11 = hsl_to_hex(42, 65.0, 64.0)
+
         c4  = hsl_to_hex(dom_h, ui_s, l_mid)
-        c5  = hsl_to_hex(sec_h, ui_s * 0.85, 56.0)
         c0, c7, c15 = bg, fg, fg
 
     palette = {
@@ -188,7 +212,7 @@ def main():
 
     # Cache key by path and modification time for instant reuse
     mtime = int(os.path.getmtime(img_path))
-    hash_key = hashlib.md5(f"{img_path}_{mtime}".encode()).hexdigest()
+    hash_key = hashlib.md5(f"{img_path}_{mtime}_v4".encode()).hexdigest()
     theme_file = os.path.join(cache_dir, f"{hash_key}.json")
 
     if not os.path.isfile(theme_file):

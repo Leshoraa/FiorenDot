@@ -23,12 +23,31 @@ PERSISTENT_FILE="$STATE_DIR/battery_charge_limit"
 SYS_STATE_FILE="/etc/asus-battery-charge-threshold"
 SOAK_SECONDS=3600 # 1 hour soak time after reaching 100%
 
-# Send desktop notifications without icons in clean English
+NOTIFY_ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/battery_limit_notify_id"
+
+# Send desktop notifications without icons (updates in-place)
 send_notify() {
     local title="$1"
     local msg="$2"
     local urgency="${3:-normal}"
-    notify-send -u "$urgency" -i "" -a "Battery" "$title" "$msg"
+
+    local replace_arg=()
+    if [ -f "$NOTIFY_ID_FILE" ]; then
+        local old_id
+        old_id=$(cat "$NOTIFY_ID_FILE" 2>/dev/null || echo "")
+        if [ -n "$old_id" ]; then
+            replace_arg=("-r" "$old_id")
+        fi
+    fi
+
+    local new_id
+    new_id=$(notify-send "${replace_arg[@]}" -p -u "$urgency" \
+        -h string:x-canonical-private-synchronous:battery_status \
+        -i "" -a "Battery" "$title" "$msg" 2>/dev/null || true)
+
+    if [ -n "$new_id" ]; then
+        echo "$new_id" > "$NOTIFY_ID_FILE" 2>/dev/null || true
+    fi
 }
 
 get_threshold() {
@@ -84,23 +103,6 @@ get_saved_limit() {
     echo "$target"
 }
 
-sync_swaync() {
-    local val="$1"
-    local config="$HOME/.config/swaync/config.json"
-    [ ! -f "$config" ] && return 0
-
-    local new_label="󰂃  Limit 80%"
-    [ "$val" -ge 100 ] && new_label="󰂄  Limit 100%"
-
-    if grep -q "Limit" "$config"; then
-        if ! grep -q "\"label\": \"$new_label\"" "$config"; then
-            sed -i -E "s/\"label\": \"[^\"]*Limit [0-9]+%\"/\"label\": \"$new_label\"/" "$config"
-            swaync-client --reload-config 2>/dev/null || true
-        fi
-    fi
-    swaync-client -R 2>/dev/null || true
-}
-
 save_limit_state() {
     local val="$1"
     mkdir -p "$STATE_DIR" 2>/dev/null || true
@@ -108,7 +110,6 @@ save_limit_state() {
     if [ -w "$SYS_STATE_FILE" ]; then
         echo "$val" > "$SYS_STATE_FILE" 2>/dev/null || true
     fi
-    sync_swaync "$val"
 }
 
 set_threshold() {
@@ -141,22 +142,29 @@ set_threshold() {
 }
 
 toggle() {
-    local current
-    current=$(get_threshold)
-
-    if [ "$current" -eq 80 ]; then
-        # Switch to 100%
-        if set_threshold 100; then
-            rm -f "$TIMER_FILE"
-            send_notify "Charge Limit" "Limit set to 100%."
-            swaync-client -R 2>/dev/null || true
+    local target
+    if [ -n "${SWAYNC_TOGGLE_STATE:-}" ]; then
+        if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
+            target=100
+        else
+            target=80
         fi
     else
-        # Switch to 80%
-        if set_threshold 80; then
-            rm -f "$TIMER_FILE"
-            send_notify "Charge Limit" "Limit set to 80%."
-            swaync-client -R 2>/dev/null || true
+        local current
+        current=$(get_threshold)
+        if [ "$current" -eq 80 ]; then
+            target=100
+        else
+            target=80
+        fi
+    fi
+
+    if set_threshold "$target"; then
+        rm -f "$TIMER_FILE"
+        if [ "$target" -eq 100 ]; then
+            send_notify "Charge Limit" "Mode 100% aktif (Pengisian penuh)"
+        else
+            send_notify "Charge Limit" "Mode 80% aktif (Proteksi baterai)"
         fi
     fi
 }
@@ -240,7 +248,6 @@ daemon_loop() {
                 rm -f "$TIMER_FILE"
                 if [ "$thresh" -ne 80 ]; then
                     set_threshold 80
-                    swaync-client -R 2>/dev/null || true
                 fi
             fi
             prev_ac="$current_ac"
@@ -303,7 +310,6 @@ daemon_loop() {
                                 if set_threshold 80; then
                                     rm -f "$TIMER_FILE"
                                     send_notify "Charge Limit" "Limit restored to 80%."
-                                    swaync-client -R 2>/dev/null || true
                                 fi
                             fi
                         else
@@ -335,13 +341,11 @@ case "$1" in
         set_threshold 80
         rm -f "$TIMER_FILE"
         send_notify "Charge Limit" "Limit set to 80%."
-        swaync-client -R 2>/dev/null || true
         ;;
     100)
         set_threshold 100
         rm -f "$TIMER_FILE"
         send_notify "Charge Limit" "Limit set to 100%."
-        swaync-client -R 2>/dev/null || true
         ;;
     *)
         echo "Usage: $0 {toggle|status|restore|daemon|80|100}"

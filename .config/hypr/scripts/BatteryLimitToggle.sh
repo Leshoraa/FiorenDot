@@ -84,6 +84,23 @@ get_saved_limit() {
     echo "$target"
 }
 
+sync_swaync() {
+    local val="$1"
+    local config="$HOME/.config/swaync/config.json"
+    [ ! -f "$config" ] && return 0
+
+    local new_label="󰂃  Limit 80%"
+    [ "$val" -ge 100 ] && new_label="󰂄  Limit 100%"
+
+    if grep -q "Limit" "$config"; then
+        if ! grep -q "\"label\": \"$new_label\"" "$config"; then
+            sed -i -E "s/\"label\": \"[^\"]*Limit [0-9]+%\"/\"label\": \"$new_label\"/" "$config"
+            swaync-client --reload-config 2>/dev/null || true
+        fi
+    fi
+    swaync-client -R 2>/dev/null || true
+}
+
 save_limit_state() {
     local val="$1"
     mkdir -p "$STATE_DIR" 2>/dev/null || true
@@ -91,6 +108,7 @@ save_limit_state() {
     if [ -w "$SYS_STATE_FILE" ]; then
         echo "$val" > "$SYS_STATE_FILE" 2>/dev/null || true
     fi
+    sync_swaync "$val"
 }
 
 set_threshold() {
@@ -293,10 +311,6 @@ daemon_loop() {
                         fi
                     fi
                 fi
-            else
-                rm -f "$TIMER_FILE"
-                set_threshold 80
-                swaync-client -R 2>/dev/null || true
             fi
         fi
 

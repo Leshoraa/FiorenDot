@@ -88,10 +88,10 @@
           "update-command": "swaync-client -D"
         },
         {
-          "label": "󰂄  Charge 100%",
+          "label": "󰂃  Limit 80%",
           "type": "toggle",
           "active": false,
-          "command": "sh -c '[[ $SWAYNC_TOGGLE_STATE == true ]] && $HOME/.config/hypr/scripts/BatteryLimitToggle.sh 100 || $HOME/.config/hypr/scripts/BatteryLimitToggle.sh 80'",
+          "command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh toggle",
           "update-command": "$HOME/.config/hypr/scripts/BatteryLimitToggle.sh status"
         },
         {

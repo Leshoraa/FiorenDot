@@ -2,11 +2,11 @@
  /* wallust template - colors-swaync */
 
 @define-color text #EBEBED;
-@define-color background rgba(20,21,23,0.25);
-@define-color background-alt #141517;
+@define-color background rgba(18,18,25,0.25);
+@define-color background-alt #121219;
 @define-color cursor #EBEBED;
-@define-color hovered #8092C6;
-@define-color button-background #9FABD0;
-@define-color button-active #4F5D88;
-@define-color border #E5746C;
+@define-color hovered #6B7DB3;
+@define-color button-background #8795BF;
+@define-color button-active #3D4766;
+@define-color border #DD685F;
 @define-color urgent #EBEBED;

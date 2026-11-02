@@ -103,24 +103,62 @@ def generate_palette(img_path):
         if sec_h is None:
             sec_h = (dom_h + 30) % 360
 
-        bg = hsl_to_hex(dom_h, min(20.0, raw_s * 0.4), 8.5)
+        # Check if there is a prominent dark cluster (shadow/background of wallpaper)
+        dark_clusters = [
+            (cnt, hex_str, h_deg, s_pct, l_pct)
+            for cnt, hex_str, h_deg, s_pct, l_pct in clusters
+            if 3.0 < l_pct <= 22.0 and s_pct > 6.0
+        ]
+        dark_h = dom_h
+        bg_sat = max(18.0, min(36.0, raw_s * 1.1))
+        bg_l = 8.0
+
+        if dark_clusters:
+            top_dark = max(dark_clusters, key=lambda x: x[0])
+            if top_dark[0] / total_px > 0.15:
+                diff = min(abs(top_dark[2] - dom_h), 360 - abs(top_dark[2] - dom_h))
+                if diff <= 45 or top_dark[0] / total_px > 0.40:
+                    dark_h = top_dark[2]
+                    bg_sat = max(16.0, min(38.0, top_dark[3] * 0.75))
+                    bg_l = max(5.0, min(8.5, top_dark[4] * 1.05))
+
+        bg = hsl_to_hex(dark_h, bg_sat, bg_l)
         fg = hsl_to_hex(dom_h, min(15.0, raw_s * 0.25), 92.5)
 
-        # Primary UI elements: 100% based on WARNA PALING BANYAK
-        c12 = hsl_to_hex(dom_h, ui_s, 64.0)          # Window border & Waybar primary
-        c14 = hsl_to_hex(dom_h, min(85.0, ui_s * 1.1), 76.0) # Logo & Starship Arch pill
-        c10 = hsl_to_hex(dom_h, ui_s * 0.85, 48.0)   # Starship dir pill (tonal shade of dominant)
-        c6  = hsl_to_hex(dom_h, ui_s * 0.90, 72.0)   # Fastfetch keys
-        c8  = hsl_to_hex(dom_h, min(18.0, raw_s * 0.3), 36.0) # Inactive border
-        c13 = hsl_to_hex(sec_h, max(40.0, min(70.0, raw_s * 1.2)), 66.0) # Title / username
+        # Natural, painterly UI saturation & lightness (prevents neon/fluorescent look)
+        if 160 <= dom_h <= 215:
+            # Teal / Cyan range: naturally very luminous to human eyes, keep saturation and lightness balanced
+            ui_s = max(26.0, min(42.0, raw_s * 0.65))
+            l_high = 65.0     # c14 (Logo)
+            l_keys = 58.0     # c6 (Fastfetch keys)
+            l_border = 50.0   # c12 (Window border & Waybar primary)
+            l_mid = 42.0      # c4 (Mid accent)
+            l_pill = 35.0     # c10 (Starship dir pill)
+            l_shade = 26.0    # c2 (Tonal dot)
+        else:
+            ui_s = max(32.0, min(56.0, raw_s * 1.05))
+            l_high = 70.0
+            l_keys = 64.0
+            l_border = 56.0
+            l_mid = 48.0
+            l_pill = 40.0
+            l_shade = 32.0
 
-        c1  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 60.0, 56.0)
-        c9  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 70.0, 66.0)
-        c2  = hsl_to_hex(dom_h, ui_s * 0.7, 42.0)
-        c3  = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 65.0, 58.0)
-        c11 = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 75.0, 68.0)
-        c4  = hsl_to_hex(dom_h, ui_s, 56.0)
-        c5  = hsl_to_hex(sec_h, ui_s * 0.8, 58.0)
+        # Primary UI elements: 100% based on WARNA PALING BANYAK
+        c12 = hsl_to_hex(dom_h, ui_s, l_border)
+        c14 = hsl_to_hex(dom_h, min(55.0, ui_s * 1.1), l_high)
+        c10 = hsl_to_hex(dom_h, ui_s * 0.90, l_pill)
+        c6  = hsl_to_hex(dom_h, ui_s * 0.95, l_keys)
+        c8  = hsl_to_hex(dark_h, max(16.0, min(28.0, bg_sat * 0.8)), 32.0)
+        c13 = hsl_to_hex(sec_h, max(36.0, min(65.0, raw_s * 1.1)), 62.0)
+
+        c1  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 55.0, 54.0)
+        c9  = hsl_to_hex(sec_h if (340 <= sec_h or sec_h <= 25) else 4, 65.0, 62.0)
+        c2  = hsl_to_hex(dom_h, ui_s * 0.80, l_shade)
+        c3  = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 60.0, 56.0)
+        c11 = hsl_to_hex(sec_h if 25 <= sec_h <= 65 else 42, 70.0, 64.0)
+        c4  = hsl_to_hex(dom_h, ui_s, l_mid)
+        c5  = hsl_to_hex(sec_h, ui_s * 0.85, 56.0)
         c0, c7, c15 = bg, fg, fg
 
     palette = {

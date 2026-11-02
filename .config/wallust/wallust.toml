@@ -71,7 +71,7 @@ preview.target = '~/.config/wallust/preview-theme.conf'
 
 [hooks]
 waybar = 'pkill -USR2 waybar 2>/dev/null || (waybar >/dev/null 2>&1 &)'
-kitty = 'touch ~/.config/kitty/kitty.conf; pkill -USR1 kitty 2>/dev/null || true'
+kitty = 'for s in /tmp/mykitty*; do [ -S "$s" ] && kitty @ --to "unix:$s" load-config 2>/dev/null; done || pkill -USR1 kitty 2>/dev/null || true'
 swaync = 'swaync-client -rs 2>/dev/null || true'
 hyprland = 'hyprctl reload 2>/dev/null || true'
 cava = 'pkill -USR1 cava 2>/dev/null || true'

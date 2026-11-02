@@ -76,6 +76,21 @@ else
   wallust run -s "$wallpaper_path" || true
 fi
 
+# Reload UI components with fresh colors (debounced safely via WallpaperRandom.sh)
+pkill -USR2 waybar 2>/dev/null || (hyprctl dispatch exec waybar 2>/dev/null || true)
+hyprctl reload 2>/dev/null || true
+swaync-client -rs 2>/dev/null || true
+pkill -USR1 cava 2>/dev/null || true
+pkill -x rofi 2>/dev/null || true
+
+# Reload kitty safely via socket to prevent OpenGL font atlas corruption
+sleep 0.05
+for sock in /tmp/mykitty*; do
+  if [[ -S "$sock" ]]; then
+    kitty @ --to "unix:$sock" load-config 2>/dev/null || true
+  fi
+done || pkill -USR1 kitty 2>/dev/null || true
+
 # Reload quickshell overview if running so launcher picks up new colors
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x qs 2>/dev/null || true

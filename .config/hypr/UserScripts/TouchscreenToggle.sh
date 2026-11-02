@@ -7,13 +7,12 @@
 STATUS_FILE="${XDG_RUNTIME_DIR:-/tmp}/touchscreen.status"
 NOTIF_ICON="input-touchscreen"
 
-# Cek status saat ini (default: enabled jika file belum ada)
+# Cek status saat ini (default: disabled sejak boot jika file belum ada)
 is_enabled() {
     if [ -f "$STATUS_FILE" ]; then
         [ "$(cat "$STATUS_FILE")" = "enabled" ]
     else
-        # Jika belum ada status file, cek dari hyprctl device
-        return 0
+        return 1
     fi
 }
 

@@ -4,8 +4,7 @@
 
 set -euo pipefail
 
-# Quickshell overview is disabled to save RAM
-notify-send "Overview" "Fitur Quickshell overview dinonaktifkan untuk menghemat RAM" -u low 2>/dev/null || true
+# Quickshell overview is disabled - silent exit
 exit 0
 
 # 2) Fall back to AGS template

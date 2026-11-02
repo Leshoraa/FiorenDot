@@ -170,7 +170,7 @@ def main():
                                         session_gesture_done = True
                                         last_trigger_time = now
                                         if session_max_fingers == 3:
-                                            run_dispatch(['hyprctl', 'dispatch', 'global', 'quickshell:overviewToggle'])
+                                            run_dispatch(['hyprctl', 'dispatch', 'exec', 'kitty'])
                                         elif session_max_fingers == 4:
                                             run_dispatch(['swaync-client', '-t', '-sw'])
                                     elif avg_dy > 0 and all(d[1] >= MIN_FINGER_SWIPE_MM for d in displacements):
@@ -230,7 +230,7 @@ def main():
                                         run_dispatch([os.path.expanduser('~/.config/hypr/UserScripts/VirtualKeyboardVisibility.sh')])
                                     elif session_max_fingers == 4:
                                         # 4-Finger Tap: Open Terminal (kitty)
-                                        run_dispatch(['hyprctl', 'dispatch', 'exec', 'kitty -1'])
+                                        run_dispatch(['hyprctl', 'dispatch', 'exec', 'kitty'])
                                     elif session_max_fingers == 5:
                                         # 5-Finger Tap: Close Active Application (Super + Q)
                                         run_dispatch([os.path.expanduser('~/.config/hypr/scripts/KillActiveProcess.sh')])

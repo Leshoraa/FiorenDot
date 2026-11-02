@@ -16,6 +16,7 @@
 "spacing": 3,
 "fixed-center": true,
 "ipc": true,
+"reload_style_on_change": true,
 "margin-top": 3,
 "margin-left": 8,
 "margin-right": 8,

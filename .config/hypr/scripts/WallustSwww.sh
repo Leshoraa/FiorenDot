@@ -76,8 +76,12 @@ else
   wallust run -s "$wallpaper_path" || true
 fi
 
-# Reload UI components with fresh colors (debounced safely via WallpaperRandom.sh)
-pkill -USR2 waybar 2>/dev/null || (hyprctl dispatch exec waybar 2>/dev/null || true)
+# Smooth in-place CSS hot-reload for Waybar (tanpa hilang, tanpa kedut/kedip)
+if pgrep -x waybar >/dev/null 2>&1; then
+  touch "$HOME/.config/waybar/style.css"
+else
+  hyprctl dispatch exec waybar 2>/dev/null || true
+fi
 hyprctl reload 2>/dev/null || true
 swaync-client -rs 2>/dev/null || true
 pkill -USR1 cava 2>/dev/null || true

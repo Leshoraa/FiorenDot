@@ -33,6 +33,15 @@ send_notify() {
     local msg="$2"
     local urgency="${3:-normal}"
 
+    local time_str
+    time_str=$(date +"%H:%M")
+    local body
+    if [ -n "$msg" ]; then
+        body="${msg} • ${time_str}"
+    else
+        body="${time_str}"
+    fi
+
     local replace_arg=()
     if [ -f "$NOTIFY_ID_FILE" ]; then
         local old_id
@@ -45,7 +54,7 @@ send_notify() {
     local new_id
     new_id=$(notify-send "${replace_arg[@]}" -p -u "$urgency" \
         -h string:x-canonical-private-synchronous:battery_status \
-        -i "" -a "Battery" "$title" "$msg" 2>/dev/null || true)
+        -i "" -a "Battery" "$title" "$body" 2>/dev/null || true)
 
     if [ -n "$new_id" ]; then
         echo "$new_id" > "$NOTIFY_ID_FILE" 2>/dev/null || true

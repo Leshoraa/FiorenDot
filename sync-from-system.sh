@@ -59,6 +59,12 @@ for home_file in .zshrc .zprofile; do
     fi
 done
 
+# 4. Sync system power sleep hooks if present
+if [ -f "/usr/lib/systemd/system-sleep/battery-limit-rtc.sh" ]; then
+    mkdir -p "$DOTFILES_DIR/system/power"
+    cp -p "/usr/lib/systemd/system-sleep/battery-limit-rtc.sh" "$DOTFILES_DIR/system/power/battery-limit-rtc.sh"
+fi
+
 echo "========================================"
 echo "✅ Sync complete! Check changes with 'git status'"
 echo "========================================"

@@ -108,14 +108,16 @@ get_saved_limit() {
 save_limit_state() {
     local val="$1"
     mkdir -p "$STATE_DIR" 2>/dev/null || true
-    echo "$val" > "$PERSISTENT_FILE" 2>/dev/null || true
-    if [ -w "$SYS_STATE_FILE" ]; then
-        echo "$val" > "$SYS_STATE_FILE" 2>/dev/null || true
-    fi
     if [ "$val" -ge 100 ]; then
-        date +%s > "$OVERRIDE_FILE" 2>/dev/null || true
+        if [ ! -f "$OVERRIDE_FILE" ]; then
+            date +%s > "$OVERRIDE_FILE" 2>/dev/null || true
+        fi
         rm -f "$TIMER_FILE" 2>/dev/null || true
     else
+        echo "80" > "$PERSISTENT_FILE" 2>/dev/null || true
+        if [ -w "$SYS_STATE_FILE" ]; then
+            echo "80" > "$SYS_STATE_FILE" 2>/dev/null || true
+        fi
         rm -f "$TIMER_FILE" "$OVERRIDE_FILE" 2>/dev/null || true
     fi
 }
@@ -189,19 +191,22 @@ status() {
 }
 
 restore() {
-    local target
-    target=$(get_saved_limit)
+    local target="80"
 
-    # If saved target was 100, check if override has expired (e.g. across reboots)
-    if [ "$target" -ge 100 ] && [ -f "$OVERRIDE_FILE" ]; then
+    # If in 100% override mode, check if override has expired (e.g. across reboots)
+    if [ -f "$OVERRIDE_FILE" ]; then
         local o_start now elapsed
         o_start=$(cat "$OVERRIDE_FILE" 2>/dev/null || echo "")
         if [ -n "$o_start" ]; then
             now=$(date +%s)
             elapsed=$((now - o_start))
-            if [ "$elapsed" -ge "$MAX_OVERRIDE_SECONDS" ]; then
-                target="80"
+            if [ "$elapsed" -lt "$MAX_OVERRIDE_SECONDS" ]; then
+                target="100"
+            else
+                rm -f "$OVERRIDE_FILE" "$TIMER_FILE" 2>/dev/null || true
             fi
+        else
+            rm -f "$OVERRIDE_FILE" "$TIMER_FILE" 2>/dev/null || true
         fi
     fi
 
@@ -253,26 +258,22 @@ daemon_loop() {
         cap=$(get_capacity)
         local thresh
         thresh=$(get_threshold)
-        local saved_target
-        saved_target=$(get_saved_limit)
         local st
         st=$(get_battery_status)
 
         # 0. Resume from Sleep / Suspend Detection
         if [ "$time_gap" -gt 30 ]; then
             if [ "$thresh" -ge 100 ] && [ "$current_ac" -eq 1 ]; then
-                if [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; then
-                    # Suspended >= 1 hour: battery was already full/soaking overnight
-                    if [ "$time_gap" -ge "$SOAK_SECONDS" ]; then
-                        set_threshold 80
-                        send_notify "Battery Limit" "80%"
-                        thresh=80
-                    elif [ "$time_gap" -ge 1800 ]; then
-                        # Suspended >= 30m: credit suspend time toward soak timer
-                        local credited=$((time_gap - 1800))
-                        local soak_start=$((loop_now - credited))
-                        echo "$soak_start" > "$TIMER_FILE"
-                    fi
+                # Suspended >= 1 hour on AC: battery was charging overnight
+                if [ "$time_gap" -ge "$SOAK_SECONDS" ] && [ "$cap" -ge 80 ]; then
+                    set_threshold 80
+                    send_notify "Battery Limit" "80%"
+                    thresh=80
+                elif [ "$time_gap" -ge 1800 ] && { [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; }; then
+                    # Suspended >= 30m and full: credit suspend time toward soak timer
+                    local credited=$((time_gap - 1800))
+                    local soak_start=$((loop_now - credited))
+                    echo "$soak_start" > "$TIMER_FILE"
                 fi
             fi
         fi
@@ -309,7 +310,7 @@ daemon_loop() {
                 send_notify "Battery" "Discharging (${cap}%)"
                 notified_limit=false
                 # Auto revert 100% override to 80% on unplug to protect battery health
-                if [ "$thresh" -ne 80 ]; then
+                if [ "$thresh" -ne 80 ] || [ -f "$OVERRIDE_FILE" ]; then
                     set_threshold 80
                     thresh=80
                 fi
@@ -349,33 +350,34 @@ daemon_loop() {
         fi
 
         # 4. Enforce Hardware Threshold (countering ASUS EC firmware resets after sleep/resume)
-        if [ ! -f "$TIMER_FILE" ]; then
-            if [ "$thresh" -ne "$saved_target" ]; then
-                set_threshold "$saved_target"
+        # If not in 100% override mode, hardware threshold must always be 80
+        if [ ! -f "$OVERRIDE_FILE" ]; then
+            if [ "$thresh" -ne 80 ]; then
+                set_threshold 80
+                thresh=80
             fi
         fi
 
         # 5. Timer for 100% Full Charge Override (soak timer starts AFTER reaching 100%)
-        if [ "$thresh" -ge 100 ]; then
-            if [ "$current_ac" -eq 1 ]; then
-                if [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; then
-                    if [ ! -f "$TIMER_FILE" ]; then
-                        date +%s > "$TIMER_FILE"
-                        send_notify "Battery" "100%"
-                    else
-                        local start_time now elapsed
-                        start_time=$(cat "$TIMER_FILE" 2>/dev/null || echo "")
-                        if [ -n "$start_time" ]; then
-                            now=$(date +%s)
-                            elapsed=$((now - start_time))
-                            if [ "$elapsed" -ge "$SOAK_SECONDS" ]; then
-                                if set_threshold 80; then
-                                    send_notify "Battery Limit" "80%"
-                                fi
+        if [ "$thresh" -ge 100 ] && [ "$current_ac" -eq 1 ]; then
+            if [ "$cap" -ge 99 ] || [ "$st" = "Full" ]; then
+                if [ ! -f "$TIMER_FILE" ]; then
+                    date +%s > "$TIMER_FILE"
+                    send_notify "Battery" "100%"
+                else
+                    local start_time now elapsed
+                    start_time=$(cat "$TIMER_FILE" 2>/dev/null || echo "")
+                    if [ -n "$start_time" ]; then
+                        now=$(date +%s)
+                        elapsed=$((now - start_time))
+                        if [ "$elapsed" -ge "$SOAK_SECONDS" ]; then
+                            if set_threshold 80; then
+                                send_notify "Battery Limit" "80%"
+                                thresh=80
                             fi
-                        else
-                            date +%s > "$TIMER_FILE"
                         fi
+                    else
+                        date +%s > "$TIMER_FILE"
                     fi
                 fi
             fi

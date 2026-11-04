@@ -12,9 +12,6 @@ AC_DIR=$(find /sys/class/power_supply -maxdepth 1 -name "AC*" 2>/dev/null | head
 RTC_ALARM="/sys/class/rtc/rtc0/wakealarm"
 TARGET_FILE="/run/battery_rtc_wake_target"
 SYS_STATE="/etc/asus-battery-charge-threshold"
-USER_STATE="/home/fioren/.local/state/battery_charge_limit"
-USER_OVERRIDE="/home/fioren/.cache/battery_override_start"
-USER_TIMER="/home/fioren/.cache/battery_limit_100_start"
 
 is_ac_online() {
     [ -n "$AC_DIR" ] && [ -f "$AC_DIR/online" ] && [ "$(cat "$AC_DIR/online" 2>/dev/null)" -eq 1 ]
@@ -28,13 +25,30 @@ get_threshold() {
     fi
 }
 
+get_override_start() {
+    for u_home in /home/*; do
+        if [ -f "$u_home/.cache/battery_override_start" ]; then
+            cat "$u_home/.cache/battery_override_start" 2>/dev/null && return
+        fi
+    done
+    echo ""
+}
+
+clean_user_overrides() {
+    for u_home in /home/*; do
+        [ -d "$u_home" ] || continue
+        rm -f "$u_home/.cache/battery_override_start" "$u_home/.cache/battery_limit_100_start" 2>/dev/null || true
+        [ -d "$u_home/.local/state" ] && echo 80 > "$u_home/.local/state/battery_charge_limit" 2>/dev/null || true
+    done
+}
+
 set_80() {
     if [ -n "$BAT_DIR" ] && [ -f "$BAT_DIR/charge_control_end_threshold" ]; then
         echo 80 > "$BAT_DIR/charge_control_end_threshold" 2>/dev/null || true
     fi
     echo 80 > "$SYS_STATE" 2>/dev/null || true
-    echo 80 > "$USER_STATE" 2>/dev/null || true
-    rm -f "$USER_OVERRIDE" "$USER_TIMER" "$TARGET_FILE" 2>/dev/null || true
+    clean_user_overrides
+    rm -f "$TARGET_FILE" 2>/dev/null || true
     if [ -f "$RTC_ALARM" ]; then
         echo 0 > "$RTC_ALARM" 2>/dev/null || true
     fi
@@ -55,16 +69,14 @@ case "$ACTION" in
             WAKE_SECS=5400 # Default: 1.5 hours (90 minutes)
 
             # If an override was started recently, calculate remaining time until 2 hours
-            if [ -f "$USER_OVERRIDE" ]; then
-                O_START=$(cat "$USER_OVERRIDE" 2>/dev/null || echo "")
-                if [ -n "$O_START" ]; then
-                    ELAPSED=$((NOW - O_START))
-                    REMAINING=$((7200 - ELAPSED))
-                    if [ "$REMAINING" -gt 1800 ] && [ "$REMAINING" -le 7200 ]; then
-                        WAKE_SECS=$REMAINING
-                    elif [ "$REMAINING" -le 1800 ]; then
-                        WAKE_SECS=1800
-                    fi
+            O_START=$(get_override_start)
+            if [ -n "$O_START" ]; then
+                ELAPSED=$((NOW - O_START))
+                REMAINING=$((7200 - ELAPSED))
+                if [ "$REMAINING" -gt 1800 ] && [ "$REMAINING" -le 7200 ]; then
+                    WAKE_SECS=$REMAINING
+                elif [ "$REMAINING" -le 1800 ]; then
+                    WAKE_SECS=1800
                 fi
             fi
 

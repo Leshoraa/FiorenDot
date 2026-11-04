@@ -53,7 +53,7 @@ alias config='/usr/bin/git --git-dir=/home/hyprlan/.cfg/ --work-tree=/home/hyprl
 # Initialize Starship prompt
 eval "$(starship init zsh)"
 
-export PATH=$PATH:/home/fioren/.spicetify
+export PATH=$PATH:$HOME/.spicetify
 
 # NVM Optimization: Put active node in PATH directly for instant execution, lazy-load nvm on demand
 export NVM_DIR="$HOME/.nvm"

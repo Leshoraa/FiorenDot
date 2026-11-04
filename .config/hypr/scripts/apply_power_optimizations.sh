@@ -104,7 +104,7 @@ StartLimitBurst=0
 [Service]
 Type=oneshot
 Restart=on-failure
-ExecStart=/bin/sh -c 'chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold; touch /etc/asus-battery-charge-threshold && chmod 0666 /etc/asus-battery-charge-threshold; if [ -s /etc/asus-battery-charge-threshold ]; then cat /etc/asus-battery-charge-threshold > /sys/class/power_supply/BATT/charge_control_end_threshold; elif [ -s /home/fioren/.local/state/battery_charge_limit ]; then cat /home/fioren/.local/state/battery_charge_limit > /sys/class/power_supply/BATT/charge_control_end_threshold; else echo 80 > /sys/class/power_supply/BATT/charge_control_end_threshold; fi'
+ExecStart=/bin/sh -c 'chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold; touch /etc/asus-battery-charge-threshold && chmod 0666 /etc/asus-battery-charge-threshold; if [ -s /etc/asus-battery-charge-threshold ]; then cat /etc/asus-battery-charge-threshold > /sys/class/power_supply/BATT/charge_control_end_threshold; else echo 80 > /sys/class/power_supply/BATT/charge_control_end_threshold; fi'
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,434 @@
+diff --git a/scrollOverview.cpp b/scrollOverview.cpp
+index 5c9a055..bc79591 100644
+--- a/scrollOverview.cpp
++++ b/scrollOverview.cpp
+@@ -1503,15 +1503,17 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+ 
+     const auto WINDOWSMOVECONFIG = Config::animationTree()->getAnimationPropertyConfig("windowsMove");
+     const auto WINDOWSMOVEVALUES = WINDOWSMOVECONFIG && WINDOWSMOVECONFIG->pValues ? WINDOWSMOVECONFIG->pValues.lock() : WINDOWSMOVECONFIG;
++    if (!Animation::mgr()->bezierExists("spatialOverviewEase"))
++        Animation::mgr()->addBezierWithName("spatialOverviewEase", Vector2D{0.05, 0.9}, Vector2D{0.1, 1.05});
+     auto       overviewBezier    = ScrollOverview::Config::getAnimationBezier();
+-    if (!Animation::mgr()->bezierExists(overviewBezier))
+-        overviewBezier = WINDOWSMOVEVALUES && Animation::mgr()->bezierExists(WINDOWSMOVEVALUES->internalBezier) ? WINDOWSMOVEVALUES->internalBezier : "default";
++    if (overviewBezier.empty() || overviewBezier == "default" || !Animation::mgr()->bezierExists(overviewBezier))
++        overviewBezier = Animation::mgr()->bezierExists("wind") ? "wind" : (Animation::mgr()->bezierExists("myBezier") ? "myBezier" : "spatialOverviewEase");
+ 
+     overviewAnimationConfig                  = makeShared<Hyprutils::Animation::SAnimationPropertyConfig>();
+     overviewAnimationConfig->overridden      = true;
+     overviewAnimationConfig->internalBezier  = overviewBezier;
+-    overviewAnimationConfig->internalSpeed   = ScrollOverview::Config::getAnimationSpeed();
+-    overviewAnimationConfig->internalEnabled = ScrollOverview::Config::getAnimationEnabled();
++    overviewAnimationConfig->internalSpeed   = ScrollOverview::Config::getAnimationSpeed() > 0 ? ScrollOverview::Config::getAnimationSpeed() : 6.F;
++    overviewAnimationConfig->internalEnabled = 1;
+     overviewAnimationConfig->internalStyle   = "";
+     overviewAnimationConfig->pValues         = overviewAnimationConfig;
+ 
+@@ -2779,14 +2781,17 @@ Vector2D CScrollOverview::workspaceOverviewOffset(size_t workspaceIdx, size_t ac
+     const int   COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
+     const float STAGGER = ScrollOverview::Config::getGridStagger();
+     const auto  gridPoint = [this, COLUMNS, STAGGER](size_t index) {
+-        if (ScrollOverview::Config::getCanvasEnabled()) {
++        if (isCanvasDesktop()) {
+             const auto CELL = canvasCellForWorkspaceIndex(index);
+             const int  ROW  = sc<int>(std::round(CELL.y));
+             return Vector2D{CELL.x + ((ROW & 1) ? STAGGER : 0.F), CELL.y};
+         }
+ 
+-        const int ROW = sc<int>(index / sc<size_t>(COLUMNS));
+-        const int COL = sc<int>(index % sc<size_t>(COLUMNS));
++        size_t slot = index;
++        if (index < images.size() && images[index] && images[index]->pWorkspace && images[index]->pWorkspace->m_id > 0)
++            slot = sc<size_t>(images[index]->pWorkspace->m_id - 1);
++        const int ROW = sc<int>(slot / sc<size_t>(COLUMNS));
++        const int COL = sc<int>(slot % sc<size_t>(COLUMNS));
+         return Vector2D{sc<float>(COL) + ((ROW & 1) ? STAGGER : 0.F), sc<float>(ROW)};
+     };
+ 
+@@ -2816,14 +2821,17 @@ Vector2D CScrollOverview::workspaceOverviewLogicalVectorOffset(size_t workspaceI
+     const int   COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
+     const float STAGGER = ScrollOverview::Config::getGridStagger();
+     const auto  gridPoint = [this, COLUMNS, STAGGER](size_t index) {
+-        if (ScrollOverview::Config::getCanvasEnabled()) {
++        if (isCanvasDesktop()) {
+             const auto CELL = canvasCellForWorkspaceIndex(index);
+             const int  ROW  = sc<int>(std::round(CELL.y));
+             return Vector2D{CELL.x + ((ROW & 1) ? STAGGER : 0.F), CELL.y};
+         }
+ 
+-        const int ROW = sc<int>(index / sc<size_t>(COLUMNS));
+-        const int COL = sc<int>(index % sc<size_t>(COLUMNS));
++        size_t slot = index;
++        if (index < images.size() && images[index] && images[index]->pWorkspace && images[index]->pWorkspace->m_id > 0)
++            slot = sc<size_t>(images[index]->pWorkspace->m_id - 1);
++        const int ROW = sc<int>(slot / sc<size_t>(COLUMNS));
++        const int COL = sc<int>(slot % sc<size_t>(COLUMNS));
+         return Vector2D{sc<float>(COL) + ((ROW & 1) ? STAGGER : 0.F), sc<float>(ROW)};
+     };
+ 
+@@ -2870,7 +2878,7 @@ void CScrollOverview::rebuildWorkspaceImages() {
+ 
+     std::sort(images.begin(), images.end(), [](const auto& a, const auto& b) { return a->pWorkspace->m_id < b->pWorkspace->m_id; });
+ 
+-    if (ScrollOverview::Config::getCanvasEnabled()) {
++    if (isCanvasDesktop()) {
+         const int COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
+         size_t    nextSlot = 0;
+         for (const auto& image : images) {
+@@ -2894,6 +2902,8 @@ void CScrollOverview::rebuildWorkspaceImages() {
+ 
+             g_canvasWorkspaceCells[image->pWorkspace->m_id] = candidate;
+         }
++    } else {
++        g_canvasWorkspaceCells.clear();
+     }
+ 
+     if (images.empty()) {
+@@ -5093,13 +5103,20 @@ bool CScrollOverview::forwardCanvasPointerAxis(const IPointer::SAxisEvent& event
+ }
+ 
+ Vector2D CScrollOverview::canvasCellForWorkspaceIndex(size_t workspaceIdx) const {
++    const int COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
++    if (!isCanvasDesktop()) {
++        size_t slot = workspaceIdx;
++        if (workspaceIdx < images.size() && images[workspaceIdx] && images[workspaceIdx]->pWorkspace && images[workspaceIdx]->pWorkspace->m_id > 0)
++            slot = sc<size_t>(images[workspaceIdx]->pWorkspace->m_id - 1);
++        return Vector2D{sc<float>(slot % sc<size_t>(COLUMNS)), sc<float>(slot / sc<size_t>(COLUMNS))};
++    }
++
+     if (workspaceIdx >= images.size() || !images[workspaceIdx] || !images[workspaceIdx]->pWorkspace)
+         return {};
+ 
+     if (const auto IT = g_canvasWorkspaceCells.find(images[workspaceIdx]->pWorkspace->m_id); IT != g_canvasWorkspaceCells.end())
+         return IT->second;
+ 
+-    const int COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
+     return Vector2D{sc<float>(workspaceIdx % sc<size_t>(COLUMNS)), sc<float>(workspaceIdx / sc<size_t>(COLUMNS))};
+ }
+ 
+@@ -6977,65 +6994,15 @@ void CScrollOverview::restoreForcedLayerVisibility() {
+ }
+ 
+ void CScrollOverview::applyWorkspaceAnimationOverrides() {
+-    if (!sharedStateOwner || workspaceAnimationsOverridden)
+-        return;
+-
+-    savedWorkspaceAnimationConfigs.clear();
+-
+-    for (const std::string name : {"workspaces", "workspacesIn", "workspacesOut"}) {
+-        const auto CONFIG = Config::animationTree()->getAnimationPropertyConfig(name);
+-        if (!CONFIG)
+-            continue;
+-
+-        auto& saved   = savedWorkspaceAnimationConfigs.emplace_back();
+-        saved.name    = name;
+-        saved.config  = *CONFIG;
+-    }
+-
+-    for (const auto& saved : savedWorkspaceAnimationConfigs)
+-        Config::animationTree()->setConfigForNode(saved.name, false, 1.F, "default", "");
+-
+-    workspaceAnimationsOverridden = true;
++    return;
+ }
+ 
+ void CScrollOverview::restoreWorkspaceAnimationOverrides() {
+-    if (!workspaceAnimationsOverridden)
+-        return;
+-
+-    const auto propagateAnimationValues = [](const SP<Hyprutils::Animation::SAnimationPropertyConfig>& parent, auto&& self) -> void {
+-        if (!parent)
+-            return;
+-
+-        for (const auto& [name, animation] : Config::animationTree()->getAnimationConfig()) {
+-            if (!animation || animation->overridden || animation->pParentAnimation != parent)
+-                continue;
+-
+-            animation->pValues = parent->pValues;
+-            self(animation, self);
+-        }
+-    };
+-
+-    for (const auto& saved : savedWorkspaceAnimationConfigs) {
+-        const auto CONFIG = Config::animationTree()->getAnimationPropertyConfig(saved.name);
+-        if (!CONFIG)
+-            continue;
+-
+-        *CONFIG = saved.config;
+-        propagateAnimationValues(CONFIG, propagateAnimationValues);
+-    }
+-
+-    savedWorkspaceAnimationConfigs.clear();
+-    workspaceAnimationsOverridden = false;
++    return;
+ }
+ 
+ void CScrollOverview::forceWorkspaceAlphaVisible() {
+-    for (const auto& workspace : State::workspaceState()->workspaces()) {
+-        if (!workspace || !workspace->m_alpha)
+-            continue;
+-
+-        workspace->m_alpha->setValueAndWarp(1.F);
+-        *workspace->m_alpha = 1.F;
+-    }
++    return;
+ }
+ 
+ void CScrollOverview::forceWorkspaceWindowsDecoRecalc(const PHLWORKSPACE& workspace) {
+@@ -8619,25 +8586,26 @@ void CScrollOverview::close() {
+     const auto finishClose = [&](const PHLWORKSPACE& finalWorkspace, const PHLWINDOW& finalWindow) {
+         emitFullscreenVisibilityState(getOverviewFullscreenVisibilityWindow(finalWorkspace, finalWindow), false);
+ 
+-        if (!ScrollOverview::Config::getValue<int>("animations:enabled")) {
+-            forceWorkspaceWindowsDecoRecalc(finalWorkspace ? finalWorkspace : MONITOR->m_activeWorkspace);
+-            damage();
++        if (!ScrollOverview::Config::getAnimationEnabled()) {
++            removeOverview(this);
++            return;
+         }
+ 
++        syncAnimationConfig();
++
+         if (isCanvasDesktop()) {
+-            if (transitionProgress->value() <= 0.001F && !transitionProgress->isBeingAnimated()) {
+-                *scale = 1.F;
++            *scale = 1.F;
++            *transitionProgress = 0.F;
++            transitionProgress->setCallbackOnEnd([this](auto) { removeOverview(this); });
++        } else {
++            if (std::abs(scale->value() - 1.F) < 0.005F) {
+                 removeOverview(this);
+                 return;
+             }
+-
+-            transitionProgress->setCallbackOnEnd([this](auto) { removeOverview(this); });
+             *scale = 1.F;
+-            *transitionProgress = 0.F;
+-        } else {
+             scale->setCallbackOnEnd([this](auto) { removeOverview(this); });
+-            *scale = 1.F;
+         }
++        damage();
+     };
+ 
+     if (!closeOnWindow && (!SELECTEDWORKSPACE || SELECTEDWORKSPACE == MONITOR->m_activeWorkspace)) {
+@@ -8648,122 +8616,40 @@ void CScrollOverview::close() {
+ 
+     closeOnWindow = getOverviewWindowToShow(closeOnWindow.lock());
+ 
+-    if (SELECTEDWORKSPACE && commitCanvasViewport(viewportCurrentWorkspace)) {
+-        const auto FINALWINDOW = closeOnWindow && closeOnWindow->m_workspace == SELECTEDWORKSPACE ? getOverviewWindowToShow(closeOnWindow.lock()) : PHLWINDOW{};
+-
+-        if (SELECTEDWORKSPACE != MONITOR->m_activeWorkspace)
+-            MONITOR->changeWorkspace(SELECTEDWORKSPACE, false, true, true);
++    if (SELECTEDWORKSPACE)
++        commitCanvasViewport(viewportCurrentWorkspace);
+ 
+-        viewOffset->setValueAndWarp(Vector2D{});
+-        *viewOffset                = Vector2D{};
+-        startedOn                  = SELECTEDWORKSPACE;
+-        focusSyncedFromWorkspaceID = WORKSPACE_INVALID;
++    const auto FINALWINDOW    = getOverviewWindowToShow(closeOnWindow.lock());
++    const auto FINALWORKSPACE = FINALWINDOW ? FINALWINDOW->m_workspace : (SELECTEDWORKSPACE ? SELECTEDWORKSPACE : MONITOR->m_activeWorkspace);
+ 
+-        if (ACTIVATESELECTION && FINALWINDOW)
+-            Desktop::focusState()->fullWindowFocus(FINALWINDOW, Desktop::FOCUS_REASON_DESKTOP_STATE_CHANGE);
++    size_t sourceIdx = activeWorkspaceIndex();
++    size_t targetIdx = sourceIdx;
+ 
+-        finishClose(SELECTEDWORKSPACE, FINALWINDOW);
+-        return;
++    for (size_t workspaceIdx = 0; workspaceIdx < images.size(); ++workspaceIdx) {
++        if (!images[workspaceIdx] || !images[workspaceIdx]->pWorkspace)
++            continue;
++        if (images[workspaceIdx]->pWorkspace == FINALWORKSPACE)
++            targetIdx = workspaceIdx;
+     }
+ 
+-    if (closeOnWindow && focusSyncedFromWorkspaceID != WORKSPACE_INVALID) {
+-        const auto FINALWORKSPACE = closeOnWindow->m_workspace;
+-        size_t     sourceIdx      = images.size();
+-        size_t     targetIdx      = images.size();
+-
+-        for (size_t workspaceIdx = 0; workspaceIdx < images.size(); ++workspaceIdx) {
+-            if (!images[workspaceIdx] || !images[workspaceIdx]->pWorkspace)
+-                continue;
+-
+-            if (images[workspaceIdx]->pWorkspace->m_id == focusSyncedFromWorkspaceID)
+-                sourceIdx = workspaceIdx;
+-            if (images[workspaceIdx]->pWorkspace == FINALWORKSPACE)
+-                targetIdx = workspaceIdx;
+-        }
+-
+-        if (sourceIdx < images.size() && targetIdx < images.size()) {
+-            if (FINALWORKSPACE != MONITOR->m_activeWorkspace)
+-                MONITOR->changeWorkspace(FINALWORKSPACE, false, true, true);
+-
+-            if (ACTIVATESELECTION)
+-                Desktop::focusState()->fullWindowFocus(closeOnWindow.lock(), Desktop::FOCUS_REASON_DESKTOP_STATE_CHANGE);
++    if (FINALWORKSPACE && FINALWORKSPACE != MONITOR->m_activeWorkspace)
++        MONITOR->changeWorkspace(FINALWORKSPACE, false, true, true);
+ 
+-            startedOn                = FINALWORKSPACE;
+-            viewportCurrentWorkspace = targetIdx;
++    if (ACTIVATESELECTION && FINALWINDOW)
++        Desktop::focusState()->fullWindowFocus(FINALWINDOW, Desktop::FOCUS_REASON_DESKTOP_STATE_CHANGE);
+ 
+-            const auto FINALPITCH = getWorkspaceLogicalPitch(MONITOR, 1.F, layout);
+-            viewOffset->setValueAndWarp(workspaceOverviewLogicalVectorOffset(sourceIdx, targetIdx, FINALPITCH));
+-            *viewOffset = Vector2D{};
+-
+-            focusSyncedFromWorkspaceID = WORKSPACE_INVALID;
+-
+-            const auto FINALWINDOW = getOverviewWindowToShow(closeOnWindow.lock());
+-            finishClose(FINALWORKSPACE, FINALWINDOW);
+-            return;
+-        }
++    if (FINALWORKSPACE) {
++        startedOn                = FINALWORKSPACE;
++        viewportCurrentWorkspace = targetIdx;
+     }
+ 
+-    if (!closeOnWindow) {
+-        const auto ACTIVEIDX = activeWorkspaceIndex();
+-        const auto FINALPITCH = getWorkspaceLogicalPitch(MONITOR, 1.F, layout);
+-        *viewOffset = Vector2D{};
+-
+-        for (size_t workspaceIdx = 0; workspaceIdx < images.size(); ++workspaceIdx) {
+-            if (!images[workspaceIdx] || images[workspaceIdx]->pWorkspace != SELECTEDWORKSPACE)
+-                continue;
+-
+-            *viewOffset = workspaceOverviewLogicalVectorOffset(workspaceIdx, ACTIVEIDX, FINALPITCH);
+-            break;
+-        }
+-
+-        if (SELECTEDWORKSPACE && SELECTEDWORKSPACE != MONITOR->m_activeWorkspace)
+-            MONITOR->changeWorkspace(SELECTEDWORKSPACE, false, true, true);
+-    } else if (closeOnWindow == Desktop::focusState()->window() && closeOnWindow->m_workspace == MONITOR->m_activeWorkspace) {
+-        if (focusSyncedFromWorkspaceID != WORKSPACE_INVALID) {
+-            const auto ACTIVEIDX   = activeWorkspaceIndex();
+-            const auto FINALPITCH = getWorkspaceLogicalPitch(MONITOR, 1.F, layout);
+-
+-            for (size_t workspaceIdx = 0; workspaceIdx < images.size(); ++workspaceIdx) {
+-                if (!images[workspaceIdx] || !images[workspaceIdx]->pWorkspace || images[workspaceIdx]->pWorkspace->m_id != focusSyncedFromWorkspaceID)
+-                    continue;
+-
+-                viewOffset->setValueAndWarp(workspaceOverviewLogicalVectorOffset(workspaceIdx, ACTIVEIDX, FINALPITCH));
+-                break;
+-            }
+-        }
+-
+-        *viewOffset = Vector2D{};
+-    } else {
+-
+-        if (closeOnWindow->m_workspace != MONITOR->m_activeWorkspace)
+-            MONITOR->changeWorkspace(closeOnWindow->m_workspace, false, true, true);
+-
+-        if (ACTIVATESELECTION)
+-            Desktop::focusState()->fullWindowFocus(closeOnWindow.lock(), Desktop::FOCUS_REASON_DESKTOP_STATE_CHANGE);
+-
+-        const auto ACTIVEIDX = activeWorkspaceIndex();
+-        const auto FINALPITCH = getWorkspaceLogicalPitch(MONITOR, 1.F, layout);
+-        bool       found      = false;
+-        const auto selectedWindow = getOverviewWindowToShow(closeOnWindow.lock());
+-        for (size_t workspaceIdx = 0; workspaceIdx < images.size(); ++workspaceIdx) {
+-            const auto& wimg = images[workspaceIdx];
+-            for (const auto& windowRef : wimg->windows) {
+-                const auto window = getOverviewWindowToShow(windowRef.lock());
+-                if (window == selectedWindow && window) {
+-                    *viewOffset = workspaceOverviewLogicalVectorOffset(workspaceIdx, ACTIVEIDX, FINALPITCH);
+-                    found = true;
+-                    break;
+-                }
+-            }
+-            if (found)
+-                break;
+-        }
+-    }
++    const auto FINALPITCH = getWorkspaceLogicalPitch(MONITOR, 1.F, layout);
++    if (sourceIdx != targetIdx)
++        viewOffset->setValueAndWarp(workspaceOverviewLogicalVectorOffset(sourceIdx, targetIdx, FINALPITCH));
++    *viewOffset = Vector2D{};
+ 
+     focusSyncedFromWorkspaceID = WORKSPACE_INVALID;
+ 
+-    const auto FINALWINDOW    = getOverviewWindowToShow(closeOnWindow.lock());
+-    const auto FINALWORKSPACE = FINALWINDOW ? FINALWINDOW->m_workspace : SELECTEDWORKSPACE;
+     finishClose(FINALWORKSPACE, FINALWINDOW);
+ }
+ 
+@@ -8894,6 +8780,7 @@ void CScrollOverview::followLinkedCamera() {
+ // at rest at 100%; moving a window to a workspace must not move it on the
+ // canvas, so it goes back exactly where it was.
+ void CScrollOverview::syncCanvasWindowScreens() {
++    return; // DISABLED: Prevent windows from ever jumping across workspaces!
+     const auto MONITOR = pMonitor.lock();
+     if (!MONITOR || !isCanvasDesktop() || closing || canvasNavigationActive || !canvasAtRestZoom() || viewOffset->isBeingAnimated() || scale->isBeingAnimated() ||
+         dragActiveWindow || g_pointerGrabOverview || !MONITOR->m_activeWorkspace || MONITOR->m_activeWorkspace->m_isSpecialWorkspace)
+@@ -9023,7 +8910,11 @@ void CScrollOverview::onWorkspaceChange() {
+         workspaceInsertFadeProgress->setValueAndWarp(0.F);
+         *workspaceInsertProgress = 1.F;
+         *workspaceInsertFadeProgress = 1.F;
+-        viewOffset->setValueAndWarp(Vector2D{});
++        if (GESTURESETTLE)
++            viewOffset->setValueAndWarp(axisOffsetVector(sc<float>(GESTURESETTLEOFFSET), layout));
++        else
++            viewOffset->setValueAndWarp(
++                workspaceOverviewLogicalVectorOffset(previousActiveIdx, viewportCurrentWorkspace, getWorkspaceLogicalPitch(pMonitor.lock(), scale->value(), layout)));
+         *viewOffset = Vector2D{};
+     } else {
+         workspaceInsertTransition.active                 = false;
+@@ -9184,14 +9075,16 @@ void CScrollOverview::syncAnimationConfig() {
+ 
+     const auto WINDOWSMOVECONFIG = Config::animationTree()->getAnimationPropertyConfig("windowsMove");
+     const auto WINDOWSMOVEVALUES = WINDOWSMOVECONFIG && WINDOWSMOVECONFIG->pValues ? WINDOWSMOVECONFIG->pValues.lock() : WINDOWSMOVECONFIG;
++    if (!Animation::mgr()->bezierExists("spatialOverviewEase"))
++        Animation::mgr()->addBezierWithName("spatialOverviewEase", Vector2D{0.05, 0.9}, Vector2D{0.1, 1.05});
+     auto       overviewBezier    = ScrollOverview::Config::getAnimationBezier();
+-    if (!Animation::mgr()->bezierExists(overviewBezier))
+-        overviewBezier = WINDOWSMOVEVALUES && Animation::mgr()->bezierExists(WINDOWSMOVEVALUES->internalBezier) ? WINDOWSMOVEVALUES->internalBezier : "default";
++    if (overviewBezier.empty() || overviewBezier == "default" || !Animation::mgr()->bezierExists(overviewBezier))
++        overviewBezier = Animation::mgr()->bezierExists("wind") ? "wind" : (Animation::mgr()->bezierExists("myBezier") ? "myBezier" : "spatialOverviewEase");
+ 
+-    overviewAnimationConfig->internalSpeed   = ScrollOverview::Config::getAnimationSpeed();
+-    overviewAnimationConfig->internalEnabled = ScrollOverview::Config::getAnimationEnabled();
+-    if (Animation::mgr()->bezierExists(overviewBezier))
+-        overviewAnimationConfig->internalBezier = overviewBezier;
++    overviewAnimationConfig->internalSpeed   = ScrollOverview::Config::getAnimationSpeed() > 0 ? ScrollOverview::Config::getAnimationSpeed() : 6.F;
++    overviewAnimationConfig->internalEnabled = 1;
++    overviewAnimationConfig->internalBezier  = overviewBezier;
++    overviewAnimationConfig->pValues         = overviewAnimationConfig;
+ }
+ 
+ static float hyprlerp(const float& from, const float& to, const float perc) {
+@@ -9902,9 +9795,11 @@ void CScrollOverview::panCamera(const Vector2D& direction) {
+ 
+ void CScrollOverview::zoomCameraBy(float factor) {
+     const auto MONITOR = pMonitor.lock();
+-    if (!isCanvasDesktop() || !MONITOR)
++    if (!MONITOR)
+         return;
+-    const float ZOOM = std::clamp(scale->goal() * factor, ScrollOverview::Config::getCanvasMinZoom(), ScrollOverview::Config::getCanvasMaxZoom());
++    const float minZ = isCanvasDesktop() ? ScrollOverview::Config::getCanvasMinZoom() : 0.15F;
++    const float maxZ = isCanvasDesktop() ? ScrollOverview::Config::getCanvasMaxZoom() : 2.5F;
++    const float ZOOM = std::clamp(scale->goal() * factor, minZ, maxZ);
+     *scale           = ZOOM;
+     markBlurDirty();
+     damage();
+@@ -10815,7 +10710,7 @@ bool CScrollOverview::canvasRedo() {
+ }
+ 
+ bool CScrollOverview::flightDeckAction(const std::string& action) {
+-    if (!isCanvasDesktop() || closing || !pMonitor) return false;
++    if (closing || !pMonitor) return false;
+     const auto m = pMonitor.lock();
+     if (action == "back") {
+         if (SpatialOverview::Experiments::on(ECanvasExperiment::Landing) || SpatialOverview::Experiments::on(ECanvasExperiment::AltTab)) {
+@@ -10871,7 +10766,6 @@ bool CScrollOverview::flightDeckAction(const std::string& action) {
+         return true;
+     }
+     if (action == "zoom in" || action == "zoom out") {
+-        if (!canvasNavigationActive) toggleCanvasNavigation();
+         zoomCameraBy(action == "zoom in" ? 1.25F : 0.8F);
+         return true;
+     }

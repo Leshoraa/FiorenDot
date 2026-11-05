@@ -73,6 +73,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) with Cava visualizer |
 | **Notification Center** | SwayNC | Notification daemon, control center, and quick setting toggles |
 | **Overview** | Quickshell | Native workspace overview with live window previews |
+| **Spatial Overview** | Phantomat (patched) | Spatial overview & zoomable workspace manager |
 | **App Launcher** | Rofi-wayland | Application menu, RofiBeats, wallpaper picker, calculator |
 | **Terminals** | Kitty / Ghostty | GPU-accelerated terminal emulators with daemon mode |
 | **Shell & Prompt** | Zsh + Oh My Zsh + Starship | Rich completions, autosuggestions, syntax highlighting |
@@ -108,6 +109,15 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + Alt + Touchpad Drag`| Pan canvas via multi-touch touchpad gestures (no click needed) |
 | `Super + Alt + Arrow Keys` | Seamlessly navigate & fly focus to nearest spatial window |
 | `Super + Alt + Space` | Pseudo-fullscreen, scale, and center target canvas window |
+
+### Spatial Overview (Phantomat)
+| Shortcut | Action |
+| :--- | :--- |
+| `Super + Ctrl + G` | Toggle Spatial Overview (zoom out, grid layout, type-to-search & land) |
+| `Super + =` / `Super + +` | Zoom in overview camera |
+| `Super + -` | Zoom out overview camera |
+| `Super + 0` | Reset / fit all workspaces in overview |
+| `Super + Shift + A` | Tidy and arrange windows on grid |
 
 ### Applications & Launchers
 | Shortcut | Action |
@@ -229,7 +239,7 @@ FiorenDot/
 ├── .local/
 │   ├── bin/                # Custom helper binaries & scripts
 │   └── share/easyeffects/  # Tuned audio DSP presets (Harman Kardon, Dolby)
-├── system/                 # Kernel sysfs, udev rules, wvkbd patch, zram
+├── system/                 # Kernel sysfs, udev rules, wvkbd & phantomat patches, zram
 ├── wallpapers/             # Curated aesthetic wallpapers
 ├── install.sh              # Interactive setup and deployment script
 └── README.md               # System documentation & reference

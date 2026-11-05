@@ -24,15 +24,14 @@ if [ -f "$DIR/phantomat-fixes.patch" ]; then
 fi
 
 echo "==> Compiling Phantomat plugin..."
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release -j"$(nproc)"
+make -j"$(nproc)"
 
 echo "==> Installing to $TARGET_DIR/spatialoverview.so..."
 mkdir -p "$TARGET_DIR"
-cp -f build/libspatialoverview.so "$TARGET_DIR/spatialoverview.so"
+cp -f spatialoverview.so "$TARGET_DIR/spatialoverview.so"
 strip --strip-unneeded "$TARGET_DIR/spatialoverview.so" 2>/dev/null || true
 
-echo "==> Reloading Hyprland plugins..."
+echo "==> Reloading Hyprland..."
 hyprctl reload || true
 
 echo "==> Done! Installed: $TARGET_DIR/spatialoverview.so"

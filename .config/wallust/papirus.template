@@ -1,3 +1,4 @@
 #!/bin/sh
 papirus-folders -c --hex {{color4}} -t Papirus-Dark
-thunar -q
+pkill -x pcmanfm-qt 2>/dev/null || true
+pkill -x thunar 2>/dev/null || true

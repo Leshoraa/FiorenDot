@@ -60,6 +60,9 @@ sddm_pixie.target = '/usr/share/sddm/themes/pixie/theme.conf'
 preview.template = 'preview-theme.conf'
 preview.target = '~/.config/wallust/preview-theme.conf'
 
+papirus.template = 'papirus.template'
+papirus.target = '~/.config/wallust/papirus.template'
+
 #macchina.template = 'colors-macchina.toml'
 #macchina.target = '~/.config/macchina/themes/wallust.toml'
 
@@ -77,5 +80,6 @@ hyprland = 'hyprctl reload 2>/dev/null || true'
 cava = 'pkill -USR1 cava 2>/dev/null || true'
 rofi = 'pkill -x rofi 2>/dev/null || true'
 sddm = 'cp -f ~/.config/wallust/sddm-theme.conf /usr/share/sddm/themes/pixie/theme.conf 2>/dev/null || true'
+papirus = 'sh ~/.config/wallust/papirus.template 2>/dev/null || true'
 
 

@@ -11,6 +11,7 @@ Matches the hide/show behavior of custom/title:
 import os
 import sys
 import time
+import json
 import signal
 import atexit
 import tempfile
@@ -30,6 +31,23 @@ running = True
 state_lock = threading.Lock()
 current_status = "Stopped"
 status_changed = threading.Event()
+is_fullscreen = False
+
+def check_fullscreen():
+    try:
+        res = subprocess.run(
+            ["hyprctl", "activewindow", "-j"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=0.2
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            data = json.loads(res.stdout)
+            return bool(data.get("fullscreen", 0) > 0 or data.get("fullscreenClient", 0) > 0)
+    except Exception:
+        pass
+    return False
 
 def get_playerctl_status():
     try:
@@ -83,8 +101,11 @@ def player_monitor():
             time.sleep(1)
 
 def periodic_verifier():
-    global current_status, running
+    global current_status, running, is_fullscreen
     last_manual = os.path.exists(MANUAL_PAUSE_FILE)
+    last_fs = check_fullscreen()
+    with state_lock:
+        is_fullscreen = last_fs
     while running:
         time.sleep(0.5)
         cur_manual = os.path.exists(MANUAL_PAUSE_FILE)
@@ -92,6 +113,13 @@ def periodic_verifier():
             last_manual = cur_manual
             status_changed.set()
         
+        cur_fs = check_fullscreen()
+        if cur_fs != last_fs:
+            last_fs = cur_fs
+            with state_lock:
+                is_fullscreen = cur_fs
+            status_changed.set()
+
         st = get_playerctl_status()
         with state_lock:
             if current_status != st:
@@ -118,15 +146,16 @@ def main():
     except Exception:
         pass
 
-    # Unique temp cava config
+    # Unique temp cava config (PipeWire native + low idle sleep)
     tmp_conf = tempfile.NamedTemporaryFile(mode="w", prefix="waybar-cava2-", suffix=".conf", delete=False)
     conf_path = tmp_conf.name
     tmp_conf.write("""[general]
-framerate = 25
+framerate = 20
 bars = 10
+sleep_timer = 2
 
 [input]
-method = pulse
+method = pipewire
 source = auto
 
 [output]
@@ -184,15 +213,34 @@ ascii_max_range = 7
     t2 = threading.Thread(target=periodic_verifier, daemon=True)
     t2.start()
 
-    last_mode = None  # "playing", "paused", "hidden"
+    last_mode = None  # "playing", "paused", "hidden", "fullscreen"
 
     while running:
         with state_lock:
             st = current_status
+            fs = is_fullscreen
 
         manual_pause = os.path.exists(MANUAL_PAUSE_FILE)
 
-        if st == "Playing":
+        if fs:
+            # Fullscreen window active -> Waybar is hidden, pause cava to save CPU & battery
+            if last_mode != "fullscreen":
+                if cava_proc and cava_proc.poll() is None:
+                    cava_proc.terminate()
+                    cava_proc.wait(timeout=0.1)
+                    cava_proc = None
+                try:
+                    sys.stdout.write('{"text":""}\n')
+                    sys.stdout.flush()
+                except BrokenPipeError:
+                    cleanup()
+                    sys.exit(0)
+                last_mode = "fullscreen"
+
+            status_changed.wait(timeout=0.5)
+            status_changed.clear()
+
+        elif st == "Playing":
             if last_mode != "playing":
                 if cava_proc is None or cava_proc.poll() is not None:
                     cava_proc = subprocess.Popen(

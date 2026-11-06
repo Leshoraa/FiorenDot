@@ -30,13 +30,17 @@ fi
 ADDR=$(echo "$ACTIVE_WIN" | jq -r '.address // empty')
 IS_FLOATING=$(echo "$ACTIVE_WIN" | jq -r '.floating // false')
 IS_PINNED=$(echo "$ACTIVE_WIN" | jq -r '.pinned // false')
+WIN_CLASS=$(echo "$ACTIVE_WIN" | jq -r '.initialClass // .class // "Window"')
 WIN_TITLE=$(echo "$ACTIVE_WIN" | jq -r '.title // "Window"')
 
 if [ -z "$ADDR" ]; then
     exit 0
 fi
 
-# Truncate title if too long for clean notification
+# Format app name (capitalize first letter, e.g. kitty -> Kitty)
+APP_NAME="${WIN_CLASS^}"
+
+# Truncate title if needed
 if [ ${#WIN_TITLE} -gt 35 ]; then
     WIN_TITLE="${WIN_TITLE:0:32}..."
 fi
@@ -46,17 +50,17 @@ if [ "$IS_FLOATING" = "true" ]; then
     hyprctl dispatch pin "address:$ADDR"
     
     if [ "$IS_PINNED" = "true" ]; then
-        notify-send -u low -i "$notif_img/note.png" \
+        notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
             "Window Unpinned" \
-            "$WIN_TITLE"
+            "$APP_NAME • Unpinned from workspaces"
     else
-        notify-send -u low -i "$notif_img/ja.png" \
+        notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
-            "Window Pinned" \
-            "$WIN_TITLE"
+            "📌 Window Pinned" \
+            "$APP_NAME • Sticky across all workspaces"
     fi
 else
     if [ "$AUTO_FLOAT" = true ]; then
@@ -64,16 +68,16 @@ else
         hyprctl dispatch togglefloating "address:$ADDR"
         sleep 0.05
         hyprctl dispatch pin "address:$ADDR"
-        notify-send -u low -i "$notif_img/ja.png" \
+        notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
-            "Window Pinned" \
-            "$WIN_TITLE"
+            "📌 Window Pinned" \
+            "$APP_NAME • Sticky across all workspaces"
     else
-        notify-send -u normal -i "$notif_img/error.png" \
+        notify-send -u normal \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
             "Window Not Floating" \
-            "Enable floating first"
+            "Enable floating first (Super + V)"
     fi
 fi

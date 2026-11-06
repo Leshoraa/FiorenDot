@@ -37,12 +37,31 @@ if [ -z "$ADDR" ]; then
     exit 0
 fi
 
-# Format app name (capitalize first letter, e.g. kitty -> Kitty)
-APP_NAME="${WIN_CLASS^}"
+# Format application name
+case "${WIN_CLASS,,}" in
+    zen*|firefox*) APP_NAME="Zen" ;;
+    kitty) APP_NAME="Kitty" ;;
+    thunar) APP_NAME="Thunar" ;;
+    code*) APP_NAME="VS Code" ;;
+    *) APP_NAME="${WIN_CLASS^}" ;;
+esac
 
-# Truncate title if needed
-if [ ${#WIN_TITLE} -gt 35 ]; then
-    WIN_TITLE="${WIN_TITLE:0:32}..."
+# Clean up trailing app names from title if already present
+CLEAN_TITLE="$WIN_TITLE"
+CLEAN_TITLE="${CLEAN_TITLE% — Zen Browser}"
+CLEAN_TITLE="${CLEAN_TITLE% - Zen Browser}"
+CLEAN_TITLE="${CLEAN_TITLE% — Mozilla Firefox}"
+CLEAN_TITLE="${CLEAN_TITLE% - Mozilla Firefox}"
+
+# Truncate content title if too long for clean notification popup
+if [ ${#CLEAN_TITLE} -gt 50 ]; then
+    CLEAN_TITLE="${CLEAN_TITLE:0:47}..."
+fi
+
+if [ -n "$CLEAN_TITLE" ] && [ "$CLEAN_TITLE" != "$APP_NAME" ]; then
+    NOTIF_BODY="$APP_NAME - $CLEAN_TITLE"
+else
+    NOTIF_BODY="$APP_NAME"
 fi
 
 if [ "$IS_FLOATING" = "true" ]; then
@@ -54,13 +73,13 @@ if [ "$IS_FLOATING" = "true" ]; then
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
             "Window Unpinned" \
-            "$APP_NAME • Unpinned from workspaces"
+            "$NOTIF_BODY"
     else
         notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
-            "📌 Window Pinned" \
-            "$APP_NAME • Sticky across all workspaces"
+            "Window Pinned" \
+            "$NOTIF_BODY"
     fi
 else
     if [ "$AUTO_FLOAT" = true ]; then
@@ -71,8 +90,8 @@ else
         notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
-            "📌 Window Pinned" \
-            "$APP_NAME • Sticky across all workspaces"
+            "Window Pinned" \
+            "$NOTIF_BODY"
     else
         notify-send -u normal \
             -h string:x-canonical-private-synchronous:hypr-pin \

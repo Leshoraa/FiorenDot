@@ -97,6 +97,6 @@ else
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \
             "Window Not Floating" \
-            "Enable floating first (Super + V)"
+            "Enable floating first"
     fi
 fi

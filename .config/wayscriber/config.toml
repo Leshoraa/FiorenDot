@@ -7,8 +7,11 @@ show_capabilities_warning = false
 show_toolbar_hint = false
 show_floating_badge = false
 
+[ui.toolbar]
+show_preset_toasts = false
+
 [keybindings]
 exit = ["Escape", "Ctrl+Q"]
-clear_canvas = ["E", "c", "C"]
-undo = ["Ctrl+Z", "z", "Z"]
+clear_canvas = ["E", "C"]
+undo = ["Ctrl+Z"]
 redo = ["Ctrl+Shift+Z", "Ctrl+Y"]

@@ -19,14 +19,14 @@ case "$ACTION" in
             notify-send -u low \
                 -h string:x-canonical-private-synchronous:gromit \
                 -a "Gromit-MPX" \
-                "✏️ Screen Drawing" \
+                "Screen Drawing" \
                 "Toggled annotation mode"
         else
             gromit-mpx --active &
             notify-send -u low \
                 -h string:x-canonical-private-synchronous:gromit \
                 -a "Gromit-MPX" \
-                "✏️ Screen Drawing Active" \
+                "Screen Drawing Active" \
                 "Draw with mouse/stylus • Super+Shift+C to clear"
         fi
         ;;
@@ -36,7 +36,7 @@ case "$ACTION" in
             notify-send -u low \
                 -h string:x-canonical-private-synchronous:gromit \
                 -a "Gromit-MPX" \
-                "🧹 Annotations Cleared" \
+                "Annotations Cleared" \
                 "All screen drawings removed"
         fi
         ;;

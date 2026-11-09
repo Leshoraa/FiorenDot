@@ -1,0 +1,13 @@
+[Unit]
+Description=Wayscriber - Screen annotation tool for Wayland
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/home/fioren/.local/bin/wayscriber --daemon --no-tray
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,7 +1,0 @@
-#!/bin/sh
-# Sync Papirus folder color with wallust color4 (requires sudo for system icon theme)
-# Run once manually: sudo papirus-folders -C blue -t Papirus-Dark
-# Then wallust hook will call this automatically on wallpaper change
-papirus-folders -C blue -t Papirus-Dark 2>/dev/null || sudo papirus-folders -C blue -t Papirus-Dark 2>/dev/null || true
-pkill -x pcmanfm-qt 2>/dev/null || true
-pkill -x thunar 2>/dev/null || true

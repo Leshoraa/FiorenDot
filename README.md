@@ -113,7 +113,7 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 ### Spatial Overview (Phantomat)
 | Shortcut | Action |
 | :--- | :--- |
-| `Super + Alt + G` | Toggle Spatial Overview (zoom out, grid layout, type-to-search & land) |
+| `Alt + Tab` | Toggle Spatial Overview (zoom out, grid layout, type-to-search & land) |
 | `Super + =` / `Super + +` | Zoom in overview camera |
 | `Super + -` | Zoom out overview camera |
 | `Super + 0` | Reset / fit all workspaces in overview |

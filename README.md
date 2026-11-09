@@ -129,7 +129,6 @@ Transforms your workspace into an unbounded infinite 2D canvas:
 | `Super + Shift + N` | Toggle Do Not Disturb (DND) for notifications / gaming |
 | `Super + Shift + O` | Screen OCR / Snip-to-Text directly to clipboard |
 | `Super + Shift + D` | Toggle on-screen annotation layer (Wayscriber) |
-| `Super + Shift + C` | Toggle drawing click-through passthrough (Wayscriber) |
 | `Super + Shift + P` | Quick Project Launcher (Enter: Codium, Shift+Enter: Kitty) |
 | `Super + K` | Toggle tablet mode virtual keyboard auto-show |
 | `Super + Shift + T` | Toggle touchscreen input on / off |

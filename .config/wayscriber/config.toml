@@ -1,0 +1,14 @@
+# Wayscriber configuration for FiorenDot
+config_revision = 3
+
+[ui]
+show_onboarding_hints = false
+show_capabilities_warning = false
+show_toolbar_hint = false
+show_floating_badge = false
+
+[keybindings]
+exit = ["Escape", "Ctrl+Q"]
+clear_canvas = ["E", "c", "C"]
+undo = ["Ctrl+Z", "z", "Z"]
+redo = ["Ctrl+Shift+Z", "Ctrl+Y"]

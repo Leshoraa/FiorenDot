@@ -81,13 +81,10 @@ def generate_palette(img_path):
         c4      = "#5b7ec4"
         c5      = "#9c68b8"
     else:
-        # WARNA PALING BANYAK (DOMINANT HUE BY PIXEL POPULATION)
-        dom_h = max(range(360), key=lambda h: smooth_pop[h])
-
-        # If dominant hue lands on the red/coral boundary (345..360 or 0..5),
-        # nudge towards warm sunset orange (14 deg) so warm clouds produce vibrant orange instead of pinkish white
-        if dom_h >= 345 or dom_h <= 5:
-            dom_h = 14
+        raw_dom_h = max(range(360), key=lambda h: smooth_pop[h])
+        peak_weight = sum(hue_pop[(raw_dom_h + off) % 360] for off in range(-12, 13))
+        peak_sum = sum(off * hue_pop[(raw_dom_h + off) % 360] for off in range(-12, 13))
+        dom_h = int(round(raw_dom_h + (peak_sum / peak_weight))) % 360 if peak_weight > 0 else raw_dom_h
 
         # Average saturation of dominant hue
         dom_sat_sum = sum(
@@ -99,15 +96,14 @@ def generate_palette(img_path):
             if min(abs(h_deg - dom_h), 360 - abs(h_deg - dom_h)) <= 25 and s_pct > 6
         )
         raw_s = (dom_sat_sum / dom_cnt_sum) if dom_cnt_sum > 0 else 20.0
-        ui_s = max(38.0, min(75.0, raw_s * 1.35))
 
         # Check for genuine secondary accent if present in wallpaper (must be visible and meaningful)
         sec_candidates = []
         for cnt, _, h_deg, s_pct, l_pct in clusters:
             diff = min(abs(h_deg - dom_h), 360 - abs(h_deg - dom_h))
             # Must be clearly visible (not dark shadow, not blown white), saturated, and distinct
-            if diff >= 45 and 18.0 <= l_pct <= 82.0 and s_pct >= 22.0:
-                if (cnt / chroma_px >= 0.08) or (cnt / total_px >= 0.025):
+            if diff >= 45 and 18.0 <= l_pct <= 82.0 and s_pct >= 20.0:
+                if (cnt / chroma_px >= 0.05) or (cnt / total_px >= 0.02):
                     sec_candidates.append((cnt, h_deg, s_pct, l_pct))
 
         if sec_candidates:
@@ -144,34 +140,53 @@ def generate_palette(img_path):
         bg = hsl_to_hex(dark_h, bg_sat, bg_l)
         fg = hsl_to_hex(dom_h, min(15.0, raw_s * 0.25), 92.5)
 
-        # Natural, painterly UI saturation & lightness (prevents neon or washed-out white/pastel look)
-        if 160 <= dom_h <= 215:
-            # Teal / Cyan range: naturally very luminous to human eyes, keep saturation and lightness balanced
-            ui_s = max(38.0, min(65.0, raw_s * 1.10))
-            l_high = 62.0     # c14 (Logo)
-            l_keys = 55.0     # c6 (Fastfetch keys)
-            l_border = 48.0   # c12 (Window border & Waybar primary)
-            l_mid = 40.0      # c4 (Mid accent)
-            l_pill = 32.0     # c10 (Starship dir pill)
-            l_shade = 24.0    # c2 (Tonal dot)
+        # Perceptually calibrated saturation and lightness across hues
+        if 215 <= dom_h <= 265:
+            # Blue / Indigo / Periwinkle: avoid harsh electric navy
+            ui_s = max(30.0, min(48.0, raw_s * 1.0))
+            l_high = 72.0     # c14 (Logo)
+            l_keys = 66.0     # c6 (Fastfetch keys)
+            l_border = 60.0   # c12 (Window border & Waybar primary)
+            l_mid = 48.0      # c4
+            l_pill = 38.0     # c10
+            l_shade = 28.0    # c2
+        elif 160 <= dom_h < 215:
+            # Teal / Cyan: naturally luminous, keep elegant and balanced
+            ui_s = max(28.0, min(45.0, raw_s * 0.90))
+            l_high = 68.0
+            l_keys = 62.0
+            l_border = 55.0
+            l_mid = 44.0
+            l_pill = 35.0
+            l_shade = 25.0
+        elif dom_h >= 340 or dom_h <= 20:
+            # Red / Crimson / Sunset: rich, deep sunset, not orange, not washed out white
+            ui_s = max(42.0, min(58.0, raw_s * 1.25))
+            l_high = 68.0
+            l_keys = 60.0
+            l_border = 54.0
+            l_mid = 44.0
+            l_pill = 35.0
+            l_shade = 25.0
         else:
-            ui_s = max(58.0, min(85.0, raw_s * 1.60))
-            l_high = 60.0
-            l_keys = 54.0
-            l_border = 48.0
-            l_mid = 40.0
-            l_pill = 32.0
-            l_shade = 24.0
+            # Orange / Amber / Green / Purple
+            ui_s = max(34.0, min(52.0, raw_s * 1.05))
+            l_high = 70.0
+            l_keys = 64.0
+            l_border = 58.0
+            l_mid = 46.0
+            l_pill = 36.0
+            l_shade = 26.0
 
         # Primary UI elements: 100% based on WARNA PALING BANYAK
         c12 = hsl_to_hex(dom_h, ui_s, l_border)
-        c14 = hsl_to_hex(dom_h, min(55.0, ui_s * 1.1), l_high)
+        c14 = hsl_to_hex(dom_h, min(52.0, ui_s * 1.05), l_high)
         c10 = hsl_to_hex(dom_h, ui_s * 0.90, l_pill)
         c6  = hsl_to_hex(dom_h, ui_s * 0.95, l_keys)
         c8  = hsl_to_hex(dark_h, max(16.0, min(28.0, bg_sat * 0.8)), 32.0)
         
-        sec_sat = max(32.0, min(65.0, raw_s * 1.05)) if has_real_sec else min(48.0, ui_s * 0.95)
-        c13 = hsl_to_hex(sec_h, sec_sat, 62.0)
+        sec_sat = max(30.0, min(50.0, raw_s * 1.0)) if has_real_sec else min(42.0, ui_s * 0.95)
+        c13 = hsl_to_hex(sec_h, sec_sat, 64.0)
         c5  = hsl_to_hex(sec_h, sec_sat * 0.85, 56.0)
 
         if has_real_sec and (340 <= sec_h or sec_h <= 25):
@@ -220,7 +235,7 @@ def main():
 
     # Cache key by path and modification time for instant reuse
     mtime = int(os.path.getmtime(img_path))
-    hash_key = hashlib.md5(f"{img_path}_{mtime}_v6".encode()).hexdigest()
+    hash_key = hashlib.md5(f"{img_path}_{mtime}_v7".encode()).hexdigest()
     theme_file = os.path.join(cache_dir, f"{hash_key}.json")
 
     if not os.path.isfile(theme_file):

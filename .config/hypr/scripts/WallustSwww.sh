@@ -65,7 +65,7 @@ rofi_source="$HOME/.config/rofi/.current_wallpaper_square.source"
 if [[ ! -f "$rofi_source" || "$(< "$rofi_source")" != "$wallpaper_path" ]]; then
   echo "$wallpaper_path" > "$rofi_source"
   pkill -f "current_wallpaper_square.png" 2>/dev/null || true
-  magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 &
+  magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 200>&- &
 fi
 
 # Derive colors prioritizing largest pixel area (warna paling banyak)
@@ -99,8 +99,8 @@ done || pkill -USR1 kitty 2>/dev/null || true
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
   pkill -x qs 2>/dev/null || true
   pkill -x quickshell 2>/dev/null || true
-  qs -c overview -d >/dev/null 2>&1 &
+  qs -c overview -d >/dev/null 2>&1 200>&- &
 fi
 
 # Update SDDM wallpaper and theme colors in background with low CPU priority
-nice -n 19 "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &
+nice -n 19 "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 200>&- &

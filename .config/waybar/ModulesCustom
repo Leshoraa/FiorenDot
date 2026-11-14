@@ -275,7 +275,7 @@
 	"tooltip": false
 },
 "custom/separator#blank_3": {
-	"format": "   ",
+	"format": " ",
 	"interval": "once",
 	"tooltip": false
 },

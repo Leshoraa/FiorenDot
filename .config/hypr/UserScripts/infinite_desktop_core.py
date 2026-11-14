@@ -105,6 +105,53 @@ def is_protected_app(window):
         return False
     return any(app in window.get('class', '').lower() for app in PROTECTED_APPS)
 
+def is_popup_or_menu(w):
+    if not w:
+        return False
+    title = str(w.get('title', '')).strip()
+    w_class = str(w.get('class', '')).lower()
+    init_title = str(w.get('initialTitle', '')).strip()
+    init_class = str(w.get('initialClass', '')).lower()
+    
+    # Pinned windows (e.g. PiP, overlays) should not participate in collisions
+    if w.get('pinned'):
+        return True
+
+    # Empty title or whitespace is standard for dropdown menus, context menus, combobox popups
+    if not title:
+        return True
+
+    # JetBrains / Java popups & dropdowns (win0, win1, win12, etc.)
+    if (title.startswith('win') and len(title) <= 6 and title[3:].isdigit()) or title in ('win', 'wind'):
+        return True
+
+    title_lower = title.lower()
+    if title_lower in ('popup', 'menu', 'dropdown', 'tooltip', 'contextmenu', 'context menu', 'sub-menu', 'submenu'):
+        return True
+
+    # Common dialogs and file pickers that appear centered or over main windows
+    dialog_titles = (
+        'open files', 'open file', 'save as', 'save file',
+        'add folder to workspace', 'select folder', 'choose file',
+        'authentication required', 'quick cheat sheet', 'properties', 'preferences'
+    )
+    if any(title_lower == dt or title_lower.startswith(dt) for dt in dialog_titles):
+        return True
+
+    # System portal / auth classes
+    if any(c in w_class or c in init_class for c in ('xdg-desktop-portal', 'polkit', 'pinentry', 'portal')):
+        return True
+
+    # Tiny tooltips / combobox dropdowns
+    size = w.get('size')
+    if size and isinstance(size, (list, tuple)) and len(size) >= 2:
+        if size[0] < 120 and size[1] < 120:
+            return True
+    elif w.get('w', 999) < 120 and w.get('h', 999) < 120:
+        return True
+
+    return False
+
 def pan_to_window(floating_windows, target_addr, center_x, center_y):
     target_window = next((w for w in floating_windows if w['address'] == target_addr), None)
     if not target_window:
@@ -159,7 +206,7 @@ def change_focus(direction):
     try:
         with cache_lock:
             workspace_id = cached_workspace_id
-        floating_windows = get_floating_windows(workspace_id)
+        floating_windows = [w for w in get_floating_windows(workspace_id) if not is_popup_or_menu(w)]
         if len(floating_windows) <= 1:
             return
         center_x, center_y = get_monitor_center()
@@ -397,6 +444,14 @@ def sync_positions(floating_windows):
         ax, ay = float(w['at'][0]), float(w['at'][1])
         aw, ah = float(w['size'][0]), float(w['size'][1])
         fs = bool(w.get('fullscreen', False))
+        w_pid = w.get('pid')
+        w_title = w.get('title', '')
+        w_class = w.get('class', '')
+        w_init_title = w.get('initialTitle', '')
+        w_init_class = w.get('initialClass', '')
+        w_pinned = bool(w.get('pinned', False))
+        is_menu = is_popup_or_menu(w)
+
         if addr not in window_positions:
             window_positions[addr] = {
                 'target_x': ax,
@@ -405,12 +460,33 @@ def sync_positions(floating_windows):
                 'sy': ay,
                 'w': aw,
                 'h': ah,
-                'fullscreen': fs
+                'fullscreen': fs,
+                'pid': w_pid,
+                'title': w_title,
+                'class': w_class,
+                'initialTitle': w_init_title,
+                'initialClass': w_init_class,
+                'pinned': w_pinned
             }
         else:
             window_positions[addr]['w'] = aw
             window_positions[addr]['h'] = ah
             window_positions[addr]['fullscreen'] = fs
+            window_positions[addr]['pid'] = w_pid
+            window_positions[addr]['title'] = w_title
+            window_positions[addr]['class'] = w_class
+            window_positions[addr]['initialTitle'] = w_init_title
+            window_positions[addr]['initialClass'] = w_init_class
+            window_positions[addr]['pinned'] = w_pinned
+
+            if is_menu:
+                window_positions[addr]['target_x'] = ax
+                window_positions[addr]['target_y'] = ay
+                window_positions[addr]['sx'] = ax
+                window_positions[addr]['sy'] = ay
+                displaced.pop(addr, None)
+                continue
+
             dev_x = abs(ax - window_positions[addr]['sx'])
             dev_y = abs(ay - window_positions[addr]['sy'])
             if dev_x > 5.0 or dev_y > 5.0:
@@ -444,6 +520,13 @@ def resolve_collisions(tracked, active_addr):
                 w2 = tracked[addr2]
                 if w1.get('fullscreen') or w2.get('fullscreen'):
                     continue
+                if is_popup_or_menu(w1) or is_popup_or_menu(w2):
+                    continue
+                if w1.get('pid') and w2.get('pid') and w1['pid'] == w2['pid']:
+                    area1 = w1['w'] * w1['h']
+                    area2 = w2['w'] * w2['h']
+                    if area1 < area2 * 0.75 or area2 < area1 * 0.75:
+                        continue
                 x1_1, y1_1 = w1['target_x'], w1['target_y']
                 x1_2, y1_2 = x1_1 + w1['w'], y1_1 + w1['h']
                 x2_1, y2_1 = w2['target_x'], w2['target_y']
@@ -687,6 +770,8 @@ while True:
         for addr, win in window_positions.items():
             if native_drag and addr == active['address']:
                 continue
+            if is_popup_or_menu(win):
+                continue
             tx, ty = win['target_x'], win['target_y']
             sx, sy = win['sx'], win['sy']
             step_x = (tx - sx) * k
@@ -717,6 +802,8 @@ while True:
             is_active = True
     animating = False
     for addr, win in window_positions.items():
+        if is_popup_or_menu(win):
+            continue
         if abs(win['target_x'] - win['sx']) > 0.1 or abs(win['target_y'] - win['sy']) > 0.1:
             animating = True
             break

@@ -263,9 +263,22 @@ tooltip {
     color: @foreground;
 }
 
+#group-clock {
+    font-size: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 #clock {
     color: @foreground;
-    padding: 1px 8px;
+    padding: 1px 4px 0px 6px;
+    margin: 0;
+}
+
+#clock label {
+    font-size: 100%;
+    padding: 0 1px;
+    margin: 0;
 }
 
 #custom-updates {
@@ -280,4 +293,30 @@ tooltip {
     to {
         color: @foreground;
     }
+}
+
+#group-clock .drawer {
+    margin: 0;
+    padding: 0 20px;
+}
+
+#custom-alarm {
+    color: @foreground;
+    padding: 1px 6px;
+    font-size: 100%;
+    transition: color 0.3s ease;
+}
+
+#custom-alarm.running {
+    color: @primary;
+    font-weight: bold;
+}
+
+#custom-alarm.ringing {
+    color: #FF8A80;
+    font-weight: bold;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
 }

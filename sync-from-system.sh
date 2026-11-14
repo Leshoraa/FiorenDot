@@ -29,6 +29,7 @@ EXCLUDE_ARGS=(
     --exclude=".current_wallpaper*"
     --exclude="*.disabled"
     --exclude="*.wants"
+    --exclude="*.pre_*"
 )
 
 # 1. Sync tracked .config folders

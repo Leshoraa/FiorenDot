@@ -24,7 +24,8 @@
 "modules-left": [],
 
 "modules-center": [
-    "clock#6",
+    "custom/alarm",
+    "group/clock",
     "hyprland/workspaces#alphabet",
 	"group/audiov2",
 	"custom/title",

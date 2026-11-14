@@ -6,5 +6,37 @@
 /* IMPORTANT, be mindful with , or ". else waybar will not start */
 
 {
+"custom/alarm": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 1,
+    "exec": "$HOME/.config/hypr/scripts/Alarm.sh status bar",
+    "on-click": "$HOME/.config/hypr/scripts/Alarm.sh toggle-ui",
+    "on-click-right": "$HOME/.config/hypr/scripts/Alarm.sh stop",
+    "tooltip": true
+},
 
+"custom/alarm#drawer": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 1,
+    "exec": "$HOME/.config/hypr/scripts/Alarm.sh status drawer",
+    "on-click": "$HOME/.config/hypr/scripts/Alarm.sh toggle-ui",
+    "on-click-right": "$HOME/.config/hypr/scripts/Alarm.sh stop",
+    "tooltip": true
+},
+
+"group/clock": {
+    "orientation": "inherit",
+    "drawer": {
+        "transition-duration": 500,
+        "children-class": "clock#6",
+        "transition-left-to-right": false
+    },
+    "modules": [
+        "clock#6",
+        "custom/alarm#drawer",
+        "custom/separator#blank_3"
+    ]
+}
 }

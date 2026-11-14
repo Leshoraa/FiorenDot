@@ -175,14 +175,14 @@ tooltip {
     min-width: 70px;
     min-height: 4px;
     border-radius: 4px;
-    background-color: alpha(@color12, 0.3);
+    background-color: alpha(@primary, 0.3);
 }
 
 #backlight-slider highlight,
 #pulseaudio-slider highlight {
     min-height: 4px;
     border-radius: 4px;
-    background-color: @color12;
+    background-color: @primary;
 }
 
 #custom-title, 

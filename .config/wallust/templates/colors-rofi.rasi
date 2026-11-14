@@ -2,7 +2,7 @@
  /* wallust template - colors-rofi */
 
 * {
-active-background: {{color12}};
+active-background: {{color9}};
 active-foreground: {{foreground}};
 normal-background: {{background}};
 normal-foreground: {{foreground}};
@@ -16,17 +16,17 @@ alternate-normal-foreground: {{foreground}};
 alternate-urgent-background: {{background}};
 alternate-urgent-foreground: {{foreground}};
 
-selected-active-background: {{color13}};
+selected-active-background: {{color9}};
 selected-active-foreground: {{foreground}};
-selected-normal-background: {{color13}};
+selected-normal-background: {{color9}};
 selected-normal-foreground: {{foreground}};
-selected-urgent-background: {{color12}};
+selected-urgent-background: {{color9}};
 selected-urgent-foreground: {{foreground}};
 
 background-color: {{background}};
 background: rgba(0,0,0,0.7);
 foreground: {{foreground}};
-border-color: {{color12}};
+border-color: {{color9}};
 
 color0: {{color0}};
 color1: {{color1}};

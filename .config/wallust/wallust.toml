@@ -70,7 +70,7 @@ preview.target = '~/.config/wallust/preview-theme.conf'
 #zathura.target = '~/.config/zathura/zathurarc'
 
 [hooks]
-waybar = 'pkill -SIGUSR2 waybar 2>/dev/null || true'
+waybar = 'touch ~/.config/waybar/style.css 2>/dev/null || true'
 kitty = 'f=0; for s in /tmp/mykitty*; do [ -S "$s" ] && kitty @ --to "unix:$s" load-config 2>/dev/null && f=1; done; [ "$f" -eq 0 ] && pkill -USR1 kitty 2>/dev/null || true'
 swaync = 'swaync-client -rs 2>/dev/null || true'
 hyprland = 'hyprctl reload 2>/dev/null || true'

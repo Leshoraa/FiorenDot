@@ -6,9 +6,9 @@
 set -euo pipefail
 
 
-# Prevent overlapping executions of WallustSwww
+# Prevent overlapping executions of WallustSwww (wait up to 2s)
 exec 200>/tmp/wallust_swww.lock
-flock -n 200 || exit 0
+flock -x -w 2 200 || exit 0
 
 # Inputs and paths
 passed_path="${1:-}"
@@ -78,7 +78,7 @@ fi
 
 # Smooth in-place CSS hot-reload for Waybar (tanpa hilang, tanpa kedut/kedip)
 if pgrep -x waybar >/dev/null 2>&1; then
-  pkill -SIGUSR2 waybar 2>/dev/null || true
+  touch "$HOME/.config/waybar/style.css"
 else
   hyprctl dispatch exec waybar 2>/dev/null || true
 fi
@@ -99,6 +99,9 @@ done
 if [[ $has_kitty_socket -eq 0 ]]; then
   pkill -USR1 kitty 2>/dev/null || true
 fi
+
+# Release lock now that templates and core UI are updated
+exec 200>&-
 
 # Reload quickshell overview if running so launcher picks up new colors
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then

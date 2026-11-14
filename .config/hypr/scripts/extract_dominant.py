@@ -45,9 +45,12 @@ def generate_palette(img_path):
         clusters.append((cnt, hex_str, h_deg, s_pct, l_pct))
         total_px += cnt
 
-        # Filter out extreme crushed blacks and blown-out whites from hue dominance
-        if 4 < l_pct < 96 and s_pct > 6:
-            hue_pop[h_deg] += cnt
+        # Filter out extreme crushed blacks and blown-out whites from hue dominance,
+        # weighting by saturation so vivid accents (like sunset clouds) take precedence over dark/dull shadows
+        if 8 < l_pct < 92 and s_pct > 12:
+            hue_pop[h_deg] += cnt * (s_pct ** 1.3)
+            chroma_px += cnt
+        elif 4 < l_pct < 96 and s_pct > 6:
             chroma_px += cnt
 
     if not clusters:
@@ -212,7 +215,7 @@ def main():
 
     # Cache key by path and modification time for instant reuse
     mtime = int(os.path.getmtime(img_path))
-    hash_key = hashlib.md5(f"{img_path}_{mtime}_v4".encode()).hexdigest()
+    hash_key = hashlib.md5(f"{img_path}_{mtime}_v5".encode()).hexdigest()
     theme_file = os.path.join(cache_dir, f"{hash_key}.json")
 
     if not os.path.isfile(theme_file):

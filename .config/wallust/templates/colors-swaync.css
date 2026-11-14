@@ -5,8 +5,8 @@
 @define-color background rgba({{background | rgb}},0.25);
 @define-color background-alt {{background}};
 @define-color cursor {{cursor}};
-@define-color hovered {{color9}};
-@define-color button-background {{color9}};
-@define-color button-active {{color1}};
+@define-color hovered {{color12}};
+@define-color button-background {{color12}};
+@define-color button-active {{color13}};
 @define-color border {{color9}};
 @define-color urgent {{color15}};

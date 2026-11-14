@@ -183,10 +183,12 @@ main() {
     choice=$(basename "$RANDOM_PIC")
   fi
 
-  choice_basename=$(basename "$choice" | sed 's/\(.*\)\.[^.]*$/\1/')
-
   # Search for the selected file in the wallpapers directory, including subdirectories
-  selected_file=$(find "$wallDIR" -iname "$choice_basename.*" -print -quit)
+  selected_file=$(find -L "$wallDIR" -type f -name "$choice" -print -quit)
+  if [[ -z "$selected_file" ]]; then
+    choice_basename=$(basename "$choice" | sed 's/\(.*\)\.[^.]*$/\1/')
+    selected_file=$(find -L "$wallDIR" -type f -iname "$choice_basename.*" -print -quit)
+  fi
 
   if [[ -z "$selected_file" ]]; then
     echo "File not found. Selected choice: $choice"

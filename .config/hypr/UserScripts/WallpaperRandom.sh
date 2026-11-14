@@ -45,7 +45,7 @@ fi
 # 1. Update state wallpaper saat ini secara instan
 ln -sf "$RANDOM_PIC" "$HOME/.config/rofi/.current_wallpaper" 2>/dev/null || true
 mkdir -p "$HOME/.config/hypr/wallpaper_effects"
-echo "$RANDOM_PIC" > "$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
+cp -f "$RANDOM_PIC" "$HOME/.config/hypr/wallpaper_effects/.wallpaper_current" 2>/dev/null || true
 
 # 2. Terapkan Wallpaper ke monitor secara INSTAN (0 ms lag)
 if ! pgrep -x "awww-daemon" >/dev/null; then

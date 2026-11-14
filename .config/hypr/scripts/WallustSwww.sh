@@ -78,7 +78,7 @@ fi
 
 # Smooth in-place CSS hot-reload for Waybar (tanpa hilang, tanpa kedut/kedip)
 if pgrep -x waybar >/dev/null 2>&1; then
-  touch "$HOME/.config/waybar/style.css"
+  pkill -SIGUSR2 waybar 2>/dev/null || true
 else
   hyprctl dispatch exec waybar 2>/dev/null || true
 fi
@@ -87,13 +87,18 @@ swaync-client -rs 2>/dev/null || true
 pkill -USR1 cava 2>/dev/null || true
 pkill -x rofi 2>/dev/null || true
 
-# Reload kitty safely via socket to prevent OpenGL font atlas corruption
+# Reload kitty safely via socket, fallback to SIGUSR1
 sleep 0.05
+has_kitty_socket=0
 for sock in /tmp/mykitty*; do
   if [[ -S "$sock" ]]; then
     kitty @ --to "unix:$sock" load-config 2>/dev/null || true
+    has_kitty_socket=1
   fi
-done || pkill -USR1 kitty 2>/dev/null || true
+done
+if [[ $has_kitty_socket -eq 0 ]]; then
+  pkill -USR1 kitty 2>/dev/null || true
+fi
 
 # Reload quickshell overview if running so launcher picks up new colors
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then

@@ -84,6 +84,11 @@ def generate_palette(img_path):
         # WARNA PALING BANYAK (DOMINANT HUE BY PIXEL POPULATION)
         dom_h = max(range(360), key=lambda h: smooth_pop[h])
 
+        # If dominant hue lands on the red/coral boundary (345..360 or 0..5),
+        # nudge towards warm sunset orange (14 deg) so warm clouds produce vibrant orange instead of pinkish white
+        if dom_h >= 345 or dom_h <= 5:
+            dom_h = 14
+
         # Average saturation of dominant hue
         dom_sat_sum = sum(
             s_pct * cnt for cnt, _, h_deg, s_pct, _ in clusters
@@ -139,24 +144,24 @@ def generate_palette(img_path):
         bg = hsl_to_hex(dark_h, bg_sat, bg_l)
         fg = hsl_to_hex(dom_h, min(15.0, raw_s * 0.25), 92.5)
 
-        # Natural, painterly UI saturation & lightness (prevents neon/fluorescent look)
+        # Natural, painterly UI saturation & lightness (prevents neon or washed-out white/pastel look)
         if 160 <= dom_h <= 215:
             # Teal / Cyan range: naturally very luminous to human eyes, keep saturation and lightness balanced
-            ui_s = max(26.0, min(42.0, raw_s * 0.65))
-            l_high = 65.0     # c14 (Logo)
-            l_keys = 58.0     # c6 (Fastfetch keys)
-            l_border = 50.0   # c12 (Window border & Waybar primary)
-            l_mid = 42.0      # c4 (Mid accent)
-            l_pill = 35.0     # c10 (Starship dir pill)
-            l_shade = 26.0    # c2 (Tonal dot)
+            ui_s = max(38.0, min(65.0, raw_s * 1.10))
+            l_high = 62.0     # c14 (Logo)
+            l_keys = 55.0     # c6 (Fastfetch keys)
+            l_border = 48.0   # c12 (Window border & Waybar primary)
+            l_mid = 40.0      # c4 (Mid accent)
+            l_pill = 32.0     # c10 (Starship dir pill)
+            l_shade = 24.0    # c2 (Tonal dot)
         else:
-            ui_s = max(32.0, min(56.0, raw_s * 1.05))
-            l_high = 70.0
-            l_keys = 64.0
-            l_border = 56.0
-            l_mid = 48.0
-            l_pill = 40.0
-            l_shade = 32.0
+            ui_s = max(58.0, min(85.0, raw_s * 1.60))
+            l_high = 60.0
+            l_keys = 54.0
+            l_border = 48.0
+            l_mid = 40.0
+            l_pill = 32.0
+            l_shade = 24.0
 
         # Primary UI elements: 100% based on WARNA PALING BANYAK
         c12 = hsl_to_hex(dom_h, ui_s, l_border)
@@ -215,7 +220,7 @@ def main():
 
     # Cache key by path and modification time for instant reuse
     mtime = int(os.path.getmtime(img_path))
-    hash_key = hashlib.md5(f"{img_path}_{mtime}_v5".encode()).hexdigest()
+    hash_key = hashlib.md5(f"{img_path}_{mtime}_v6".encode()).hexdigest()
     theme_file = os.path.join(cache_dir, f"{hash_key}.json")
 
     if not os.path.isfile(theme_file):

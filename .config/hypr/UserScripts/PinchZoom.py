@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # =============================================================================
-# PinchZoom.py – Continuous 2-Finger Pinch-to-Zoom for Hyprland
+# PinchZoom.py – Continuous 2-Finger Gestures for Hyprland:
+#   1. Super + 2-Finger Pinch:
+#      → Continuous Desktop Zoom (cursor:zoom_factor)
+#   2. Super + Alt + 2-Finger Pinch:
+#      → Continuous 2D Resize for Floating Window (X and Y independently)
 #
 # HOW IT WORKS:
-#   • Activates ONLY when the Super (Mod4/Windows) key is held down.
 #   • Reads raw MT (Multi-Touch) events PASSIVELY – cursor is NOT affected.
-#   • When 2 fingers touch while Super is held, records reference distance & zoom.
-#   • As fingers move, computes: new_zoom = ref_zoom × (cur_dist / ref_dist)
-#     → Ratio-based: zoom tracks finger spread 1:1, naturally smooth.
-#   • Writes cursor:zoom_factor via Hyprland IPC socket (or hyprctl) at ~40 fps.
-#   • When Super is not held, touchpad performs normal 2-finger scroll/gestures.
+#   • Super held: desktop zoom tracks 2-finger spread ratio smoothly.
+#   • Super + Alt held: floating window resizes in width (X) and height (Y)
+#     proportional to horizontal & vertical finger spread (centered).
+#   • No modifiers held: normal touchpad scroll and gestures are untouched.
+#   • Writes updates directly via Hyprland IPC UNIX socket at ~40 fps.
 #
 # Requires: python-evdev
 # =============================================================================
@@ -29,17 +32,22 @@ from evdev import ecodes
 # ─── Config ───────────────────────────────────────────────────────────────────
 TOUCHPAD_DEVICE = os.environ.get("TOUCHPAD_DEVICE", "auto")
 
+# Desktop Zoom range
 ZOOM_MIN        = 1.0    # minimum zoom (1 = normal)
 ZOOM_MAX        = 5.0    # maximum zoom
+EXPONENT        = 1.0    # zoom response curve (1.0 = linear)
 
-# Fingers must be at least this far apart (in touchpad units) to start tracking
+# Floating Window Resize settings
+WINDOW_RESIZE_SCALE_X = 0.85  # Screen pixels per touchpad unit (horizontal)
+WINDOW_RESIZE_SCALE_Y = 0.85  # Screen pixels per touchpad unit (vertical)
+MIN_WINDOW_W          = 200   # Minimum window width in px
+MIN_WINDOW_H          = 150   # Minimum window height in px
+
+# Minimum distance between fingers to begin tracking (touchpad units)
 MIN_DIST        = 25
 
-# How often to push zoom to Hyprland (seconds). ~40 fps = 0.025s
+# Update throttle interval (seconds). ~40 fps = 0.025s
 THROTTLE_S      = 0.025
-
-# Exponent for zoom feel. 1.0 = linear, 1.2 = slightly boosted at extremes
-EXPONENT        = 1.0
 
 # ─── State ────────────────────────────────────────────────────────────────────
 class Slot:
@@ -136,8 +144,73 @@ def set_zoom(val: float):
     _zoom_cache = val
     hypr_cmd(f"keyword cursor:zoom_factor {val:.4f}")
 
-# ─── Keyboard / Super Key Detection ───────────────────────────────────────────
+# ─── Window / Monitor Queries ─────────────────────────────────────────────────
+def get_target_floating_window() -> dict | None:
+    # 1. Active window if floating
+    try:
+        raw_act = hypr_cmd("j/activewindow")
+        if raw_act:
+            act = json.loads(raw_act)
+            if act.get("floating") and not act.get("fullscreen") and act.get("mapped"):
+                return act
+    except Exception:
+        pass
+
+    # 2. Window under cursor on current workspace or any floating on active workspace
+    try:
+        raw_cur = hypr_cmd("j/cursorpos")
+        raw_clients = hypr_cmd("j/clients")
+        raw_ws = hypr_cmd("j/activeworkspace")
+        if raw_clients:
+            clients = json.loads(raw_clients)
+            ws_id = json.loads(raw_ws).get("id") if raw_ws else None
+            cx, cy = None, None
+            if raw_cur:
+                cur = json.loads(raw_cur)
+                cx, cy = cur.get("x"), cur.get("y")
+
+            # Check floating window containing cursor on active workspace
+            if cx is not None and cy is not None:
+                for c in clients:
+                    if not (c.get("floating") and not c.get("fullscreen") and c.get("mapped")):
+                        continue
+                    if ws_id is not None and c.get("workspace", {}).get("id") != ws_id:
+                        continue
+                    at = c.get("at", [0, 0])
+                    sz = c.get("size", [0, 0])
+                    if at[0] <= cx <= at[0] + sz[0] and at[1] <= cy <= at[1] + sz[1]:
+                        return c
+
+            # Fallback: any floating window on active workspace
+            for c in clients:
+                if c.get("floating") and not c.get("fullscreen") and c.get("mapped"):
+                    if ws_id is not None and c.get("workspace", {}).get("id") == ws_id:
+                        return c
+    except Exception:
+        pass
+    return None
+
+def get_active_monitor_bounds() -> tuple[int, int, int, int]:
+    try:
+        raw = hypr_cmd("j/monitors")
+        if raw:
+            mons = json.loads(raw)
+            for m in mons:
+                if m.get("focused"):
+                    scale = m.get("scale", 1.0)
+                    w = int(m.get("width", 1920) / scale)
+                    h = int(m.get("height", 1080) / scale)
+                    x = int(m.get("x", 0) / scale)
+                    y = int(m.get("y", 0) / scale)
+                    return x, y, w, h
+    except Exception:
+        pass
+    return 0, 0, 1920, 1080
+
+# ─── Keyboard & Modifier Detection ───────────────────────────────────────────
 SUPER_KEYS = {ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA}
+ALT_KEYS   = {ecodes.KEY_LEFTALT,  ecodes.KEY_RIGHTALT}
+
 _keyboards: dict[str, evdev.InputDevice] = {}
 _last_kbd_scan: float = 0.0
 
@@ -164,7 +237,7 @@ def update_keyboards():
                 caps = dev.capabilities()
                 if ecodes.EV_KEY in caps:
                     keys = caps[ecodes.EV_KEY]
-                    if ecodes.KEY_LEFTMETA in keys or ecodes.KEY_RIGHTMETA in keys:
+                    if any(k in SUPER_KEYS for k in keys) or any(k in ALT_KEYS for k in keys):
                         _keyboards[p] = dev
                     else:
                         dev.close()
@@ -173,13 +246,19 @@ def update_keyboards():
             except Exception:
                 pass
 
-def is_super_pressed() -> bool:
+def get_modifiers() -> tuple[bool, bool]:
     update_keyboards()
+    super_down = False
+    alt_down = False
     for path, kbd in list(_keyboards.items()):
         try:
             active = kbd.active_keys()
-            if any(k in SUPER_KEYS for k in active):
-                return True
+            if not super_down and any(k in SUPER_KEYS for k in active):
+                super_down = True
+            if not alt_down and any(k in ALT_KEYS for k in active):
+                alt_down = True
+            if super_down and alt_down:
+                break
         except (OSError, IOError):
             try:
                 kbd.close()
@@ -188,7 +267,7 @@ def is_super_pressed() -> bool:
             _keyboards.pop(path, None)
         except Exception:
             pass
-    return False
+    return super_down, alt_down
 
 # ─── Touchpad Helpers ─────────────────────────────────────────────────────────
 def find_touchpad() -> str:
@@ -214,12 +293,15 @@ def find_touchpad() -> str:
         return candidates[0]
     return "/dev/input/event8"
 
-def finger_dist(slots: list[Slot]) -> float:
+def finger_deltas(slots: list[Slot]) -> tuple[float, float, float]:
     active = [s for s in slots if s.tid != -1 and s.x is not None and s.y is not None]
     if len(active) < 2:
-        return 0.0
+        return 0.0, 0.0, 0.0
     s0, s1 = active[0], active[1]
-    return math.hypot(s1.x - s0.x, s1.y - s0.y)
+    dx = abs(s1.x - s0.x)
+    dy = abs(s1.y - s0.y)
+    d  = math.hypot(s1.x - s0.x, s1.y - s0.y)
+    return dx, dy, d
 
 def active_count(slots: list[Slot]) -> int:
     return sum(1 for s in slots if s.tid != -1 and s.x is not None and s.y is not None)
@@ -233,21 +315,37 @@ async def run_listener():
         try:
             dev = evdev.InputDevice(dev_path)
         except FileNotFoundError:
-            print(f"[PinchZoom] ✗ Device not found: {dev_path}, retrying in 3s...", flush=True)
+            print(f"[PinchGestures] ✗ Device not found: {dev_path}, retrying in 3s...", flush=True)
             await asyncio.sleep(3.0)
             continue
         except PermissionError:
-            print(f"[PinchZoom] ✗ Permission denied for {dev_path} – ensure user is in 'input' group", flush=True)
+            print(f"[PinchGestures] ✗ Permission denied for {dev_path} – ensure user is in 'input' group", flush=True)
             sys.exit(1)
 
         slots = [Slot() for _ in range(MAX_SLOTS)]
         cur_slot = 0
+
+        # Desktop Zoom state
         ref_dist: float | None = None
         ref_zoom: float | None = None
+
+        # Floating Window Resize state
+        win_addr: str | None = None
+        win_w_ref: int = 0
+        win_h_ref: int = 0
+        win_x_ref: int = 0
+        win_y_ref: int = 0
+        win_dx_ref: float | None = None
+        win_dy_ref: float | None = None
+        win_last_w: int = 0
+        win_last_h: int = 0
+        mon_bounds: tuple[int, int, int, int] = (0, 0, 1920, 1080)
+
         last_apply: float = 0.0
 
-        print(f"[PinchZoom] ✓ Listening on {dev.name} ({dev_path})", flush=True)
-        print(f"[PinchZoom]   Hold Super + 2-Finger Pinch to zoom ({ZOOM_MIN}×–{ZOOM_MAX}×)", flush=True)
+        print(f"[PinchGestures] ✓ Listening on {dev.name} ({dev_path})", flush=True)
+        print(f"[PinchGestures]   • Super + Pinch: Desktop Zoom ({ZOOM_MIN}×–{ZOOM_MAX}×)", flush=True)
+        print(f"[PinchGestures]   • Super + Alt + Pinch: Floating Window 2D Resize (X & Y)", flush=True)
 
         try:
             async for event in dev.async_read_loop():
@@ -266,23 +364,81 @@ async def run_listener():
                     elif code == ecodes.ABS_MT_POSITION_Y:
                         slots[cur_slot].y = event.value
 
-                # ── On sync, evaluate pinch ──────────────────────────────────
+                # ── On sync, evaluate gestures ───────────────────────────────
                 elif event.type == ecodes.EV_SYN and event.code == ecodes.SYN_REPORT:
                     n = active_count(slots)
+                    super_down, alt_down = get_modifiers()
 
-                    # Only zoom if exactly 2 fingers are touching AND Super key is held
-                    if n == 2 and is_super_pressed():
-                        d = finger_dist(slots)
+                    # ── MODE 1: RESIZE FLOATING WINDOW (Super + Alt + 2 Fingers) ──
+                    if n == 2 and super_down and alt_down:
+                        # Reset desktop zoom tracking if previously active
+                        if ref_dist is not None:
+                            ref_dist = None
+                            ref_zoom = None
+
+                        dx, dy, d = finger_deltas(slots)
                         if d < MIN_DIST:
-                            continue   # fingers too close together – ignore
+                            continue
+
+                        if win_addr is None:
+                            target = get_target_floating_window()
+                            if target:
+                                win_addr = target.get("address")
+                                win_w_ref = target.get("size", [800, 600])[0]
+                                win_h_ref = target.get("size", [800, 600])[1]
+                                win_x_ref = target.get("at", [100, 100])[0]
+                                win_y_ref = target.get("at", [100, 100])[1]
+                                win_dx_ref = dx
+                                win_dy_ref = dy
+                                win_last_w = win_w_ref
+                                win_last_h = win_h_ref
+                                mon_bounds = get_active_monitor_bounds()
+                            continue
+
+                        # Compute size based on horizontal and vertical finger spread
+                        delta_dx = dx - win_dx_ref
+                        delta_dy = dy - win_dy_ref
+
+                        mon_x, mon_y, mon_w, mon_h = mon_bounds
+                        max_w = max(MIN_WINDOW_W, mon_w - 20)
+                        max_h = max(MIN_WINDOW_H, mon_h - 40)
+
+                        new_w = max(MIN_WINDOW_W, min(max_w, int(win_w_ref + delta_dx * WINDOW_RESIZE_SCALE_X)))
+                        new_h = max(MIN_WINDOW_H, min(max_h, int(win_h_ref + delta_dy * WINDOW_RESIZE_SCALE_Y)))
+
+                        # Symmetric resize around center
+                        new_x = win_x_ref - int((new_w - win_w_ref) / 2)
+                        new_y = win_y_ref - int((new_h - win_h_ref) / 2)
+
+                        # Keep within monitor bounds
+                        new_x = max(mon_x + 10, min(mon_x + mon_w - new_w - 10, new_x))
+                        new_y = max(mon_y + 30, min(mon_y + mon_h - new_h - 10, new_y))
+
+                        now = time.monotonic()
+                        if (abs(new_w - win_last_w) >= 3 or abs(new_h - win_last_h) >= 3) and (now - last_apply >= THROTTLE_S):
+                            batch_cmd = f"[[BATCH]]dispatch resizewindowpixel exact {new_w} {new_h},address:{win_addr} ; dispatch movewindowpixel exact {new_x} {new_y},address:{win_addr}"
+                            hypr_cmd(batch_cmd)
+                            win_last_w = new_w
+                            win_last_h = new_h
+                            last_apply = now
+
+                    # ── MODE 2: DESKTOP ZOOM (Super + 2 Fingers) ───────────────
+                    elif n == 2 and super_down and not alt_down:
+                        # Reset window resize tracking if previously active
+                        if win_addr is not None:
+                            win_addr = None
+                            win_dx_ref = None
+                            win_dy_ref = None
+
+                        dx, dy, d = finger_deltas(slots)
+                        if d < MIN_DIST:
+                            continue
 
                         if ref_dist is None:
-                            # Pinch starts: snapshot reference distance and current zoom
                             ref_dist = d
                             ref_zoom = get_zoom()
                             continue
 
-                        # ── RATIO-BASED zoom ──────────────────────────────────
                         ratio = d / ref_dist
                         if EXPONENT != 1.0:
                             ratio = ratio ** EXPONENT
@@ -293,14 +449,18 @@ async def run_listener():
                             set_zoom(new_zoom)
                             last_apply = now
 
+                    # ── IDLE / RESET ──────────────────────────────────────────
                     else:
-                        # Not 2 fingers or Super is not held – reset pinch tracking state
                         if ref_dist is not None:
                             ref_dist = None
                             ref_zoom = None
+                        if win_addr is not None:
+                            win_addr = None
+                            win_dx_ref = None
+                            win_dy_ref = None
 
         except (OSError, IOError) as e:
-            print(f"[PinchZoom] Device disconnected ({e}), re-detecting in 2s...", flush=True)
+            print(f"[PinchGestures] Device disconnected ({e}), re-detecting in 2s...", flush=True)
             try:
                 dev.close()
             except Exception:
@@ -319,7 +479,7 @@ async def main():
 
 if __name__ == "__main__":
     def _shutdown(*_):
-        print("\n[PinchZoom] Shutting down…", flush=True)
+        print("\n[PinchGestures] Shutting down…", flush=True)
         set_zoom(1.0)
         for k in _keyboards.values():
             try:

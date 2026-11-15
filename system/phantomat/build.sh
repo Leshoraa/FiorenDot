@@ -28,10 +28,13 @@ make -j"$(nproc)"
 
 echo "==> Installing to $TARGET_DIR/spatialoverview.so..."
 mkdir -p "$TARGET_DIR"
-cp -f spatialoverview.so "$TARGET_DIR/spatialoverview.so"
+hyprctl plugin unload "$TARGET_DIR/spatialoverview.so" 2>/dev/null || true
+rm -f "$TARGET_DIR/spatialoverview.so"
+cp spatialoverview.so "$TARGET_DIR/spatialoverview.so"
 strip --strip-unneeded "$TARGET_DIR/spatialoverview.so" 2>/dev/null || true
 
-echo "==> Reloading Hyprland..."
+echo "==> Loading updated plugin in Hyprland..."
+hyprctl plugin load "$TARGET_DIR/spatialoverview.so" 2>/dev/null || true
 hyprctl reload || true
 
 echo "==> Done! Installed: $TARGET_DIR/spatialoverview.so"

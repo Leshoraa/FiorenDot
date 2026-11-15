@@ -492,8 +492,8 @@ def sync_positions(floating_windows):
             if dev_x > 5.0 or dev_y > 5.0:
                 is_anim = abs(window_positions[addr]['target_x'] - window_positions[addr]['sx']) > 1.0 or \
                           abs(window_positions[addr]['target_y'] - window_positions[addr]['sy']) > 1.0
-                is_user_drag = btn_left and (addr == dragged_window_addr or w.get('focused', False))
-                if not is_anim or is_user_drag:
+                is_user_drag = (btn_left or super_pressed) and (addr == dragged_window_addr or w.get('focused', False))
+                if not is_anim or is_user_drag or super_pressed or dev_x > 25.0 or dev_y > 25.0:
                     window_positions[addr]['target_x'] = ax
                     window_positions[addr]['target_y'] = ay
                     window_positions[addr]['sx'] = ax
@@ -746,7 +746,7 @@ while True:
         else:
             active = get_active_window(floating_windows)
         native_drag = False
-        if active and btn_left and not (super_pressed and alt_pressed):
+        if (active and btn_left and not (super_pressed and alt_pressed)) or (super_pressed and not alt_pressed):
             native_drag = True
         batch_cmds = []
         if (idx != 0 or idy != 0) and (super_pressed and alt_pressed):
@@ -761,7 +761,7 @@ while True:
             for info in displaced.values():
                 info['home_x'] += idx
                 info['home_y'] += idy
-        elif not (super_pressed and alt_pressed):
+        elif not (super_pressed and alt_pressed) and not (super_pressed and not alt_pressed):
             if active:
                 resolve_collisions(window_positions, active_addr=active['address'])
             else:

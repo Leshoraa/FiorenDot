@@ -750,17 +750,18 @@ while True:
             native_drag = True
         batch_cmds = []
         if (idx != 0 or idy != 0) and (super_pressed and alt_pressed):
-            for w in floating_windows:
-                addr = w['address']
-                if addr in window_positions:
-                    window_positions[addr]['target_x'] += idx
-                    window_positions[addr]['target_y'] += idy
-                    window_positions[addr]['sx'] += idx
-                    window_positions[addr]['sy'] += idy
-                batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
-            for info in displaced.values():
-                info['home_x'] += idx
-                info['home_y'] += idy
+            if not os.path.exists("/tmp/phantom_active"):
+                for w in floating_windows:
+                    addr = w['address']
+                    if addr in window_positions:
+                        window_positions[addr]['target_x'] += idx
+                        window_positions[addr]['target_y'] += idy
+                        window_positions[addr]['sx'] += idx
+                        window_positions[addr]['sy'] += idy
+                    batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
+                for info in displaced.values():
+                    info['home_x'] += idx
+                    info['home_y'] += idy
         elif not (super_pressed and alt_pressed) and not (super_pressed and not alt_pressed):
             if active:
                 resolve_collisions(window_positions, active_addr=active['address'])

@@ -376,6 +376,15 @@ async def run_listener():
                             ref_dist = None
                             ref_zoom = None
 
+                        # When in Phantomat overview, disable window resize so it does not clash
+                        # with Phantomat's overview zoom in/out or window movement
+                        if os.path.exists("/tmp/phantom_active"):
+                            if win_addr is not None:
+                                win_addr = None
+                                win_dx_ref = None
+                                win_dy_ref = None
+                            continue
+
                         dx, dy, d = finger_deltas(slots)
                         if d < MIN_DIST:
                             continue
@@ -429,6 +438,13 @@ async def run_listener():
                             win_addr = None
                             win_dx_ref = None
                             win_dy_ref = None
+
+                        # When in Phantomat overview, disable desktop zoom so it does not clash
+                        if os.path.exists("/tmp/phantom_active"):
+                            if ref_dist is not None:
+                                ref_dist = None
+                                ref_zoom = None
+                            continue
 
                         dx, dy, d = finger_deltas(slots)
                         if d < MIN_DIST:

@@ -71,3 +71,35 @@ nvm() {
 
 # Run fastfetch at the very end so that shell is 100% loaded and starship prompt appears instantly
 fastfetch
+
+# Shortcut Scrcpy (Wireless & Kabel USB)
+hp() {
+    local default_ip="192.168.18.176"
+    local common_opts=(-S -w --always-on-top --window-height=850)
+
+    case "$1" in
+        -k|--kabel|kabel)
+            echo "🔌 Menghubungkan scrcpy via Kabel USB (Kualitas Tajam)..."
+            scrcpy -d -m 1920 -b 20M "${common_opts[@]}"
+            ;;
+        -w|--wireless|wireless|"")
+            local target_ip="${2:-$default_ip}"
+            echo "📶 Menghubungkan scrcpy via Wireless ($target_ip)..."
+            adb connect "$target_ip:5555" >/dev/null 2>&1
+            scrcpy -s "$target_ip:5555" -m 1920 --max-fps=60 --video-codec=h265 -b 16M "${common_opts[@]}"
+            ;;
+        *)
+            if [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                local target_ip="$1"
+                echo "📶 Menghubungkan scrcpy via Wireless ($target_ip)..."
+                adb connect "$target_ip:5555" >/dev/null 2>&1
+                scrcpy -s "$target_ip:5555" -m 1920 --max-fps=60 --video-codec=h265 -b 16M "${common_opts[@]}"
+            else
+                echo "Penggunaan: hp [-w [IP] | -k]"
+                echo "  hp -w          : Mode Wireless (IP default: $default_ip)"
+                echo "  hp -w <IP>     : Mode Wireless ke IP tertentu"
+                echo "  hp -k          : Mode Kabel USB"
+            fi
+            ;;
+    esac
+}

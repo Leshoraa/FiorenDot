@@ -330,7 +330,7 @@ ShellRoot {
                 radius: 20
                 clip: true
                 color: root.col("background")
-                border.width: 1.2
+                border.width: 0
                 border.color: root.alarmStatus === "ringing"
                     ? root.col("color1")
                     : (root.alarmStatus === "running" ? root.col("primary") : root.col("color8"))
@@ -411,7 +411,7 @@ ShellRoot {
                                     color: root.alarmStatus === "idle" && root.editingHours
                                         ? root.col("color4")
                                         : root.col("color0")
-                                    border.width: root.alarmStatus === "idle" && root.editingHours ? 1.4 : 1
+                                    border.width: root.alarmStatus === "idle" && root.editingHours ? 0 : 1
                                     border.color: root.alarmStatus === "idle" && root.editingHours
                                         ? root.col("primary")
                                         : root.col("color8")
@@ -459,7 +459,7 @@ ShellRoot {
                                         font.pixelSize: 9
                                         font.bold: true
                                         font.family: "JetBrainsMono Nerd Font"
-                                        color: ampmMouse.containsMouse ? root.col("primary") : root.col("color6")
+                                        color: ampmMouse.containsMouse ? root.col("primary") : root.col("foreground")
 
                                         MouseArea {
                                             id: ampmMouse
@@ -490,7 +490,7 @@ ShellRoot {
                                     color: root.alarmStatus === "idle" && !root.editingHours
                                         ? root.col("color4")
                                         : root.col("color0")
-                                    border.width: root.alarmStatus === "idle" && !root.editingHours ? 1.4 : 1
+                                    border.width: root.alarmStatus === "idle" && !root.editingHours ? 0 : 1
                                     border.color: root.alarmStatus === "idle" && !root.editingHours
                                         ? root.col("primary")
                                         : root.col("color8")
@@ -605,7 +605,7 @@ ShellRoot {
                                 Layout.preferredHeight: 4
                                 Layout.topMargin: 8
                                 radius: 2
-                                color: root.col("color0")
+                                color: root.col("background")
 
                                 Rectangle {
                                     height: parent.height
@@ -875,8 +875,8 @@ ShellRoot {
                                 width: dial.faceR * 2
                                 height: dial.faceR * 2
                                 radius: width / 2
-                                color: root.col("color0")
-                                border.width: 1
+                                color: root.col("background")
+                                border.width: 2
                                 border.color: root.col("color8")
 
                                 Behavior on color {

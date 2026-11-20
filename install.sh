@@ -121,6 +121,25 @@ if [ -d "$DOTFILES_DIR/.config" ]; then
     done
 fi
 
+# Deploy .local/bin scripts
+if [ -d "$DOTFILES_DIR/.local/bin" ]; then
+    mkdir -p "$HOME_TARGET/.local/bin"
+    for bin_item in "$DOTFILES_DIR/.local/bin"/*; do
+        [ -e "$bin_item" ] || continue
+        base="$(basename "$bin_item")"
+        deploy_config "$bin_item" "$HOME_TARGET/.local/bin/$base"
+    done
+fi
+
+# Deploy .local/share presets (e.g. EasyEffects)
+if [ -d "$DOTFILES_DIR/.local/share" ]; then
+    for share_item in "$DOTFILES_DIR/.local/share"/*; do
+        [ -e "$share_item" ] || continue
+        base="$(basename "$share_item")"
+        deploy_config "$share_item" "$HOME_TARGET/.local/share/$base"
+    done
+fi
+
 # Deploy wallpapers
 if [ -d "$DOTFILES_DIR/wallpapers" ]; then
     mkdir -p "$HOME_TARGET/Pictures"

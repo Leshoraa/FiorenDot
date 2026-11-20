@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="cpu", ATTR{cpufreq/energy_performance_preference}!="", ATTR{cpufreq/energy_performance_preference}="balance_performance"

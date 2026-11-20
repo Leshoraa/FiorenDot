@@ -313,49 +313,6 @@ def kbd_reader(dev_path):
                             threading.Thread(target=change_focus, args=('left',), daemon=True).start()
                         elif code == KEY_RIGHT:
                             threading.Thread(target=change_focus, args=('right',), daemon=True).start()
-                        elif code in (KEY_SPACE, KEY_F):
-                            def pseudo_fullscreen():
-                                try:
-                                    r = subprocess.run(
-                                        ['hyprctl', 'activewindow', '-j'],
-                                        capture_output=True,
-                                        text=True,
-                                        timeout=0.2
-                                    )
-                                    win = json.loads(r.stdout)
-                                    if not win:
-                                        return
-                                    addr = win['address']
-                                    with cache_lock:
-                                        monitors = cached_monitors
-                                    mon = next(
-                                        (m for m in monitors if m.get('focused', False)),
-                                        monitors[0]
-                                    )
-                                    scale = mon.get('scale', 1)
-                                    w = int((mon['width'] / scale) * PSEUDO_SCALE_W)
-                                    h = int((mon['height'] / scale) * PSEUDO_SCALE_H)
-                                    cmds = []
-                                    if not win.get('floating', False):
-                                        cmds.append(f"dispatch togglefloating address:{addr}")
-                                    def do_resize():
-                                        if cmds:
-                                            subprocess.run(
-                                                ['hyprctl', '--batch', ';'.join(cmds)],
-                                                stdout=subprocess.DEVNULL,
-                                                stderr=subprocess.DEVNULL
-                                            )
-                                            time.sleep(0.1)
-                                        subprocess.run(
-                                            ['hyprctl', '--batch',
-                                             f"dispatch resizewindowpixel exact {w} {h},address:{addr};dispatch centerwindow"],
-                                            stdout=subprocess.DEVNULL,
-                                            stderr=subprocess.DEVNULL
-                                        )
-                                    threading.Thread(target=do_resize, daemon=True).start()
-                                except:
-                                    pass
-                            threading.Thread(target=pseudo_fullscreen, daemon=True).start()
         except:
             break
 

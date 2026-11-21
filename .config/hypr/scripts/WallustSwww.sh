@@ -68,10 +68,11 @@ if [[ ! -f "$rofi_source" || "$(< "$rofi_source")" != "$wallpaper_path" ]]; then
   magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 200>&- &
 fi
 
-# Derive colors via matugen (scheme-vibrant, dark, prefer saturation for rich, lively colors)
-if command -v matugen >/dev/null 2>&1; then
-  matugen image "$wallpaper_path" --type scheme-vibrant --mode dark --prefer saturation || true
-elif command -v wallust >/dev/null 2>&1; then
+# Derive colors prioritizing largest pixel area (warna paling banyak)
+dominant_script="$HOME/.config/hypr/scripts/extract_dominant.py"
+if [[ -x "$dominant_script" ]]; then
+  "$dominant_script" "$wallpaper_path" || wallust run -s "$wallpaper_path" || true
+else
   wallust run -s "$wallpaper_path" || true
 fi
 

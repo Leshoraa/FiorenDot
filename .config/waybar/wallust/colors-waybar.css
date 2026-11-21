@@ -1,27 +1,28 @@
-/* matugen generated colors - Waybar */
-@define-color foreground #f7dcde;
-@define-color background #1d1011;
-@define-color background-alt rgba(43, 28, 29, 0.45);
-@define-color cursor #f7dcde;
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */  
+ /* wallust template - colors-waybar */
 
-@define-color primary #ffb2ba;
-@define-color secondary #f6b8ac;
-@define-color tertiary #ffb691;
-@define-color yellow #ffb691;
+ @define-color foreground #EFE9EB;
+ @define-color background #241519;
+ @define-color background-alt rgba(36,21,25,0.45);
+ @define-color cursor #EFE9EB;
+ 
+ @define-color primary #CE466E;
+ @define-color secondary #CA7F7D;
+ @define-color yellow #DFBB68;
 
-@define-color color0 #180b0c;
-@define-color color1 #ffb4ab;
-@define-color color2 #f6b8ac;
-@define-color color3 #ffb691;
-@define-color color4 #ffb2ba;
-@define-color color5 #f6b8ac;
-@define-color color6 #ffb691;
-@define-color color7 #dac0c2;
-@define-color color8 #a28b8d;
-@define-color color9 #ffb2ba;
-@define-color color10 #ffdad4;
-@define-color color11 #ffdbcb;
-@define-color color12 #ffd9dc;
-@define-color color13 #ffdad4;
-@define-color color14 #ffd9dc;
-@define-color color15 #f7dcde;
+ @define-color color0 #2A1C1F;
+ @define-color color1 #CE587B;
+ @define-color color2 #6A3444;
+ @define-color color3 #D1AE5F;
+ @define-color color4 #B74064;
+ @define-color color5 #BD7573;
+ @define-color color6 #D56E8D;
+ @define-color color7 #EFE9EB;
+ @define-color color8 #744B57;
+ @define-color color9 #E06C8F;
+ @define-color color10 #923C56;
+ @define-color color11 #E2C074;
+ @define-color color12 #D2557A;
+ @define-color color13 #CE8987;
+ @define-color color14 #D8839C;
+ @define-color color15 #EFE9EB; 

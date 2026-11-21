@@ -1,23 +1,23 @@
-# FiorenDot — ⚠️ PERSONAL USE ONLY: DO NOT USE THIS DOTFILE
+# FiorenDot --- WARNING: DO NOT RUN THIS ON YOUR MACHINE!!!
 
-> ⛔ **WARNING: STRICTLY CONFIGURED FOR A SINGLE SPECIFIC LAPTOP (ASUS Vivobook S 14 Flip TN3402QA). DO NOT INSTALL ON OTHER DEVICES.**
+> CRITICAL: STRICTLY CONFIGURED FOR A SINGLE SPECIFIC LAPTOP (ASUS Vivobook S 14 Flip TN3402QA). DO NOT CLONE AND RUN INSTALL.SH ON OTHER HARDWARE!!!
 
 Personal dotfiles and system configurations for **Arch Linux** powered by **Hyprland** Wayland compositor. Tailored for high productivity, 2-in-1 touchscreen convertibles, intelligent battery longevity, and dynamic aesthetic theming.
 
 > [!CAUTION]
-> ### ⚠️ PERINGATAN KERAS / STRICT DEVICE LOCK: PERSONAL DEVICE ONLY
-> **Repositori konfigurasi ini TIDAK BOLEH digunakan atau di-install pada perangkat lain.**
-> Seluruh isi repositori ini dirancang secara eksklusif untuk laptop pribadi milik **Fioren (@Leshoraa)** (**ASUS Vivobook S 14 Flip TN3402QA** / `leviola`).
+> ### HARDWARE LOCKOUT WARNING: PERSONAL HARDWARE BUILD ONLY!!!
+> **DO NOT BLINDLY RUN THESE SCRIPTS OR COPY SYSTEM CONFIGS TO OTHER DEVICES!!!**
+> This repository is not your average generic r/unixporn config collection. It contains raw, bare-metal hardware tuning specifically built for **Fioren's ASUS Vivobook S 14 Flip TN3402QA** (`leviola`). If you run `./install.sh` on your laptop, you are going to break things fast!!!
 > 
-> #### 💥 6 Dampak Fatal Jika Memaksakan Pemasangan di Perangkat Lain:
-> 1. **Boot Failure / Kernel Panic (`acpi_override.img`)**: Berkas ini menyuntikkan tabel compiled ACPI SSDT (`CpuPlugA`/`ZPSS`) langsung ke kernel saat bootloader memuat initramfs. Pada laptop selain ASUS Vivobook ini (terutama prosesor Intel atau motherboard non-ASUS), pemetaan pin dan tabel ACPI akan bentrok, menyebabkan **Kernel Panic** atau freeze total saat boot.
-> 2. **Black Screen & Display Crash (Kernel Bootloader & AMDGPU Parameters)**: Opsi bootloader `amd_pstate=active amdgpu.runpm=1 amdgpu.bapm=1` serta konfigurasi GPU disetel spesifik untuk APU AMD Ryzen 5600H. Di laptop berprosesor Intel atau GPU NVIDIA, opsi ini memicu **layar hitam (*black screen*)** atau kegagalan inisialisasi display server Wayland/Hyprland.
-> 3. **Crash Loop Layanan Baterai (`asus-battery-charge-threshold.service`)**: Skrip proteksi baterai dan udev rules mengakses direktori sysfs eksklusif ASUS (`/sys/class/power_supply/BAT0/charge_control_end_threshold` via driver kernel `asus_wmi`). Di laptop merk lain (Lenovo, Dell, HP, Acer, MacBook), path ini tidak ada sehingga service akan masuk **crash loop** tanpa henti dan membebani log sistem (*journalctl spam*).
-> 4. **Touchpad Macet atau Input Liar (`asus_touchpad_numpad.service`)**: Virtual driver uinput dijalankan khusus untuk matriks NumberPad ASUS (`ux3402za`/TN3402QA). Pada laptop lain, layanan ini akan bentrok dengan driver bawaan laptop dan berisiko membuat touchpad fisik tidak merespons atau memicu klik/sentuhan hantu (*ghost clicks*).
-> 5. **Touchscreen Mati atau Orientasi Layar Terbalik (`wdht1f01:00-2575:0911` & `TouchRotate.sh`)**: Pengaturan Hyprland mengunci sensor ke hardware chip ID laptop ini secara spesifik. Di laptop convertible lain, skrip rotasi otomatis akan salah membaca sumbu sensor akselerometer, menyebabkan orientasi layar terbalik 90° atau 180°.
-> 6. **Tampilan UI, Waybar & Floating Pecah (Rasio Layar 16:10 1920x1200 & Script Scrcpy)**: Seluruh dimensi Waybar, Quickshell, padding, DropDown terminal, dan algoritma penataan kanvas infinite desktop dihitung berdasarkan resolusi 1920x1200 (16:10). Di layar standar 16:9 (1080p / 768p), antarmuka akan meluber atau terpotong, serta skrip floating `ToggleFloat.sh` mengunci rasio HP spesifik Redmi Note 13 Pro.
+> #### 6 WAYS THIS DOTFILE WILL DESTROY YOUR SETUP IF YOU RUN IT ON DIFFERENT HARDWARE:
+> 1. **Immediate Kernel Panic / Boot Failure (`acpi_override.img`)**: We are literally injecting raw, custom-compiled ACPI SSDT tables (`CpuPlugA` / `ZPSS`) straight into the initramfs at boot time!!! If your motherboard does not have the exact ASUS DSDT memory layout, the Linux kernel will choke, throw a massive kernel panic, and freeze before you even hit user space!!!
+> 2. **Instant Black Screen & Wayland Compositor Crash (`loader-linux.conf`)**: The bootloader parameters force `amd_pstate=active amdgpu.runpm=1 amdgpu.bapm=1` and aggressively blacklists driver modules for our specific Ryzen 5 5600H APU!!! If you run an Intel CPU or an NVIDIA GPU, your graphics drivers will completely fail to initialize, leaving you staring at a dead black screen with zero display output!!!
+> 3. **Infinite Crash Loop on Battery Services (`asus-battery-charge-threshold.service`)**: The charging limiter writes directly to ASUS-exclusive sysfs nodes under `/sys/class/power_supply/BAT0/charge_control_end_threshold` via `asus_wmi`!!! Dell, Lenovo, HP, or Framework laptops do not have these nodes. Your systemd journal will get spammed to death with restart loops every single second!!!
+> 4. **Dead Touchpad or Ghost Mouse Clicks (`asus_touchpad_numpad.service`)**: There is an active Python uinput daemon mapped strictly to the ASUS NumberPad dial matrix on the touchpad glass (`ux3402za` / TN3402QA)!!! Running this on Synaptics, Elan, or Apple touchpads will hijack your input bus, corrupt gestures, or leave your mouse cursor completely paralyzed!!!
+> 5. **Broken Touchscreen & Inverted Display Orientation (`TouchRotate.sh`)**: We hardcode the exact hardware chip vendor ID (`wdht1f01:00-2575:0911`) inside Hyprland settings, and our sensor daemon monitors the raw orientation matrices of this specific 2-in-1 chassis!!! Run this on another convertible and your screen will rotate upside down into an unusable mess!!!
+> 6. **Completely Ruined UI Geometry & Squished Layouts (16:10 1200p & Mobile DPI Math)**: Every single pixel in Waybar, Quickshell, dropterm, floating windows (`795x482`), and our infinite desktop canvas physics is calculated for a 1920x1200 16:10 display, plus aspect-ratio math for a Redmi Note 13 Pro in `ToggleFloat.sh`!!! Run this on a 16:9 1080p or 768p monitor and your panels will overflow, popups will get clipped, and your windows will spawn out of bounds!!!
 > 
-> *Catatan: Jika Anda tertarik dengan tema atau tampilan visual repo ini, Anda HANYA diperbolehkan menyalin berkas kosmetik (CSS Waybar, template Wallust, tema Rofi, Kitty, atau animasi Hyprland) secara manual, BUKAN menjalankan skrip instalasi `./install.sh` atau menyalin berkas tingkat sistem.*
+> *NOTE: Want the visual theme? Cherry-pick our Waybar CSS, Wallust templates, Kitty configs, and Hyprland animations manually. DO NOT run `./install.sh` on non-matching hardware unless you want a broken system!!!*
 
 ---
 

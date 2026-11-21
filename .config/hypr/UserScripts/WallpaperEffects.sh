@@ -48,7 +48,7 @@ no-effects() {
     swww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
     wait $!
     if command -v matugen >/dev/null 2>&1; then
-        matugen image "$wallpaper_current" --type scheme-content --mode dark --prefer saturation
+        matugen image "$wallpaper_current" --type scheme-vibrant --mode dark --prefer saturation
     else
         wallust run "$wallpaper_current" -s
     fi &&
@@ -92,7 +92,7 @@ main() {
             sleep 2
   
             if command -v matugen >/dev/null 2>&1; then
-                matugen image "$wallpaper_output" --type scheme-content --mode dark --prefer saturation &
+                matugen image "$wallpaper_output" --type scheme-vibrant --mode dark --prefer saturation &
             else
                 wallust run "$wallpaper_output" -s &
             fi

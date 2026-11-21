@@ -25,7 +25,7 @@ if [ ! -f "$HOME/.config/hypr/.initial_startup_done" ]; then
     sleep 1
     # Initialize matugen and wallpaper
 	if [ -f "$wallpaper" ]; then
-		matugen image "$wallpaper" --type scheme-content --mode dark --prefer saturation > /dev/null 2>&1 || wallust run -s $wallpaper > /dev/null 2>&1 
+		matugen image "$wallpaper" --type scheme-vibrant --mode dark --prefer saturation > /dev/null 2>&1 || wallust run -s $wallpaper > /dev/null 2>&1 
 		swww query || swww-daemon && $swww $wallpaper $effect
 	    "$scriptsDir/WallustSwww.sh" > /dev/null 2>&1 & 
 	fi

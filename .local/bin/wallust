@@ -11,7 +11,7 @@ if [[ "$1" == "run" ]]; then
         fi
     done
     if [[ -n "$img" && -f "$img" ]]; then
-        exec matugen image "$img" --type scheme-content --mode dark --prefer saturation
+        exec matugen image "$img" --type scheme-vibrant --mode dark --prefer saturation
     fi
 fi
 

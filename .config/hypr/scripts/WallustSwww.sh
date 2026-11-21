@@ -68,9 +68,9 @@ if [[ ! -f "$rofi_source" || "$(< "$rofi_source")" != "$wallpaper_path" ]]; then
   magick "$wallpaper_path"[0] -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 200>&- &
 fi
 
-# Derive colors via matugen using settings from mkhmtdots (scheme-content, dark, prefer saturation)
+# Derive colors via matugen (scheme-vibrant, dark, prefer saturation for rich, lively colors)
 if command -v matugen >/dev/null 2>&1; then
-  matugen image "$wallpaper_path" --type scheme-content --mode dark --prefer saturation || true
+  matugen image "$wallpaper_path" --type scheme-vibrant --mode dark --prefer saturation || true
 elif command -v wallust >/dev/null 2>&1; then
   wallust run -s "$wallpaper_path" || true
 fi

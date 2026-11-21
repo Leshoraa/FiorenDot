@@ -1,5 +1,8 @@
 [config]
 version_check = false
+type = "scheme-vibrant"
+mode = "dark"
+prefer = "saturation"
 
 [config.wallpaper]
 command = "awww"

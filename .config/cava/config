@@ -223,7 +223,7 @@
 
 # SDL and sdl_glsl only support hex code colors, these are the default:
 ; background = '#111111'
-foreground = '#d5c68f'
+foreground = '#ffb2ba'
 
 # these are default
 # Gradient mode, only hex defined colors are supported,
@@ -234,14 +234,14 @@ foreground = '#d5c68f'
 
 ; gradient = 0
 ; gradient_count = 0
-gradient_color_1 = '#9d915e'
-gradient_color_2 = '#9d915e'
-gradient_color_3 = '#9d915e'
-gradient_color_4 = '#9d915e'
-gradient_color_5 = '#9d915e'
-gradient_color_6 = '#9d915e'
-gradient_color_7 = '#9d915e'
-gradient_color_8 = '#9d915e'
+gradient_color_1 = '#910031'
+gradient_color_2 = '#910031'
+gradient_color_3 = '#910031'
+gradient_color_4 = '#910031'
+gradient_color_5 = '#910031'
+gradient_color_6 = '#910031'
+gradient_color_7 = '#910031'
+gradient_color_8 = '#910031'
 
 
 #; gradient = 1
@@ -249,14 +249,14 @@ gradient_color_8 = '#9d915e'
 # for wallust
 gradient = 0
 gradient_count = 0
-gradient_color_1 = '#9d915e'
-gradient_color_2 = '#9d915e'
-gradient_color_3 = '#9d915e'
-gradient_color_4 = '#9d915e'
-gradient_color_5 = '#9d915e'
-gradient_color_6 = '#9d915e'
-gradient_color_7 = '#9d915e'
-gradient_color_8 = '#9d915e'
+gradient_color_1 = '#910031'
+gradient_color_2 = '#910031'
+gradient_color_3 = '#910031'
+gradient_color_4 = '#910031'
+gradient_color_5 = '#910031'
+gradient_color_6 = '#910031'
+gradient_color_7 = '#910031'
+gradient_color_8 = '#910031'
 
 
 [smoothing]

@@ -7,15 +7,17 @@ Personal dotfiles and system configurations for **Arch Linux** powered by **Hypr
 > [!CAUTION]
 > ### ⚠️ PERINGATAN KERAS / STRICT DEVICE LOCK: PERSONAL DEVICE ONLY
 > **Repositori konfigurasi ini TIDAK BOLEH digunakan atau di-install pada perangkat lain.**
-> Seluruh isi repositori ini dirancang secara eksklusif untuk laptop pribadi milik **Fioren (@Leshoraa)** (**ASUS Vivobook S 14 Flip TN3402QA** / `leviola`). Repositori ini memuat konfigurasi tingkat rendah (*low-level system settings*) meliputi:
-> - **Kernel boot parameters & systemd-boot loader options**
-> - **Custom compiled ACPI SSDT table override (`acpi_override.img`)**
-> - **ASUS Embedded Controller (EC) battery charge control & RTC wake/sleep hooks**
-> - **AMD Ryzen P-State EPP & AMDGPU power profile udev rules**
-> - **ASUS Touchpad / Numberpad virtual driver daemon & uinput permissions**
-> - **Hardware permissions khusus untuk STM32 DFU & Flight Controller**
+> Seluruh isi repositori ini dirancang secara eksklusif untuk laptop pribadi milik **Fioren (@Leshoraa)** (**ASUS Vivobook S 14 Flip TN3402QA** / `leviola`).
 > 
-> Menggunakan atau memasang repositori ini pada perangkat lain dapat menyebabkan instabilitas sistem, konflik kernel modules, atau malfungsi hardware.
+> #### 💥 6 Dampak Fatal Jika Memaksakan Pemasangan di Perangkat Lain:
+> 1. **Boot Failure / Kernel Panic (`acpi_override.img`)**: Berkas ini menyuntikkan tabel compiled ACPI SSDT (`CpuPlugA`/`ZPSS`) langsung ke kernel saat bootloader memuat initramfs. Pada laptop selain ASUS Vivobook ini (terutama prosesor Intel atau motherboard non-ASUS), pemetaan pin dan tabel ACPI akan bentrok, menyebabkan **Kernel Panic** atau freeze total saat boot.
+> 2. **Black Screen & Display Crash (Kernel Bootloader & AMDGPU Parameters)**: Opsi bootloader `amd_pstate=active amdgpu.runpm=1 amdgpu.bapm=1` serta konfigurasi GPU disetel spesifik untuk APU AMD Ryzen 5600H. Di laptop berprosesor Intel atau GPU NVIDIA, opsi ini memicu **layar hitam (*black screen*)** atau kegagalan inisialisasi display server Wayland/Hyprland.
+> 3. **Crash Loop Layanan Baterai (`asus-battery-charge-threshold.service`)**: Skrip proteksi baterai dan udev rules mengakses direktori sysfs eksklusif ASUS (`/sys/class/power_supply/BAT0/charge_control_end_threshold` via driver kernel `asus_wmi`). Di laptop merk lain (Lenovo, Dell, HP, Acer, MacBook), path ini tidak ada sehingga service akan masuk **crash loop** tanpa henti dan membebani log sistem (*journalctl spam*).
+> 4. **Touchpad Macet atau Input Liar (`asus_touchpad_numpad.service`)**: Virtual driver uinput dijalankan khusus untuk matriks NumberPad ASUS (`ux3402za`/TN3402QA). Pada laptop lain, layanan ini akan bentrok dengan driver bawaan laptop dan berisiko membuat touchpad fisik tidak merespons atau memicu klik/sentuhan hantu (*ghost clicks*).
+> 5. **Touchscreen Mati atau Orientasi Layar Terbalik (`wdht1f01:00-2575:0911` & `TouchRotate.sh`)**: Pengaturan Hyprland mengunci sensor ke hardware chip ID laptop ini secara spesifik. Di laptop convertible lain, skrip rotasi otomatis akan salah membaca sumbu sensor akselerometer, menyebabkan orientasi layar terbalik 90° atau 180°.
+> 6. **Tampilan UI, Waybar & Floating Pecah (Rasio Layar 16:10 1920x1200 & Script Scrcpy)**: Seluruh dimensi Waybar, Quickshell, padding, DropDown terminal, dan algoritma penataan kanvas infinite desktop dihitung berdasarkan resolusi 1920x1200 (16:10). Di layar standar 16:9 (1080p / 768p), antarmuka akan meluber atau terpotong, serta skrip floating `ToggleFloat.sh` mengunci rasio HP spesifik Redmi Note 13 Pro.
+> 
+> *Catatan: Jika Anda tertarik dengan tema atau tampilan visual repo ini, Anda HANYA diperbolehkan menyalin berkas kosmetik (CSS Waybar, template Wallust, tema Rofi, Kitty, atau animasi Hyprland) secara manual, BUKAN menjalankan skrip instalasi `./install.sh` atau menyalin berkas tingkat sistem.*
 
 ---
 

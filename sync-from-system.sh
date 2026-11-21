@@ -39,6 +39,11 @@ if [ -d "$DOTFILES_DIR/.config" ]; then
         base="$(basename "$repo_item")"
         sys_item="$CONFIG_SOURCE/$base"
         
+        # Skip special folders handled separately
+        if [ "$base" = "VSCodium" ] || [ "$base" = "systemd" ]; then
+            continue
+        fi
+
         if [ -d "$sys_item" ]; then
             rsync -av --delete "${EXCLUDE_ARGS[@]}" "$sys_item/" "$repo_item/"
         elif [ -f "$sys_item" ]; then
@@ -47,10 +52,10 @@ if [ -d "$DOTFILES_DIR/.config" ]; then
     done
 fi
 
-# 2. Sync systemd user overrides if present
-if [ -d "$CONFIG_SOURCE/systemd/user/swaync.service.d" ]; then
-    mkdir -p "$DOTFILES_DIR/.config/systemd/user/swaync.service.d"
-    rsync -av "$CONFIG_SOURCE/systemd/user/swaync.service.d/" "$DOTFILES_DIR/.config/systemd/user/swaync.service.d/"
+# 2. Sync systemd user units & overrides if present
+if [ -d "$CONFIG_SOURCE/systemd/user" ]; then
+    mkdir -p "$DOTFILES_DIR/.config/systemd/user"
+    rsync -av --delete "$CONFIG_SOURCE/systemd/user/" "$DOTFILES_DIR/.config/systemd/user/"
 fi
 
 # 3. Sync .local/bin scripts
@@ -71,16 +76,29 @@ if [ -d "$DOTFILES_DIR/.local/share/easyeffects" ] && [ -d "$HOME_SOURCE/.local/
 fi
 
 # 5. Sync home dotfiles
-for home_file in .zshrc .zprofile; do
+for home_file in .zshrc .zprofile .gtkrc-2.0; do
     if [ -f "$HOME_SOURCE/$home_file" ]; then
         cp -p "$HOME_SOURCE/$home_file" "$DOTFILES_DIR/$home_file"
     fi
 done
 
-# 6. Sync system hardware, power & kernel configs if present
-mkdir -p "$DOTFILES_DIR/system/power" "$DOTFILES_DIR/system/gpu" "$DOTFILES_DIR/system/input"
+# 6. Sync standalone .config files & VSCodium
+for cfg_file in chromium-flags.conf brave-flags.conf pavucontrol.ini; do
+    if [ -f "$CONFIG_SOURCE/$cfg_file" ]; then
+        cp -p "$CONFIG_SOURCE/$cfg_file" "$DOTFILES_DIR/.config/$cfg_file"
+    fi
+done
 
-# Power & battery
+if [ -f "$CONFIG_SOURCE/VSCodium/User/settings.json" ]; then
+    mkdir -p "$DOTFILES_DIR/.config/VSCodium/User"
+    cp -p "$CONFIG_SOURCE/VSCodium/User/settings.json" "$DOTFILES_DIR/.config/VSCodium/User/settings.json"
+fi
+
+# 7. Sync system hardware, power, kernel & udev configs if present
+mkdir -p "$DOTFILES_DIR/system/power" "$DOTFILES_DIR/system/gpu" "$DOTFILES_DIR/system/input" \
+         "$DOTFILES_DIR/system/hardware" "$DOTFILES_DIR/system/sysctl" "$DOTFILES_DIR/system/boot"
+
+# Power, battery & ACPI
 if [ -f "/usr/lib/systemd/system-sleep/battery-limit-rtc.sh" ]; then
     cp -p "/usr/lib/systemd/system-sleep/battery-limit-rtc.sh" "$DOTFILES_DIR/system/power/battery-limit-rtc.sh"
 fi
@@ -102,6 +120,9 @@ fi
 if [ -f "/etc/systemd/system/asus-battery-charge-threshold.service" ]; then
     cp -p "/etc/systemd/system/asus-battery-charge-threshold.service" "$DOTFILES_DIR/system/power/asus-battery-charge-threshold.service"
 fi
+if [ -f "/boot/acpi_override.img" ]; then
+    cp -p "/boot/acpi_override.img" "$DOTFILES_DIR/system/power/acpi_override.img"
+fi
 
 # GPU
 if [ -f "/etc/udev/rules.d/60-amdgpu-power.rules" ]; then
@@ -110,18 +131,35 @@ fi
 if [ -f "/etc/modprobe.d/amdgpu.conf" ]; then
     cp -p "/etc/modprobe.d/amdgpu.conf" "$DOTFILES_DIR/system/gpu/amdgpu.conf"
 fi
+if [ -f "/etc/modprobe.d/supergfxd.conf" ]; then
+    cp -p "/etc/modprobe.d/supergfxd.conf" "$DOTFILES_DIR/system/gpu/supergfxd.conf"
+fi
 
-# Input & Touchpad
+# Input, Touchpad & Hardware rules
 if [ -f "/etc/udev/rules.d/80-uinput.rules" ]; then
     cp -p "/etc/udev/rules.d/80-uinput.rules" "$DOTFILES_DIR/system/input/80-uinput.rules"
 fi
 if [ -f "/etc/systemd/system/asus_touchpad_numpad.service" ]; then
     cp -p "/etc/systemd/system/asus_touchpad_numpad.service" "$DOTFILES_DIR/system/input/asus_touchpad_numpad.service"
 fi
+if [ -f "/etc/udev/rules.d/45-stdfu-permissions.rules" ]; then
+    cp -p "/etc/udev/rules.d/45-stdfu-permissions.rules" "$DOTFILES_DIR/system/hardware/45-stdfu-permissions.rules"
+fi
+if [ -f "/etc/udev/rules.d/99-flightcontroller.rules" ]; then
+    cp -p "/etc/udev/rules.d/99-flightcontroller.rules" "$DOTFILES_DIR/system/hardware/99-flightcontroller.rules"
+fi
 
-# VM / ZRAM
+# Sysctl & VM / ZRAM
 if [ -f "/etc/sysctl.d/99-zram.conf" ]; then
-    cp -p "/etc/sysctl.d/99-zram.conf" "$DOTFILES_DIR/system/99-zram.conf"
+    cp -p "/etc/sysctl.d/99-zram.conf" "$DOTFILES_DIR/system/sysctl/99-zram.conf"
+fi
+if [ -f "/etc/sysctl.d/50-cursor.conf" ]; then
+    cp -p "/etc/sysctl.d/50-cursor.conf" "$DOTFILES_DIR/system/sysctl/50-cursor.conf"
+fi
+
+# Bootloader & Kernel Options
+if [ -f "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" ]; then
+    cp -p "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" "$DOTFILES_DIR/system/boot/loader-linux.conf"
 fi
 
 echo "========================================"

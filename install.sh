@@ -28,6 +28,16 @@ Options:
 HELP
 }
 
+# Options:
+#   -s, --symlink    Create symlinks from dotfiles to target directories (default)
+#   -c, --copy       Copy files directly instead of symlinking
+#   -n, --dry-run    Show what would be done without making changes
+#   --force          Bypass strict device lock check
+#   --no-backup      Skip backing up existing configs
+#   -h, --help       Show this help message
+
+FORCE_INSTALL=false
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -s|--symlink)
@@ -40,6 +50,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -n|--dry-run)
             DRY_RUN=true
+            shift
+            ;;
+        --force)
+            FORCE_INSTALL=true
             shift
             ;;
         --no-backup)
@@ -57,6 +71,28 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Strict device lock check
+CURRENT_USER="$(whoami 2>/dev/null || echo "$USER")"
+CURRENT_HOST="$(hostname 2>/dev/null || uname -n)"
+
+if [[ "$CURRENT_USER" != "fioren" || "$CURRENT_HOST" != "leviola" ]]; then
+    echo "=========================================================="
+    echo "⚠️  PERINGATAN KERAS / STRICT DEVICE LOCK:                "
+    echo "   Repositori ini dikhususkan secara eksklusif untuk     "
+    echo "   perangkat pribadi milik Fioren (@Leshoraa)            "
+    echo "   (ASUS Vivobook S 14 Flip TN3402QA / leviola).         "
+    echo "   Banyak pengaturan hardware (ACPI, udev rules, EPP,    "
+    echo "   battery threshold, touchpad numpad) yang dirancang    "
+    echo "   hanya untuk hardware ini dan TIDAK BOLEH dipasang     "
+    echo "   di perangkat lain!                                    "
+    echo "=========================================================="
+    if [[ "$FORCE_INSTALL" != "true" ]]; then
+        echo "❌ Instalasi dibatalkan demi keamanan hardware Anda."
+        echo "   (Gunakan --force hanya jika Anda tahu persis apa yang Anda lakukan)"
+        exit 1
+    fi
+fi
 
 echo "========================================"
 echo "         FiorenDot Installer           "
@@ -146,8 +182,8 @@ if [ -d "$DOTFILES_DIR/wallpapers" ]; then
     deploy_config "$DOTFILES_DIR/wallpapers" "$HOME_TARGET/Pictures/wallpapers"
 fi
 
-# Deploy home dotfiles (.zshrc, .zprofile, etc.)
-for home_file in .zshrc .zprofile; do
+# Deploy home dotfiles (.zshrc, .zprofile, .gtkrc-2.0, etc.)
+for home_file in .zshrc .zprofile .gtkrc-2.0; do
     if [ -f "$DOTFILES_DIR/$home_file" ]; then
         deploy_config "$DOTFILES_DIR/$home_file" "$HOME_TARGET/$home_file"
     fi

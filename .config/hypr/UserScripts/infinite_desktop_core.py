@@ -387,14 +387,27 @@ def sync_positions(floating_windows):
     current_addresses = {w['address'] for w in floating_windows}
     window_positions = {addr: pos for addr, pos in window_positions.items() if addr in current_addresses}
 
+    removed_pushers = True
+    while removed_pushers:
+        removed_pushers = False
+        for addr, info in list(displaced.items()):
+            if info['pusher'] not in current_addresses:
+                if addr in window_positions:
+                    window_positions[addr]['target_x'] = info['home_x']
+                    window_positions[addr]['target_y'] = info['home_y']
+                del displaced[addr]
+                removed_pushers = True
+            elif addr not in current_addresses:
+                del displaced[addr]
+                removed_pushers = True
+
     for addr, info in list(displaced.items()):
-        if info['pusher'] not in current_addresses:
-            if addr in window_positions:
-                window_positions[addr]['target_x'] = info['home_x']
-                window_positions[addr]['target_y'] = info['home_y']
-            del displaced[addr]
-        elif addr not in current_addresses:
-            del displaced[addr]
+        pusher_addr = info['pusher']
+        if pusher_addr in window_positions and addr in window_positions:
+            pusher_w = window_positions[pusher_addr]
+            curr_w = window_positions[addr]
+            curr_w['target_x'] = pusher_w['target_x'] + pusher_w['w'] + GAP
+            curr_w['target_y'] = pusher_w['target_y'] - (curr_w['h'] * 0.5)
 
     for w in floating_windows:
         addr = w['address']
@@ -408,6 +421,7 @@ def sync_positions(floating_windows):
         w_init_class = w.get('initialClass', '')
         w_pinned = bool(w.get('pinned', False))
         is_menu = is_popup_or_menu(w)
+        focus_hist = w.get('focusHistoryID', 999)
 
         if addr not in window_positions:
             window_positions[addr] = {
@@ -423,7 +437,8 @@ def sync_positions(floating_windows):
                 'class': w_class,
                 'initialTitle': w_init_title,
                 'initialClass': w_init_class,
-                'pinned': w_pinned
+                'pinned': w_pinned,
+                'focusHistoryID': focus_hist
             }
         else:
             window_positions[addr]['w'] = aw
@@ -435,6 +450,7 @@ def sync_positions(floating_windows):
             window_positions[addr]['initialTitle'] = w_init_title
             window_positions[addr]['initialClass'] = w_init_class
             window_positions[addr]['pinned'] = w_pinned
+            window_positions[addr]['focusHistoryID'] = focus_hist
 
             if is_menu:
                 window_positions[addr]['target_x'] = ax
@@ -460,19 +476,31 @@ def sync_positions(floating_windows):
 def resolve_collisions(tracked, active_addr):
     global displaced
 
-    def get_pusher(addr):
-        if addr == active_addr:
-            return active_addr
-        if addr in displaced:
-            return displaced[addr]['pusher']
-        return None
+    def get_priority(addr, w):
+        if active_addr and addr == active_addr:
+            return 0
+        curr = addr
+        dist = 1
+        visited = set()
+        while curr in displaced and dist < 20:
+            visited.add(curr)
+            p = displaced[curr].get('pusher')
+            if active_addr and p == active_addr:
+                return dist
+            if not p or p in visited:
+                break
+            curr = p
+            dist += 1
+        return 100 + w.get('focusHistoryID', 999)
 
     keys = list(tracked.keys())
-    for _ in range(8):
+    for _ in range(12):
         moved = False
         for i in range(len(keys)):
             for j in range(i + 1, len(keys)):
                 addr1, addr2 = keys[i], keys[j]
+                if addr1 not in tracked or addr2 not in tracked:
+                    continue
                 w1 = tracked[addr1]
                 w2 = tracked[addr2]
                 if w1.get('fullscreen') or w2.get('fullscreen'):
@@ -491,43 +519,31 @@ def resolve_collisions(tracked, active_addr):
                 overlap_x = min(x1_2, x2_2) - max(x1_1, x2_1) + GAP
                 overlap_y = min(y1_2, y2_2) - max(y1_1, y2_1) + GAP
                 if overlap_x > 0 and overlap_y > 0:
-                    pusher1 = get_pusher(addr1)
-                    pusher2 = get_pusher(addr2)
-                    if overlap_x < overlap_y:
-                        cx1 = x1_1 + w1['w'] / 2.0
-                        cx2 = x2_1 + w2['w'] / 2.0
-                        dx = overlap_x
-                        if cx2 < cx1:
-                            dx = -dx
-                        if pusher1 and not pusher2:
-                            if addr2 not in displaced:
-                                displaced[addr2] = {'pusher': pusher1, 'home_x': w2['target_x'], 'home_y': w2['target_y']}
-                            w2['target_x'] += dx
-                        elif pusher2 and not pusher1:
-                            if addr1 not in displaced:
-                                displaced[addr1] = {'pusher': pusher2, 'home_x': w1['target_x'], 'home_y': w1['target_y']}
-                            w1['target_x'] -= dx
-                        else:
-                            w1['target_x'] -= dx * 0.5
-                            w2['target_x'] += dx * 0.5
+                    p1 = get_priority(addr1, w1)
+                    p2 = get_priority(addr2, w2)
+                    if p1 < p2 or (p1 == p2 and addr1 < addr2):
+                        pusher_addr, pushed_addr = addr1, addr2
+                        w_push, w_target = w1, w2
                     else:
-                        cy1 = y1_1 + w1['h'] / 2.0
-                        cy2 = y2_1 + w2['h'] / 2.0
-                        dy = overlap_y
-                        if cy2 < cy1:
-                            dy = -dy
-                        if pusher1 and not pusher2:
-                            if addr2 not in displaced:
-                                displaced[addr2] = {'pusher': pusher1, 'home_x': w2['target_x'], 'home_y': w2['target_y']}
-                            w2['target_y'] += dy
-                        elif pusher2 and not pusher1:
-                            if addr1 not in displaced:
-                                displaced[addr1] = {'pusher': pusher2, 'home_x': w1['target_x'], 'home_y': w1['target_y']}
-                            w1['target_y'] -= dy
-                        else:
-                            w1['target_y'] -= dy * 0.5
-                            w2['target_y'] += dy * 0.5
-                    moved = True
+                        pusher_addr, pushed_addr = addr2, addr1
+                        w_push, w_target = w2, w1
+
+                    if pushed_addr not in displaced:
+                        displaced[pushed_addr] = {
+                            'pusher': pusher_addr,
+                            'home_x': w_target['target_x'],
+                            'home_y': w_target['target_y']
+                        }
+                    else:
+                        displaced[pushed_addr]['pusher'] = pusher_addr
+
+                    new_tx = w_push['target_x'] + w_push['w'] + GAP
+                    new_ty = w_push['target_y'] - (w_target['h'] * 0.5)
+
+                    if abs(w_target['target_x'] - new_tx) > 0.5 or abs(w_target['target_y'] - new_ty) > 0.5:
+                        w_target['target_x'] = new_tx
+                        w_target['target_y'] = new_ty
+                        moved = True
         if not moved:
             break
 

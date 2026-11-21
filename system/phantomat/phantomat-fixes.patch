@@ -1,3 +1,37 @@
+diff --git a/Config.cpp b/Config.cpp
+index 442ec7a..207854b 100644
+--- a/Config.cpp
++++ b/Config.cpp
+@@ -360,11 +360,11 @@ static void registerConfigValues() {
+                                   makeShared<CFloatValue>("plugin:spatialoverview:canvas:initial_zoom", "initial shared-canvas camera zoom", 0.72F,
+                                                           SFloatValueOptions{.min = 0.01F, .max = 2.F}));
+     HyprlandAPI::addConfigValueV2(SCROLLOVERVIEW_HANDLE,
+-                                  makeShared<CFloatValue>("plugin:spatialoverview:canvas:min_zoom", "minimum shared-canvas camera zoom", 0.05F,
+-                                                          SFloatValueOptions{.min = 0.05F, .max = 2.F}));
++                                  makeShared<CFloatValue>("plugin:spatialoverview:canvas:min_zoom", "minimum shared-canvas camera zoom", 0.001F,
++                                                          SFloatValueOptions{.min = 0.0001F, .max = 2.F}));
+     HyprlandAPI::addConfigValueV2(SCROLLOVERVIEW_HANDLE,
+-                                  makeShared<CFloatValue>("plugin:spatialoverview:canvas:max_zoom", "maximum shared-canvas camera zoom", 2.5F,
+-                                                          SFloatValueOptions{.min = 0.1F, .max = 8.F}));
++                                  makeShared<CFloatValue>("plugin:spatialoverview:canvas:max_zoom", "maximum shared-canvas camera zoom", 50.0F,
++                                                          SFloatValueOptions{.min = 0.1F, .max = 1000.F}));
+     HyprlandAPI::addConfigValueV2(SCROLLOVERVIEW_HANDLE,
+                                   makeShared<CFloatValue>("plugin:spatialoverview:canvas:zoom_step", "wheel zoom strength", 0.12F,
+                                                           SFloatValueOptions{.min = 0.01F, .max = 1.F}));
+@@ -665,11 +665,11 @@ float getCanvasInitialZoom() {
+ }
+ 
+ float getCanvasMinZoom() {
+-    return std::clamp(getValue<float>("plugin:spatialoverview:canvas:min_zoom"), 0.05F, 2.F);
++    return std::clamp(getValue<float>("plugin:spatialoverview:canvas:min_zoom"), 0.0001F, 2.F);
+ }
+ 
+ float getCanvasMaxZoom() {
+-    return std::max(getCanvasMinZoom(), std::clamp(getValue<float>("plugin:spatialoverview:canvas:max_zoom"), 0.1F, 8.F));
++    return std::max(getCanvasMinZoom(), std::clamp(getValue<float>("plugin:spatialoverview:canvas:max_zoom"), 0.1F, 1000.F));
+ }
+ 
+ float getCanvasZoomStep() {
 diff --git a/IOverview.hpp b/IOverview.hpp
 index 40bfed8..d9aa963 100644
 --- a/IOverview.hpp
@@ -130,7 +164,7 @@ index 54bcf2e..86a95f3 100644
      g_flightDeckIdle = nullptr;
      g_flightDeckRequest.reset();
 diff --git a/scrollOverview.cpp b/scrollOverview.cpp
-index 5c9a055..cd440f1 100644
+index 5c9a055..3e7e929 100644
 --- a/scrollOverview.cpp
 +++ b/scrollOverview.cpp
 @@ -54,6 +54,8 @@
@@ -142,6 +176,15 @@ index 5c9a055..cd440f1 100644
  #include <hyprland/src/managers/fullscreen/FullscreenController.hpp>
  #include <hyprland/src/protocols/LayerShell.hpp>
  #include <hyprland/src/devices/IKeyboard.hpp>
+@@ -1166,7 +1168,7 @@ static float getWorkspaceRenderedPitch(PHLMONITOR monitor, float scale, ScrollOv
+ }
+ 
+ static float getWorkspaceLogicalPitch(PHLMONITOR monitor, float scale, ScrollOverview::Config::ELayout layout) {
+-    const auto safeScale = std::max(scale, 0.01F);
++    const auto safeScale = std::max(scale, 0.0001F);
+     return axisSize(monitor->m_size, layout) + sc<float>(ScrollOverview::Config::getWorkspaceGap()) / safeScale;
+ }
+ 
 @@ -1503,15 +1505,17 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
  
      const auto WINDOWSMOVECONFIG = Config::animationTree()->getAnimationPropertyConfig("windowsMove");
@@ -277,7 +320,7 @@ index 5c9a055..cd440f1 100644
                  if (beginSubmapMouseClickPending(event.button))
                      return;
  
-@@ -2087,6 +2154,43 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+@@ -2087,6 +2154,38 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
  
          markCanvasCameraActive(pMonitor.lock());
  
@@ -294,20 +337,15 @@ index 5c9a055..cd440f1 100644
 +            const float sensitivity = 0.0035F * (scrollFactor > 0 ? scrollFactor : 1.F);
 +            const float factor = std::exp(-sc<float>(e.delta) * sensitivity);
 +
-+            const float currentScale = std::max(scale->value(), 0.01F);
-+            const float minZoom = 0.10F;
-+            const float maxZoom = 2.5F;
++            const float currentScale = std::max(scale->value(), 0.0001F);
++            const float minZoom = ScrollOverview::Config::getCanvasMinZoom();
++            const float maxZoom = ScrollOverview::Config::getCanvasMaxZoom();
 +            const float targetScale = std::clamp(currentScale * factor, minZoom, maxZoom);
 +
 +            const auto mousePos = getOverviewMousePosLocal(MONITOR);
 +            const auto centerPx = CBox{{}, MONITOR->m_size * MONITOR->m_scale}.middle();
 +            const float diff = (1.F / currentScale) - (1.F / targetScale);
 +            const Vector2D newOffset = viewOffset->value() + ((mousePos - centerPx) * (1.F / MONITOR->m_scale)) * diff;
-+
-+            if (targetScale >= 0.80F) {
-+                smoothLandIntoWorkspace();
-+                return;
-+            }
 +
 +            viewOffset->setValueAndWarp(newOffset);
 +            scale->setValueAndWarp(targetScale);
@@ -321,7 +359,7 @@ index 5c9a055..cd440f1 100644
          if (isCanvasDesktop()) {
              info.cancelled = true;
              const auto MODS      = g_pInputManager->getModsFromAllKBs();
-@@ -2180,6 +2284,8 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+@@ -2180,6 +2279,8 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
              if (window->layoutTarget()) g_canvasManagedTargets.erase(window->layoutTarget().get());
              if (navigatorHoverWindow.lock() == window)
                  navigatorHoverWindow.reset();
@@ -330,7 +368,7 @@ index 5c9a055..cd440f1 100644
          }
  
          rebuildPending = true;
-@@ -2328,11 +2434,37 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+@@ -2328,10 +2429,36 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
              return;
          }
  
@@ -346,8 +384,8 @@ index 5c9a055..cd440f1 100644
 +        const bool IS_ESC   = (KEYSYM == XKB_KEY_Escape);
 +
 +        if (!IS_ARROW && !IS_TAB && !IS_ENTER && !IS_ESC)
-             return;
- 
++            return;
++
 +        // Cancel the event immediately so Hyprland dispatchers (cyclenext, movefocus) NEVER run
 +        // and do not trigger unexpected workspace switches while overview is open!
 +        info.cancelled = true;
@@ -360,18 +398,17 @@ index 5c9a055..cd440f1 100644
 +        if (IS_TAB) {
 +            const bool SHIFT = (MODS & HL_MODIFIER_SHIFT) || (KEYSYM == XKB_KEY_ISO_Left_Tab);
 +            cycleOverviewWindow(SHIFT ? -1 : 1);
-+            return;
+             return;
 +        }
 +
 +        if (IS_ENTER) {
 +            smoothLandIntoWorkspace();
 +            return;
 +        }
-+
+ 
          switch (KEYSYM) {
              case XKB_KEY_Left:
-             case XKB_KEY_KP_Left:
-@@ -2350,19 +2482,19 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+@@ -2350,32 +2477,52 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
              case XKB_KEY_KP_Down:
                  moveSelection("down");
                  break;
@@ -390,57 +427,56 @@ index 5c9a055..cd440f1 100644
 -        if (closing || !isCanvasDesktop() || (isPersistentCanvas() && !canvasNavigationActive) ||
 -            scrollOverviewAt(g_pInputManager->getMouseCoordsInternal()).get() != this)
 +        if (closing || scrollOverviewAt(g_pInputManager->getMouseCoordsInternal()).get() != this)
-+            return;
-+
-+        const auto MODS = g_pInputManager ? g_pInputManager->getModsFromAllKBs() : 0;
-+        const bool SUPER_ALT = (MODS & HL_MODIFIER_META) && (MODS & HL_MODIFIER_ALT);
-+        if (!SUPER_ALT && (!isCanvasDesktop() || (isPersistentCanvas() && !canvasNavigationActive)))
              return;
  
++        info.cancelled       = true;
          canvasPinching       = true;
-@@ -2371,7 +2503,40 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+         canvasPinchStartZoom = scale->value();
+-        info.cancelled       = true;
      };
  
      auto onPinchUpdate = [this](IPointer::SPinchUpdateEvent event, Event::SCallbackInfo& info) {
 -        if (closing || !isCanvasDesktop() || !canvasPinching || scrollOverviewAt(g_pInputManager->getMouseCoordsInternal()).get() != this)
 +        if (closing || !canvasPinching || scrollOverviewAt(g_pInputManager->getMouseCoordsInternal()).get() != this)
-+            return;
-+
-+        const auto MODS = g_pInputManager ? g_pInputManager->getModsFromAllKBs() : 0;
-+        const bool SUPER_ALT = (MODS & HL_MODIFIER_META) && (MODS & HL_MODIFIER_ALT);
-+        if (SUPER_ALT) {
-+            info.cancelled = true;
-+            const auto MONITOR = pMonitor.lock();
-+            if (!MONITOR)
-+                return;
-+
-+            const float currentScale = std::max(scale->value(), 0.01F);
-+            const float targetScale = std::clamp(canvasPinchStartZoom * sc<float>(event.scale), 0.10F, 2.5F);
-+
-+            const auto mousePos = getOverviewMousePosLocal(MONITOR);
-+            const auto centerPx = CBox{{}, MONITOR->m_size * MONITOR->m_scale}.middle();
-+            const float diff = (1.F / currentScale) - (1.F / targetScale);
-+            const Vector2D newOffset = viewOffset->value() + ((mousePos - centerPx) * (1.F / MONITOR->m_scale)) * diff;
-+
-+            if (targetScale >= 0.80F) {
-+                smoothLandIntoWorkspace();
-+                return;
-+            }
-+
-+            viewOffset->setValueAndWarp(newOffset);
-+            scale->setValueAndWarp(targetScale);
-+            *scale = targetScale;
-+            *viewOffset = newOffset;
-+            markBlurDirty();
-+            damage();
-+            return;
-+        }
-+
-+        if (!isCanvasDesktop())
              return;
  
          info.cancelled = true;
-@@ -2387,6 +2552,32 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+-        zoomCanvasAt(getOverviewMousePosLocal(pMonitor.lock()), canvasPinchStartZoom * sc<float>(event.scale));
++
++        if (isCanvasDesktop()) {
++            zoomCanvasAt(getOverviewMousePosLocal(pMonitor.lock()), canvasPinchStartZoom * sc<float>(event.scale));
++            return;
++        }
++
++        const auto MONITOR = pMonitor.lock();
++        if (!MONITOR)
++            return;
++
++        const float currentScale = std::max(scale->value(), 0.0001F);
++        const float minZoom = ScrollOverview::Config::getCanvasMinZoom();
++        const float maxZoom = ScrollOverview::Config::getCanvasMaxZoom();
++        const float targetScale = std::clamp(canvasPinchStartZoom * sc<float>(event.scale), minZoom, maxZoom);
++
++        const auto mousePos = getOverviewMousePosLocal(MONITOR);
++        const auto centerPx = CBox{{}, MONITOR->m_size * MONITOR->m_scale}.middle();
++        const float diff = (1.F / currentScale) - (1.F / targetScale);
++        const Vector2D newOffset = viewOffset->value() + ((mousePos - centerPx) * (1.F / MONITOR->m_scale)) * diff;
++
++        viewOffset->setValueAndWarp(newOffset);
++        scale->setValueAndWarp(targetScale);
++        *scale = targetScale;
++        *viewOffset = newOffset;
++        markBlurDirty();
++        damage();
+     };
+ 
+     auto onPinchEnd = [this](IPointer::SPinchEndEvent, Event::SCallbackInfo& info) {
+@@ -2383,10 +2530,36 @@ CScrollOverview::CScrollOverview(PHLWORKSPACE startedOn_, bool swipe_, PHLMONITO
+             return;
+ 
+         canvasPinching = false;
+-        info.cancelled = isCanvasDesktop();
++        info.cancelled = true;
      };
  
      mouseMoveHook = Event::bus()->m_events.input.mouse.move.listen(onMouseMove);
@@ -473,7 +509,7 @@ index 5c9a055..cd440f1 100644
      touchMoveHook = Event::bus()->m_events.input.touch.motion.listen(onTouchMove);
      mouseAxisHook = Event::bus()->m_events.input.mouse.axis.listen(onMouseAxis);
      pinchBeginHook = Event::bus()->m_events.gesture.pinch.begin.listen(onPinchBegin);
-@@ -2779,14 +2970,17 @@ Vector2D CScrollOverview::workspaceOverviewOffset(size_t workspaceIdx, size_t ac
+@@ -2779,19 +2952,22 @@ Vector2D CScrollOverview::workspaceOverviewOffset(size_t workspaceIdx, size_t ac
      const int   COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
      const float STAGGER = ScrollOverview::Config::getGridStagger();
      const auto  gridPoint = [this, COLUMNS, STAGGER](size_t index) {
@@ -494,7 +530,13 @@ index 5c9a055..cd440f1 100644
          return Vector2D{sc<float>(COL) + ((ROW & 1) ? STAGGER : 0.F), sc<float>(ROW)};
      };
  
-@@ -2816,14 +3010,17 @@ Vector2D CScrollOverview::workspaceOverviewLogicalVectorOffset(size_t workspaceI
+     const auto  DELTA        = gridPoint(workspaceIdx) - gridPoint(activeIdx);
+-    const float RENDERSCALE  = std::max(scale->value(), 0.01F);
++    const float RENDERSCALE  = std::max(scale->value(), 0.0001F);
+     const float MONITORSCALE = std::max(MONITOR->m_scale, 0.01F);
+     const float GAP          = sc<float>(ScrollOverview::Config::getWorkspaceGap());
+     const Vector2D PITCH{
+@@ -2816,23 +2992,69 @@ Vector2D CScrollOverview::workspaceOverviewLogicalVectorOffset(size_t workspaceI
      const int   COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
      const float STAGGER = ScrollOverview::Config::getGridStagger();
      const auto  gridPoint = [this, COLUMNS, STAGGER](size_t index) {
@@ -515,7 +557,10 @@ index 5c9a055..cd440f1 100644
          return Vector2D{sc<float>(COL) + ((ROW & 1) ? STAGGER : 0.F), sc<float>(ROW)};
      };
  
-@@ -2833,6 +3030,49 @@ Vector2D CScrollOverview::workspaceOverviewLogicalVectorOffset(size_t workspaceI
+     const auto  DELTA = gridPoint(workspaceIdx) - gridPoint(activeIdx);
+-    const float SCALE = std::max(scale->value(), 0.01F);
++    const float SCALE = std::max(scale->value(), 0.0001F);
+     const float GAP   = sc<float>(ScrollOverview::Config::getWorkspaceGap()) / SCALE;
      return {DELTA.x * (MONITOR->m_size.x + GAP), DELTA.y * (MONITOR->m_size.y + GAP)};
  }
  
@@ -565,7 +610,7 @@ index 5c9a055..cd440f1 100644
  float CScrollOverview::workspaceOverviewAlpha(size_t workspaceIdx) const {
      if (!workspaceInsertTransition.active || workspaceIdx >= images.size() || !images[workspaceIdx] || !images[workspaceIdx]->pWorkspace)
          return 1.F;
-@@ -2862,15 +3102,25 @@ void CScrollOverview::rebuildWorkspaceImages() {
+@@ -2862,15 +3084,25 @@ void CScrollOverview::rebuildWorkspaceImages() {
          if (!valid(WORKSPACE) || (!isCanvasDesktop() && WORKSPACE->m_monitor != pMonitor) || WORKSPACE->m_isSpecialWorkspace)
              continue;
  
@@ -595,7 +640,7 @@ index 5c9a055..cd440f1 100644
          const int COLUMNS = std::max(1, ScrollOverview::Config::getGridColumns());
          size_t    nextSlot = 0;
          for (const auto& image : images) {
-@@ -2894,6 +3144,8 @@ void CScrollOverview::rebuildWorkspaceImages() {
+@@ -2894,6 +3126,8 @@ void CScrollOverview::rebuildWorkspaceImages() {
  
              g_canvasWorkspaceCells[image->pWorkspace->m_id] = candidate;
          }
@@ -604,7 +649,7 @@ index 5c9a055..cd440f1 100644
      }
  
      if (images.empty()) {
-@@ -5093,13 +5345,20 @@ bool CScrollOverview::forwardCanvasPointerAxis(const IPointer::SAxisEvent& event
+@@ -5093,13 +5327,20 @@ bool CScrollOverview::forwardCanvasPointerAxis(const IPointer::SAxisEvent& event
  }
  
  Vector2D CScrollOverview::canvasCellForWorkspaceIndex(size_t workspaceIdx) const {
@@ -626,7 +671,16 @@ index 5c9a055..cd440f1 100644
      return Vector2D{sc<float>(workspaceIdx % sc<size_t>(COLUMNS)), sc<float>(workspaceIdx / sc<size_t>(COLUMNS))};
  }
  
-@@ -6266,6 +6525,8 @@ void CScrollOverview::moveViewportWorkspaceTo(size_t targetIndex) {
+@@ -5286,7 +5527,7 @@ Vector2D CScrollOverview::overviewPointToGlobal(size_t workspaceIdx, const Vecto
+     if (!MONITOR)
+         return pointLocal;
+ 
+-    const auto  SAFE_SCALE       = std::max(scale->value(), 0.01F);
++    const auto  SAFE_SCALE       = std::max(scale->value(), 0.0001F);
+     const auto  SAFE_MON_SCALE   = std::max(MONITOR->m_scale, 0.01F);
+     const auto  VIEWPORT_CENTER  = CBox{{}, MONITOR->m_size * MONITOR->m_scale}.middle();
+     const auto  VIEWPORT_CENTER_LOGICAL = CBox{{}, MONITOR->m_size}.middle();
+@@ -6266,6 +6507,8 @@ void CScrollOverview::moveViewportWorkspaceTo(size_t targetIndex) {
      if (pMonitor && pMonitor->m_activeWorkspace != TARGETWORKSPACEIMAGE->pWorkspace)
          pMonitor->changeWorkspace(TARGETWORKSPACEIMAGE->pWorkspace, false, true, true);
  
@@ -635,7 +689,7 @@ index 5c9a055..cd440f1 100644
      damage();
  }
  
-@@ -6518,6 +6779,129 @@ size_t CScrollOverview::dragWorkspaceIndex(PHLWINDOW window) const {
+@@ -6518,6 +6761,129 @@ size_t CScrollOverview::dragWorkspaceIndex(PHLWINDOW window) const {
      return images.size();
  }
  
@@ -765,7 +819,7 @@ index 5c9a055..cd440f1 100644
  bool CScrollOverview::moveSelection(const std::string& direction) {
      const bool MOVINGLEFT  = direction == "left";
      const bool MOVINGRIGHT = direction == "right";
-@@ -6663,6 +7047,191 @@ bool CScrollOverview::moveSelection(const std::string& direction) {
+@@ -6663,6 +7029,191 @@ bool CScrollOverview::moveSelection(const std::string& direction) {
          return true;
      }
  
@@ -957,7 +1011,7 @@ index 5c9a055..cd440f1 100644
      bool shouldMoveWorkspace = images.empty() || viewportCurrentWorkspace >= images.size();
  
      const auto WORKSPACEIMAGE = shouldMoveWorkspace ? SP<SWorkspaceImage>{} : images[viewportCurrentWorkspace];
-@@ -6810,6 +7379,8 @@ bool CScrollOverview::moveSelection(const std::string& direction) {
+@@ -6810,6 +7361,8 @@ bool CScrollOverview::moveSelection(const std::string& direction) {
      closeOnWindow = bestCandidate;
      rememberSelection(bestCandidate);
      syncFocusedSelection();
@@ -966,7 +1020,7 @@ index 5c9a055..cd440f1 100644
      damage();
  
      return true;
-@@ -6977,65 +7548,15 @@ void CScrollOverview::restoreForcedLayerVisibility() {
+@@ -6977,65 +7530,15 @@ void CScrollOverview::restoreForcedLayerVisibility() {
  }
  
  void CScrollOverview::applyWorkspaceAnimationOverrides() {
@@ -1035,7 +1089,7 @@ index 5c9a055..cd440f1 100644
  }
  
  void CScrollOverview::forceWorkspaceWindowsDecoRecalc(const PHLWORKSPACE& workspace) {
-@@ -7285,6 +7806,7 @@ void CScrollOverview::renderWorkspaceLive(PHLMONITOR monitor, size_t workspaceId
+@@ -7285,6 +7788,7 @@ void CScrollOverview::renderWorkspaceLive(PHLMONITOR monitor, size_t workspaceId
  
              renderOverviewWindow(window);
          }
@@ -1043,7 +1097,7 @@ index 5c9a055..cd440f1 100644
          renderDropIndicator();
          return;
      }
-@@ -7301,6 +7823,7 @@ void CScrollOverview::renderWorkspaceLive(PHLMONITOR monitor, size_t workspaceId
+@@ -7301,6 +7805,7 @@ void CScrollOverview::renderWorkspaceLive(PHLMONITOR monitor, size_t workspaceId
  
      renderWindowsByState(false);
      renderWindowsByState(true);
@@ -1051,7 +1105,7 @@ index 5c9a055..cd440f1 100644
      renderDropIndicator();
  }
  
-@@ -7367,6 +7890,65 @@ void CScrollOverview::renderWorkspaceOutline(PHLMONITOR monitor, size_t workspac
+@@ -7367,6 +7872,65 @@ void CScrollOverview::renderWorkspaceOutline(PHLMONITOR monitor, size_t workspac
      g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(border));
  }
  
@@ -1117,7 +1171,7 @@ index 5c9a055..cd440f1 100644
  void CScrollOverview::renderCanvasBackgroundDim(PHLMONITOR monitor) {
      if (!isCanvasDesktop() || !monitor)
          return;
-@@ -7758,6 +8340,7 @@ void CScrollOverview::renderCanvasDesktopScene(PHLMONITOR monitor, float renderS
+@@ -7758,6 +8322,7 @@ void CScrollOverview::renderCanvasDesktopScene(PHLMONITOR monitor, float renderS
  
      renderPass(false);
      renderPass(true);
@@ -1125,7 +1179,7 @@ index 5c9a055..cd440f1 100644
  
      for (const auto& window : Desktop::windowState()->windows()) {
          if (!canvasScreenFixedWindow(window))
-@@ -7768,6 +8351,59 @@ void CScrollOverview::renderCanvasDesktopScene(PHLMONITOR monitor, float renderS
+@@ -7768,6 +8333,59 @@ void CScrollOverview::renderCanvasDesktopScene(PHLMONITOR monitor, float renderS
      }
  }
  
@@ -1185,7 +1239,7 @@ index 5c9a055..cd440f1 100644
  void CScrollOverview::renderChromeLayers(PHLMONITOR monitor, const Time::steady_tp& now) {
      if (!monitor)
          return;
-@@ -7926,7 +8562,17 @@ void CScrollOverview::renderWindowLive(PHLMONITOR monitor, PHLWINDOW window, con
+@@ -7926,7 +8544,17 @@ void CScrollOverview::renderWindowLive(PHLMONITOR monitor, PHLWINDOW window, con
      if (!shouldShowOverviewWindow(PSEUDOFOCUSED))
          PSEUDOFOCUSED.reset();
  
@@ -1204,7 +1258,7 @@ index 5c9a055..cd440f1 100644
  
      forceWindowVisible(window);
      forceWindowSurfaceVisibility(window);
-@@ -8170,7 +8816,13 @@ int CScrollOverview::realtimePreviewTimerCallback(void* data) {
+@@ -8170,7 +8798,13 @@ int CScrollOverview::realtimePreviewTimerCallback(void* data) {
  }
  
  bool CScrollOverview::hasRunningWorkspaceAnimation() const {
@@ -1219,7 +1273,7 @@ index 5c9a055..cd440f1 100644
  }
  
  bool CScrollOverview::shouldSuppressRenderDamage() const {
-@@ -8181,6 +8833,11 @@ bool CScrollOverview::shouldSuppressRenderDamage() const {
+@@ -8181,6 +8815,11 @@ bool CScrollOverview::shouldSuppressRenderDamage() const {
      if (scale->isBeingAnimated() || viewOffset->isBeingAnimated())
          return false;
  
@@ -1231,7 +1285,7 @@ index 5c9a055..cd440f1 100644
      const auto ACTIVEIDX = activeWorkspaceIndex();
      const auto SCALE     = scale->value();
      const auto PITCH     = getWorkspaceRenderedPitch(MONITOR, SCALE, layout);
-@@ -8619,25 +9276,71 @@ void CScrollOverview::close() {
+@@ -8619,25 +9258,71 @@ void CScrollOverview::close() {
      const auto finishClose = [&](const PHLWORKSPACE& finalWorkspace, const PHLWINDOW& finalWindow) {
          emitFullscreenVisibilityState(getOverviewFullscreenVisibilityWindow(finalWorkspace, finalWindow), false);
  
@@ -1278,7 +1332,8 @@ index 5c9a055..cd440f1 100644
 +        const bool OVERVIEW_INVISIBLE = std::abs(scale->value() - 1.F) < 0.005F;
 +        const auto CURMON2 = pMonitor.lock();
 +        const bool NEEDS_WS_SWITCH = CURMON2 && finalWorkspace && finalWorkspace != CURMON2->m_activeWorkspace;
-+
+ 
+-            transitionProgress->setCallbackOnEnd([this](auto) { removeOverview(this); });
 +        if (!ScrollOverview::Config::getAnimationEnabled()) {
 +            executeSeamlessLand();
 +            return;
@@ -1297,8 +1352,7 @@ index 5c9a055..cd440f1 100644
 +            executeSeamlessLand();
 +            return;
 +        }
- 
--            transitionProgress->setCallbackOnEnd([this](auto) { removeOverview(this); });
++
 +        syncAnimationConfig();
 +
 +        if (isCanvasDesktop()) {
@@ -1314,18 +1368,18 @@ index 5c9a055..cd440f1 100644
      };
  
      if (!closeOnWindow && (!SELECTEDWORKSPACE || SELECTEDWORKSPACE == MONITOR->m_activeWorkspace)) {
-@@ -8648,123 +9351,111 @@ void CScrollOverview::close() {
+@@ -8648,123 +9333,111 @@ void CScrollOverview::close() {
  
      closeOnWindow = getOverviewWindowToShow(closeOnWindow.lock());
  
 -    if (SELECTEDWORKSPACE && commitCanvasViewport(viewportCurrentWorkspace)) {
 -        const auto FINALWINDOW = closeOnWindow && closeOnWindow->m_workspace == SELECTEDWORKSPACE ? getOverviewWindowToShow(closeOnWindow.lock()) : PHLWINDOW{};
+-
+-        if (SELECTEDWORKSPACE != MONITOR->m_activeWorkspace)
+-            MONITOR->changeWorkspace(SELECTEDWORKSPACE, false, true, true);
 +    if (SELECTEDWORKSPACE)
 +        commitCanvasViewport(viewportCurrentWorkspace);
  
--        if (SELECTEDWORKSPACE != MONITOR->m_activeWorkspace)
--            MONITOR->changeWorkspace(SELECTEDWORKSPACE, false, true, true);
--
 -        viewOffset->setValueAndWarp(Vector2D{});
 -        *viewOffset                = Vector2D{};
 -        startedOn                  = SELECTEDWORKSPACE;
@@ -1522,7 +1576,7 @@ index 5c9a055..cd440f1 100644
  }
  
  bool CScrollOverview::isClosing() const {
-@@ -8894,6 +9585,7 @@ void CScrollOverview::followLinkedCamera() {
+@@ -8894,6 +9567,7 @@ void CScrollOverview::followLinkedCamera() {
  // at rest at 100%; moving a window to a workspace must not move it on the
  // canvas, so it goes back exactly where it was.
  void CScrollOverview::syncCanvasWindowScreens() {
@@ -1530,7 +1584,7 @@ index 5c9a055..cd440f1 100644
      const auto MONITOR = pMonitor.lock();
      if (!MONITOR || !isCanvasDesktop() || closing || canvasNavigationActive || !canvasAtRestZoom() || viewOffset->isBeingAnimated() || scale->isBeingAnimated() ||
          dragActiveWindow || g_pointerGrabOverview || !MONITOR->m_activeWorkspace || MONITOR->m_activeWorkspace->m_isSpecialWorkspace)
-@@ -8943,6 +9635,11 @@ void CScrollOverview::onPreRender() {
+@@ -8943,6 +9617,11 @@ void CScrollOverview::onPreRender() {
  
      focusSyncedFromWorkspaceID = WORKSPACE_INVALID;
  
@@ -1542,7 +1596,7 @@ index 5c9a055..cd440f1 100644
      if (rebuildPending) {
          rebuildPending = false;
          markBlurDirty();
-@@ -8959,6 +9656,7 @@ void CScrollOverview::onWorkspaceChange() {
+@@ -8959,6 +9638,7 @@ void CScrollOverview::onWorkspaceChange() {
  
      const auto previousActiveIdx = activeWorkspaceIndex();
      const auto previousStartedOn = startedOn;
@@ -1550,7 +1604,7 @@ index 5c9a055..cd440f1 100644
  
      // consume any pending gesture-driven settle (set by finishWorkspaceScrollFollow)
      const bool   GESTURESETTLE       = trackpadGestureSettlePending;
-@@ -8995,6 +9693,9 @@ void CScrollOverview::onWorkspaceChange() {
+@@ -8995,6 +9675,9 @@ void CScrollOverview::onWorkspaceChange() {
          REMOVEDWORKSPACE &&
          std::find_if(images.begin(), images.end(), [REMOVEDWORKSPACE](const auto& image) { return image && image->pWorkspace == REMOVEDWORKSPACE; }) == images.end();
  
@@ -1560,7 +1614,7 @@ index 5c9a055..cd440f1 100644
      if (INSERTEDWORKSPACE || REMOVEDPREVIOUSWORKSPACE) {
          workspaceInsertTransition.active                 = true;
          workspaceInsertTransition.transitionWorkspaceID  = INSERTEDWORKSPACE ? NEWWORKSPACE->m_id : REMOVEDWORKSPACE->m_id;
-@@ -9023,7 +9724,10 @@ void CScrollOverview::onWorkspaceChange() {
+@@ -9023,7 +9706,10 @@ void CScrollOverview::onWorkspaceChange() {
          workspaceInsertFadeProgress->setValueAndWarp(0.F);
          *workspaceInsertProgress = 1.F;
          *workspaceInsertFadeProgress = 1.F;
@@ -1572,7 +1626,7 @@ index 5c9a055..cd440f1 100644
          *viewOffset = Vector2D{};
      } else {
          workspaceInsertTransition.active                 = false;
-@@ -9038,8 +9742,7 @@ void CScrollOverview::onWorkspaceChange() {
+@@ -9038,8 +9724,7 @@ void CScrollOverview::onWorkspaceChange() {
          if (GESTURESETTLE) // a trackpad follow committed this change: settle from the drag position, not a full pitch
              viewOffset->setValueAndWarp(axisOffsetVector(sc<float>(GESTURESETTLEOFFSET), layout));
          else
@@ -1582,7 +1636,7 @@ index 5c9a055..cd440f1 100644
          *viewOffset = Vector2D{};
      }
  
-@@ -9124,6 +9827,12 @@ void CScrollOverview::render() {
+@@ -9124,6 +9809,12 @@ void CScrollOverview::render() {
                  g_minimapFlashUntil = std::max(g_minimapFlashUntil, Time::steadyNow() + std::chrono::milliseconds(1000));
              damage();
          }
@@ -1595,7 +1649,7 @@ index 5c9a055..cd440f1 100644
          canvasResyncX11Windows();
          return;
      }
-@@ -9172,6 +9881,13 @@ void CScrollOverview::render() {
+@@ -9172,6 +9863,13 @@ void CScrollOverview::render() {
      renderChromeLayers(MONITOR, NOW);
  
      sendOverviewFrameCallbacks(NOW);
@@ -1609,7 +1663,7 @@ index 5c9a055..cd440f1 100644
  }
  
  void CScrollOverview::fullRender() {
-@@ -9184,14 +9900,16 @@ void CScrollOverview::syncAnimationConfig() {
+@@ -9184,14 +9882,16 @@ void CScrollOverview::syncAnimationConfig() {
  
      const auto WINDOWSMOVECONFIG = Config::animationTree()->getAnimationPropertyConfig("windowsMove");
      const auto WINDOWSMOVEVALUES = WINDOWSMOVECONFIG && WINDOWSMOVECONFIG->pValues ? WINDOWSMOVECONFIG->pValues.lock() : WINDOWSMOVECONFIG;
@@ -1632,7 +1686,7 @@ index 5c9a055..cd440f1 100644
  }
  
  static float hyprlerp(const float& from, const float& to, const float perc) {
-@@ -9235,6 +9953,7 @@ void CScrollOverview::releaseInputListeners() {
+@@ -9235,6 +9935,7 @@ void CScrollOverview::releaseInputListeners() {
      mouseButtonHook.reset();
      touchDownHook.reset();
      keyboardKeyHook.reset();
@@ -1640,27 +1694,42 @@ index 5c9a055..cd440f1 100644
  }
  
  void CScrollOverview::activateSubmapIfConfigured() {
-@@ -9902,9 +10621,17 @@ void CScrollOverview::panCamera(const Vector2D& direction) {
+@@ -9849,9 +10550,18 @@ void CScrollOverview::revertAllNavigation() {
+ 
+ void CScrollOverview::fitAllWindows() {
+     const auto MONITOR = pMonitor.lock();
+-    if (!isCanvasDesktop() || !MONITOR || closing)
++    if (!MONITOR || closing)
+         return;
+ 
++    if (!isCanvasDesktop()) {
++        const float defaultScale = ScrollOverview::Config::getScale();
++        *scale = defaultScale;
++        *viewOffset = Vector2D{};
++        markBlurDirty();
++        damage();
++        return;
++    }
++
+     // With a search running, "everything" means everything that matches.
+     std::optional<CBox>             bounds;
+     std::unordered_set<const void*> visited;
+@@ -9902,9 +10612,12 @@ void CScrollOverview::panCamera(const Vector2D& direction) {
  
  void CScrollOverview::zoomCameraBy(float factor) {
      const auto MONITOR = pMonitor.lock();
 -    if (!isCanvasDesktop() || !MONITOR)
 +    if (!MONITOR)
-+        return;
-+    const float minZ = isCanvasDesktop() ? ScrollOverview::Config::getCanvasMinZoom() : 0.15F;
-+    const float maxZ = isCanvasDesktop() ? ScrollOverview::Config::getCanvasMaxZoom() : 2.5F;
-+    const float ZOOM = std::clamp(scale->goal() * factor, minZ, maxZ);
-+
-+    if (ZOOM >= 0.80F) {
-+        smoothLandIntoWorkspace();
          return;
 -    const float ZOOM = std::clamp(scale->goal() * factor, ScrollOverview::Config::getCanvasMinZoom(), ScrollOverview::Config::getCanvasMaxZoom());
-+    }
++    const float minZ = ScrollOverview::Config::getCanvasMinZoom();
++    const float maxZ = ScrollOverview::Config::getCanvasMaxZoom();
++    const float ZOOM = std::clamp(scale->goal() * factor, minZ, maxZ);
 +
      *scale           = ZOOM;
      markBlurDirty();
      damage();
-@@ -10815,7 +11542,7 @@ bool CScrollOverview::canvasRedo() {
+@@ -10815,7 +11528,7 @@ bool CScrollOverview::canvasRedo() {
  }
  
  bool CScrollOverview::flightDeckAction(const std::string& action) {
@@ -1669,7 +1738,7 @@ index 5c9a055..cd440f1 100644
      const auto m = pMonitor.lock();
      if (action == "back") {
          if (SpatialOverview::Experiments::on(ECanvasExperiment::Landing) || SpatialOverview::Experiments::on(ECanvasExperiment::AltTab)) {
-@@ -10871,7 +11598,6 @@ bool CScrollOverview::flightDeckAction(const std::string& action) {
+@@ -10871,7 +11584,6 @@ bool CScrollOverview::flightDeckAction(const std::string& action) {
          return true;
      }
      if (action == "zoom in" || action == "zoom out") {

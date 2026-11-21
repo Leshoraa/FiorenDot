@@ -1,0 +1,3 @@
+KERNEL=="ttyACM*", MODE="0666", GROUP="uucp"
+KERNEL=="ttyUSB*", MODE="0666", GROUP="uucp"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", MODE="0666", GROUP="uucp"

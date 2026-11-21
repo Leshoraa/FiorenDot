@@ -2,6 +2,19 @@
 
 Personal dotfiles and system configurations for **Arch Linux** powered by **Hyprland** Wayland compositor. Tailored for high productivity, 2-in-1 touchscreen convertibles, intelligent battery longevity, and dynamic aesthetic theming.
 
+> [!CAUTION]
+> ### ⚠️ PERINGATAN KERAS / STRICT DEVICE LOCK: PERSONAL DEVICE ONLY
+> **Repositori konfigurasi ini TIDAK BOLEH digunakan atau di-install pada perangkat lain.**
+> Seluruh isi repositori ini dirancang secara eksklusif untuk laptop pribadi milik **Fioren (@Leshoraa)** (**ASUS Vivobook S 14 Flip TN3402QA** / `leviola`). Repositori ini memuat konfigurasi tingkat rendah (*low-level system settings*) meliputi:
+> - **Kernel boot parameters & systemd-boot loader options**
+> - **Custom compiled ACPI SSDT table override (`acpi_override.img`)**
+> - **ASUS Embedded Controller (EC) battery charge control & RTC wake/sleep hooks**
+> - **AMD Ryzen P-State EPP & AMDGPU power profile udev rules**
+> - **ASUS Touchpad / Numberpad virtual driver daemon & uinput permissions**
+> - **Hardware permissions khusus untuk STM32 DFU & Flight Controller**
+> 
+> Menggunakan atau memasang repositori ini pada perangkat lain dapat menyebabkan instabilitas sistem, konflik kernel modules, atau malfungsi hardware.
+
 ---
 
 ## Preview

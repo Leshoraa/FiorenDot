@@ -1,4 +1,6 @@
-# FiorenDot
+# FiorenDot — ⚠️ PERSONAL USE ONLY: DO NOT USE THIS DOTFILE
+
+> ⛔ **WARNING: STRICTLY CONFIGURED FOR A SINGLE SPECIFIC LAPTOP (ASUS Vivobook S 14 Flip TN3402QA). DO NOT INSTALL ON OTHER DEVICES.**
 
 Personal dotfiles and system configurations for **Arch Linux** powered by **Hyprland** Wayland compositor. Tailored for high productivity, 2-in-1 touchscreen convertibles, intelligent battery longevity, and dynamic aesthetic theming.
 

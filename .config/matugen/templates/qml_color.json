@@ -1,0 +1,17 @@
+{
+    "windowBackground": "#{{colors.surface.dark.hex_stripped}}",
+    "primaryText": "#{{colors.on_surface.dark.hex_stripped}}",
+    "layerBackground1": "#{{colors.surface_container_low.dark.hex_stripped}}",
+    "layerBackground2": "#{{colors.surface_container.dark.hex_stripped}}",
+    "layerBackground3": "#{{colors.surface_container_high.dark.hex_stripped}}",
+    "surfaceText": "#{{colors.on_surface.dark.hex_stripped}}",
+    "secondaryText": "#{{colors.on_surface_variant.dark.hex_stripped}}",
+    "borderPrimary": "#{{colors.outline.dark.hex_stripped}}",
+    "shadowColor": "#000000",
+    "accentPrimary": "#{{colors.primary.dark.hex_stripped}}",
+    "accentSecondary": "#{{colors.secondary.dark.hex_stripped}}",
+    "selectionBackground": "#{{colors.primary.dark.hex_stripped}}",
+    "accentPrimaryText": "#{{colors.on_primary.dark.hex_stripped}}",
+    "selectionText": "#{{colors.on_primary.dark.hex_stripped}}",
+    "borderSecondary": "#{{colors.outline_variant.dark.hex_stripped}}"
+}

@@ -1,0 +1,91 @@
+[config]
+version_check = false
+
+[config.wallpaper]
+command = "awww"
+arguments = ["img", "--transition-type", "center"]
+set = false   # the wallpaper script sets it; matugen only generates colours
+
+# --- Hyprland Colors (Classic .conf) ---
+[templates.hyprland]
+input_path = '~/.config/matugen/templates/colors-hyprland.conf'
+output_path = '~/.config/hypr/wallust/wallust-hyprland.conf'
+post_hook = 'hyprctl reload >/dev/null 2>&1 || true'
+
+# --- Hyprland Colors (Lua for configs using Lua) ---
+[templates.hyprland_lua]
+input_path = '~/.config/matugen/templates/hyprland-colors.lua'
+output_path = '~/.config/hypr/matugen-colors.lua'
+
+# --- Waybar Colors ---
+[templates.waybar]
+input_path = '~/.config/matugen/templates/colors-waybar.css'
+output_path = '~/.config/waybar/wallust/colors-waybar.css'
+post_hook = 'touch ~/.config/waybar/style.css 2>/dev/null || true'
+
+# --- Kitty Terminal Themes ---
+[templates.kitty_wallust]
+input_path = '~/.config/matugen/templates/kitty-colors.conf'
+output_path = '~/.config/kitty/kitty-themes/01-Wallust.conf'
+
+[templates.kitty_matugen]
+input_path = '~/.config/matugen/templates/kitty-colors.conf'
+output_path = '~/.config/kitty/themes/matugen.conf'
+post_hook = 'for s in /tmp/mykitty*; do [ -S "$s" ] && kitty @ --to "unix:$s" load-config 2>/dev/null; done; pkill -USR1 kitty 2>/dev/null || true'
+
+# --- Rofi App Launcher ---
+[templates.rofi_wallust]
+input_path = '~/.config/matugen/templates/rofi-colors.rasi'
+output_path = '~/.config/rofi/wallust/colors-rofi.rasi'
+
+[templates.rofi_matugen]
+input_path = '~/.config/matugen/templates/rofi-colors.rasi'
+output_path = '~/.config/rofi/colors-matugen.rasi'
+post_hook = 'pkill -x rofi 2>/dev/null || true'
+
+# --- SwayNC Notification Center ---
+[templates.swaync]
+input_path = '~/.config/matugen/templates/colors-swaync.css'
+output_path = '~/.config/swaync/wallust/colors-wallust.css'
+post_hook = 'swaync-client -rs 2>/dev/null || true'
+
+# --- Mako Notifications ---
+[templates.mako]
+input_path = '~/.config/matugen/templates/mako-config'
+output_path = '~/.config/mako/config'
+post_hook = 'makoctl reload 2>/dev/null || true'
+
+# --- Quickshell Desktop Shell ---
+[templates.quickshell_qml]
+input_path = '~/.config/matugen/templates/qml_color.json'
+output_path = '~/.config/quickshell/qml_color.json'
+
+[templates.quickshell_cache]
+input_path = '~/.config/matugen/templates/quickshell-colours.json'
+output_path = '~/.cache/quickshell-colors.json'
+
+# --- Cava Audio Visualizer ---
+[templates.cava]
+input_path = '~/.config/matugen/templates/colors-cava'
+output_path = '~/.config/cava/config'
+post_hook = 'pkill -USR1 cava 2>/dev/null || true'
+
+# --- SDDM and Wallust Cache Previews ---
+[templates.sddm]
+input_path = '~/.config/matugen/templates/sddm-theme.conf'
+output_path = '~/.config/wallust/sddm-theme.conf'
+
+[templates.preview]
+input_path = '~/.config/matugen/templates/preview-theme.conf'
+output_path = '~/.config/wallust/preview-theme.conf'
+
+# --- Neovim Base16 ---
+[templates.nvim]
+input_path = '~/.config/matugen/templates/nvim-base16.lua'
+output_path = '~/.cache/matugen/nvim-base16.lua'
+post_hook = 'find "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" -maxdepth 1 -name "nvim.*" -exec nvim --server {} --remote-send "<cmd>lua pcall(_G.MatugenReload)<cr>" \; 2>/dev/null || true'
+
+# --- Keyboard RGB ---
+[templates.keyboard]
+input_path = '~/.config/matugen/templates/keyboard-colors-rgb'
+output_path = '~/.config/keyboard/matugen-colors-rgb'

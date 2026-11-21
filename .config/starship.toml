@@ -5,8 +5,16 @@ format = """
 $os\
 [](bg:10 fg:14)\
 $directory\
-[](fg:10)
+[](fg:10)\
+$fill\
+$status[─╮](10)
 [╰─](10)$character"""
+
+# Garis penutup bawah di baris input perintah
+right_format = """[─╯](10)"""
+
+[fill]
+symbol = " "
 
 [os]
 disabled = false
@@ -26,3 +34,12 @@ read_only = " 󰌾 "
 [character]
 success_symbol = "[❯](bold 14)"
 error_symbol = "[❯](bold red)"
+
+# Kapsul status ujung kanan
+[status]
+disabled = false
+style = "bg:8 fg:15"
+format = "[](8)[ $symbol ]($style)[](8)"
+success_symbol = "✓"
+symbol = "✗"
+map_symbol = true

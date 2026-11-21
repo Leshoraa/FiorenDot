@@ -24,52 +24,52 @@
     "editor.semanticHighlighting.enabled": false,
     "editor.bracketPairColorization.enabled": false,
     "workbench.colorCustomizations": {
-        "editor.selectionBackground": "#9D734D80",
-        "editor.selectionHighlightBackground": "#9D734D40",
-        "titleBar.activeBackground": "#0F0E0D",
-        "titleBar.activeForeground": "#0F0E0D",
-        "titleBar.inactiveBackground": "#0F0E0D",
-        "titleBar.inactiveForeground": "#0F0E0D",
-        "tab.activeBorderTop": "#B8916F",
-        "editorGutter.background": "#0F0E0D",
-        "editor.background": "#0F0E0D",
+        "editor.selectionBackground": "#9D814D80",
+        "editor.selectionHighlightBackground": "#9D814D40",
+        "titleBar.activeBackground": "#100E0B",
+        "titleBar.activeForeground": "#100E0B",
+        "titleBar.inactiveBackground": "#100E0B",
+        "titleBar.inactiveForeground": "#100E0B",
+        "tab.activeBorderTop": "#B89F6F",
+        "editorGutter.background": "#100E0B",
+        "editor.background": "#100E0B",
         "editor.foreground": "#EDECEB",
-        "sideBar.background": "#0F0E0D",
-        "sideBar.foreground": "#B8916F",
-        "list.activeSelectionForeground": "#B8916F",
-        "list.inactiveSelectionForeground": "#B8916F",
-        "list.focusForeground": "#B8916F",
-        "list.hoverForeground": "#B8916F",
-        "activityBar.background": "#0F0E0D",
-        "activityBar.foreground": "#B8916F",
-        "statusBar.background": "#0F0E0D",
+        "sideBar.background": "#100E0B",
+        "sideBar.foreground": "#B89F6F",
+        "list.activeSelectionForeground": "#B89F6F",
+        "list.inactiveSelectionForeground": "#B89F6F",
+        "list.focusForeground": "#B89F6F",
+        "list.hoverForeground": "#B89F6F",
+        "activityBar.background": "#100E0B",
+        "activityBar.foreground": "#B89F6F",
+        "statusBar.background": "#100E0B",
         "statusBar.foreground": "#EDECEB",
-        "terminal.ansiBlack": "#191612",
+        "terminal.ansiBlack": "#1B160E",
         "terminal.ansiRed": "#CA5249",
-        "terminal.ansiGreen": "#544130",
+        "terminal.ansiGreen": "#544830",
         "terminal.ansiYellow": "#CDA751",
-        "terminal.ansiBlue": "#9D734D",
-        "terminal.ansiMagenta": "#AEA170",
-        "terminal.ansiCyan": "#785A40",
-        "terminal.ansiWhite": "#B8916F",
-        "editorStickyScroll.background": "#0F0E0D",
-        "editorStickyScrollHover.background": "#0F0E0D",
-        "tab.activeBackground": "#0F0E0D",
-        "tab.inactiveBackground": "#0F0E0D",
-        "tab.activeForeground": "#B8916F",
-        "tab.activeUnfocusedForeground": "#B8916F",
-        "breadcrumb.foreground": "#B8916F",
+        "terminal.ansiBlue": "#9D814D",
+        "terminal.ansiMagenta": "#A9AE70",
+        "terminal.ansiCyan": "#786440",
+        "terminal.ansiWhite": "#B89F6F",
+        "editorStickyScroll.background": "#100E0B",
+        "editorStickyScrollHover.background": "#100E0B",
+        "tab.activeBackground": "#100E0B",
+        "tab.inactiveBackground": "#100E0B",
+        "tab.activeForeground": "#B89F6F",
+        "tab.activeUnfocusedForeground": "#B89F6F",
+        "breadcrumb.foreground": "#B89F6F",
         "breadcrumb.focusForeground": "#EDECEB",
         "textLink.foreground": "#EDECEB",
-        "textLink.activeForeground": "#B8916F",
-        "button.background": "#B8916F",
-        "button.foreground": "#0F0E0D",
-        "button.hoverBackground": "#9D734D",
-        "button.secondaryBackground": "#0F0E0D",
+        "textLink.activeForeground": "#B89F6F",
+        "button.background": "#B89F6F",
+        "button.foreground": "#100E0B",
+        "button.hoverBackground": "#9D814D",
+        "button.secondaryBackground": "#100E0B",
         "button.secondaryForeground": "#EDECEB"
     },
     "editor.tokenColorCustomizations": {
-        "comments": "#C1B586",
+        "comments": "#BDC186",
         "textMateRules": [
             {
                 "scope": [
@@ -97,7 +97,7 @@
                     "variable.language.this.cs"
                 ],
                 "settings": {
-                    "foreground": "#B8916F"
+                    "foreground": "#B89F6F"
                 }
             },
             {
@@ -110,7 +110,7 @@
                     "constant.numeric"
                 ],
                 "settings": {
-                    "foreground": "#B8916F"
+                    "foreground": "#B89F6F"
                 }
             },
             {
@@ -130,7 +130,7 @@
                     "punctuation.definition.template-expression.end.js"
                 ],
                 "settings": {
-                    "foreground": "#B8916F"
+                    "foreground": "#B89F6F"
                 }
             }
         ]

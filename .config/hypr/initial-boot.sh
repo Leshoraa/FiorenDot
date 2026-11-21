@@ -23,9 +23,9 @@ effect="--transition-bezier .43,1.19,1,.4 --transition-fps 30 --transition-type 
 # Check if a marker file exists.
 if [ ! -f "$HOME/.config/hypr/.initial_startup_done" ]; then
     sleep 1
-    # Initialize wallust and wallpaper
+    # Initialize matugen and wallpaper
 	if [ -f "$wallpaper" ]; then
-		wallust run -s $wallpaper > /dev/null 
+		matugen image "$wallpaper" --type scheme-content --mode dark --prefer saturation > /dev/null 2>&1 || wallust run -s $wallpaper > /dev/null 2>&1 
 		swww query || swww-daemon && $swww $wallpaper $effect
 	    "$scriptsDir/WallustSwww.sh" > /dev/null 2>&1 & 
 	fi

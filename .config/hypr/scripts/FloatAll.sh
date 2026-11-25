@@ -21,11 +21,11 @@ for addr in $WINDOW_ADDRESSES; do
     
     if [ "$FIRST_WINDOW_STATUS" = "true" ]; then
         if [ "$CURRENT_STATUS" = "true" ]; then
-            hyprctl dispatch togglefloating address:$addr
+            hyprctl eval "hl.dispatch(hl.dsp.window.float({ action = 'toggle', window = 'address:$addr' }))" >/dev/null
         fi
     else
         if [ "$CURRENT_STATUS" = "false" ]; then
-            hyprctl dispatch togglefloating address:$addr
+            hyprctl eval "hl.dispatch(hl.dsp.window.float({ action = 'toggle', window = 'address:$addr' }))" >/dev/null
         fi
     fi
 done

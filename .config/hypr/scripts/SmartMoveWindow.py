@@ -15,14 +15,8 @@ def hypr_cmd(cmd):
         import subprocess
         if cmd.startswith('j/'):
             return subprocess.check_output(['hyprctl', cmd[2:], '-j']).decode('utf-8')
-        elif cmd.startswith('[[BATCH]]'):
-            batch_cmd = cmd[9:]
-            return subprocess.run(['hyprctl', '--batch', batch_cmd], stdout=subprocess.PIPE, text=True).stdout
-        elif cmd.startswith('dispatch '):
-            parts = cmd.split(' ', 2)
-            disp = parts[1]
-            args = parts[2] if len(parts) > 2 else ''
-            return subprocess.run(['hyprctl', 'dispatch', disp, args], stdout=subprocess.PIPE, text=True).stdout
+        elif cmd.startswith('eval '):
+            return subprocess.run(['hyprctl', 'eval', cmd[5:]], stdout=subprocess.PIPE, text=True).stdout
         return ''
 
     sock_path = f"/run/user/{os.getuid()}/hypr/{sig}/.socket.sock"
@@ -37,6 +31,9 @@ def hypr_cmd(cmd):
             res += chunk
     return res.decode('utf-8', errors='replace')
 
+def hypr_eval(lua_code):
+    return hypr_cmd(f'eval {lua_code}')
+
 def get_hypr_data():
     active = json.loads(hypr_cmd('j/activewindow'))
     clients = json.loads(hypr_cmd('j/clients'))
@@ -47,9 +44,9 @@ def fallback_move(direction, is_floating):
     if is_floating:
         deltas = {'l': (-40, 0), 'r': (40, 0), 'u': (0, -30), 'd': (0, 30)}
         dx, dy = deltas.get(direction, (0, 0))
-        hypr_cmd(f'dispatch moveactive {dx} {dy}')
+        hypr_eval(f'hl.dispatch(hl.dsp.window.move({{ x = {dx}, y = {dy}, relative = true }}))')
     else:
-        hypr_cmd(f'dispatch movewindow {direction}')
+        hypr_eval(f'hl.dispatch(hl.dsp.window.move({{ direction = "{direction}" }}))')
 
 def classify_3windows(tiled_windows, active_addr):
     min_x = min(w['at'][0] for w in tiled_windows)
@@ -176,58 +173,27 @@ def execute_3win_target(target, active_addr, active_ws, others):
     if len(others) < 2:
         return
     wb, wc = others[0], others[1]
-    if target == 'target_left':
-        batch = (
-            f"dispatch movetoworkspacesilent special:temp,address:{wb} ; "
-            f"dispatch movetoworkspacesilent special:temp,address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr} ; "
-            f"dispatch layoutmsg preselect r ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wb} ; "
-            f"dispatch focuswindow address:{wb} ; "
-            f"dispatch layoutmsg preselect d ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr}"
-        )
-    elif target == 'target_top':
-        batch = (
-            f"dispatch movetoworkspacesilent special:temp,address:{wb} ; "
-            f"dispatch movetoworkspacesilent special:temp,address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr} ; "
-            f"dispatch layoutmsg preselect d ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wb} ; "
-            f"dispatch focuswindow address:{wb} ; "
-            f"dispatch layoutmsg preselect r ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr}"
-        )
-    elif target == 'target_right':
-        batch = (
-            f"dispatch movetoworkspacesilent special:temp,address:{wb} ; "
-            f"dispatch movetoworkspacesilent special:temp,address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr} ; "
-            f"dispatch layoutmsg preselect l ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wb} ; "
-            f"dispatch focuswindow address:{wb} ; "
-            f"dispatch layoutmsg preselect d ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr}"
-        )
-    elif target == 'target_bottom':
-        batch = (
-            f"dispatch movetoworkspacesilent special:temp,address:{wb} ; "
-            f"dispatch movetoworkspacesilent special:temp,address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr} ; "
-            f"dispatch layoutmsg preselect u ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wb} ; "
-            f"dispatch focuswindow address:{wb} ; "
-            f"dispatch layoutmsg preselect r ; "
-            f"dispatch movetoworkspacesilent {active_ws},address:{wc} ; "
-            f"dispatch focuswindow address:{active_addr}"
-        )
-    else:
+    preselects = {
+        'target_left': ('r', 'd'),
+        'target_top': ('d', 'r'),
+        'target_right': ('l', 'd'),
+        'target_bottom': ('u', 'r'),
+    }
+    if target not in preselects:
         return
-        
-    hypr_cmd(f'[[BATCH]]{batch}')
+    p1, p2 = preselects[target]
+    code = (
+        f"hl.dispatch(hl.dsp.window.move({{ workspace = 'special:temp', follow = false, window = 'address:{wb}' }})); "
+        f"hl.dispatch(hl.dsp.window.move({{ workspace = 'special:temp', follow = false, window = 'address:{wc}' }})); "
+        f"hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }})); "
+        f"hl.dispatch(hl.dsp.layout('preselect {p1}')); "
+        f"hl.dispatch(hl.dsp.window.move({{ workspace = '{active_ws}', follow = false, window = 'address:{wb}' }})); "
+        f"hl.dispatch(hl.dsp.focus({{ window = 'address:{wb}' }})); "
+        f"hl.dispatch(hl.dsp.layout('preselect {p2}')); "
+        f"hl.dispatch(hl.dsp.window.move({{ workspace = '{active_ws}', follow = false, window = 'address:{wc}' }})); "
+        f"hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }}))"
+    )
+    hypr_eval(code)
 
 def main():
     if len(sys.argv) < 2:
@@ -298,23 +264,19 @@ def main():
         if is_vert_split:
             is_left = active['at'][0] < mid_x
             if (direction == 'r' and is_left) or (direction == 'l' and not is_left):
-                hypr_cmd(f'dispatch swapwindow {direction}')
-            elif direction == 'u':
-                batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect d ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                hypr_cmd(f'[[BATCH]]{batch}')
-            elif direction == 'd':
-                batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect u ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                hypr_cmd(f'[[BATCH]]{batch}')
+                hypr_eval(f'hl.dispatch(hl.dsp.window.swap({{ direction = "{direction}" }}))')
+            elif direction in ('u', 'd'):
+                p = 'd' if direction == 'u' else 'u'
+                code = f"hl.dispatch(hl.dsp.window.move({{ workspace = 'special:temp', follow = false, window = 'address:{other['address']}' }})); hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }})); hl.dispatch(hl.dsp.layout('preselect {p}')); hl.dispatch(hl.dsp.window.move({{ workspace = '{active_ws}', follow = false, window = 'address:{other['address']}' }})); hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }}))"
+                hypr_eval(code)
         else: # Horizontal split
             is_top = active['at'][1] < mid_y
             if (direction == 'd' and is_top) or (direction == 'u' and not is_top):
-                hypr_cmd(f'dispatch swapwindow {direction}')
-            elif direction == 'l':
-                batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect r ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                hypr_cmd(f'[[BATCH]]{batch}')
-            elif direction == 'r':
-                batch = f"dispatch movetoworkspacesilent special:temp,address:{other['address']} ; dispatch focuswindow address:{active_addr} ; dispatch layoutmsg preselect l ; dispatch movetoworkspacesilent {active_ws},address:{other['address']} ; dispatch focuswindow address:{active_addr}"
-                hypr_cmd(f'[[BATCH]]{batch}')
+                hypr_eval(f'hl.dispatch(hl.dsp.window.swap({{ direction = "{direction}" }}))')
+            elif direction in ('l', 'r'):
+                p = 'r' if direction == 'l' else 'l'
+                code = f"hl.dispatch(hl.dsp.window.move({{ workspace = 'special:temp', follow = false, window = 'address:{other['address']}' }})); hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }})); hl.dispatch(hl.dsp.layout('preselect {p}')); hl.dispatch(hl.dsp.window.move({{ workspace = '{active_ws}', follow = false, window = 'address:{other['address']}' }})); hl.dispatch(hl.dsp.focus({{ window = 'address:{active_addr}' }}))"
+                hypr_eval(code)
         sys.exit(0)
         
     # Handle 3 windows
@@ -328,7 +290,7 @@ def main():
         sys.exit(0)
     elif action.startswith('swap_'):
         swap_dir = action.split('_')[1]
-        hypr_cmd(f'dispatch swapwindow {swap_dir}')
+        hypr_eval(f'hl.dispatch(hl.dsp.window.swap({{ direction = "{swap_dir}" }}))')
     elif action.startswith('target_'):
         execute_3win_target(action, active_addr, active_ws, others)
     else:

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 # Screenshots scripts - MODIFIED: No Sound & Faster + Auto Save (No Icon)
 
 # variables

@@ -142,7 +142,7 @@ def set_zoom(val: float):
     if _zoom_cache is not None and abs(val - _zoom_cache) < 0.005:
         return   # skip if no meaningful change
     _zoom_cache = val
-    hypr_cmd(f"keyword cursor:zoom_factor {val:.4f}")
+    hypr_cmd(f"eval hl.config({{ cursor = {{ zoom_factor = {val:.4f} }} }})")
 
 # ─── Window / Monitor Queries ─────────────────────────────────────────────────
 def get_target_floating_window() -> dict | None:
@@ -425,7 +425,7 @@ async def run_listener():
 
                         now = time.monotonic()
                         if (abs(new_w - win_last_w) >= 3 or abs(new_h - win_last_h) >= 3) and (now - last_apply >= THROTTLE_S):
-                            batch_cmd = f"[[BATCH]]dispatch resizewindowpixel exact {new_w} {new_h},address:{win_addr} ; dispatch movewindowpixel exact {new_x} {new_y},address:{win_addr}"
+                            batch_cmd = f"eval hl.dispatch(hl.dsp.window.resize({{ x = {new_w}, y = {new_h}, exact = true, window = 'address:{win_addr}' }})); hl.dispatch(hl.dsp.window.move({{ x = {new_x}, y = {new_y}, exact = true, window = 'address:{win_addr}' }}))"
                             hypr_cmd(batch_cmd)
                             win_last_w = new_w
                             win_last_h = new_h

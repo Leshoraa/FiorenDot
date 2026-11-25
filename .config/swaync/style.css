@@ -8,7 +8,7 @@
 @define-color noti-bg alpha(mix(@background, #0A0A0C, 0.65), 0.97);
 @define-color text-color @foreground;
 
-/* PENGATURAN FONT GLOBAL */
+/* GLOBAL FONT */
 * {
     font-family: "JetBrains Mono Nerd Font", "Rubik", sans-serif;
     font-weight: bold;
@@ -20,7 +20,7 @@ button {
     transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
 }
 
-/* WADAH UTAMA CONTROL CENTER */
+/* CONTROL CENTER CONTAINER */
 .control-center {
     background: @noti-bg;
     border-radius: 14px;
@@ -30,7 +30,7 @@ button {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* 1. BAGIAN ATAS: MENU BAR (Ombak / Kapal & Power) - Tanpa background */
+/* 1. TOP MENU BAR (Header & Power) */
 .widget-menubar,
 .widget-menubar#power,
 #power,
@@ -58,7 +58,7 @@ button {
     box-shadow: none;
 }
 
-/* Teks ombak di sisi kiri menu bar */
+/* Left header label */
 .widget-menubar>box>box:first-child>button {
     font-size: 13px;
     color: @text-color;
@@ -70,7 +70,7 @@ button {
     margin: 0;
 }
 
-/* Tombol power di sisi kanan menu bar */
+/* Right power menu button */
 .widget-menubar>box>box:last-child>button {
     font-size: 14px;
     color: @text-color;
@@ -87,7 +87,7 @@ button {
     color: @background;
 }
 
-/* 2. BAGIAN SLIDER (Volume dan Brightness - Dynamic Hover Expand) */
+/* 2. SLIDERS (Volume & Brightness - Hover Expand) */
 .widget-volume,
 .widget-backlight {
     background: transparent;
@@ -110,7 +110,7 @@ button {
     color: @text-color;
 }
 
-/* Track (Jalur Kosong) */
+/* Track */
 scale trough {
     background: alpha(@foreground, 0.1);
     border-radius: 6px;
@@ -120,7 +120,7 @@ scale trough {
     transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
-/* Highlight (Jalur Terisi) */
+/* Active Fill */
 scale highlight {
     background-color: @primary;
     border-radius: 6px 0px 0px 6px;
@@ -128,7 +128,7 @@ scale highlight {
     transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
-/* Slider (Pegangan) */
+/* Thumb */
 scale slider {
     background: @foreground;
     border-radius: 4px;
@@ -142,7 +142,7 @@ scale slider {
     transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
-/* Rel kosong membesar & ganti warna saat hover */
+/* Expand track on hover */
 scale:hover trough {
     background: alpha(@foreground, 0.2);
     min-height: 24px;
@@ -159,7 +159,7 @@ scale:hover slider {
     margin: -6px 0;
 }
 
-/* 3. TOMBOL AKSI UTAMA (2 Kolom x 3 Baris) */
+/* 3. QUICK TOGGLES (2x3 Grid) */
 .widget-buttons-grid {
     margin: 18px 8px 10px 8px;
 }
@@ -221,7 +221,7 @@ scale:hover slider {
     color: @background;
 }
 
-/* 5. BAGIAN PEMUTAR MEDIA MPRIS */
+/* 5. MPRIS PLAYER */
 .widget-mpris {
     background: alpha(@background, 0.4);
     border-radius: 14px;
@@ -265,7 +265,7 @@ scale:hover slider {
     color: @primary;
 }
 
-/* 6. JUDUL NOTIFIKASI */
+/* 6. NOTIFICATIONS HEADER */
 .widget-title {
     color: @text-color;
     margin: 8px 16px 4px 16px;
@@ -305,7 +305,7 @@ scale:hover slider {
     color: @background;
 }
 
-/* 7. GAYA KARTU NOTIFIKASI INDIVIDUAL (Sesuai Lampiran 1) */
+/* 7. NOTIFICATION CARDS */
 .widget-notifications {
     background: transparent;
     border: none;
@@ -383,7 +383,7 @@ scale:hover slider {
     outline: none;
 }
 
-/* Gambar album art / preview foto notifikasi */
+/* Album art / image preview */
 .notification-content .image,
 .notification .image {
     opacity: 1;
@@ -396,7 +396,7 @@ scale:hover slider {
     -gtk-icon-size: 48px;
 }
 
-/* Ikon aplikasi di samping judul */
+/* App icon */
 .notification-content .app-icon,
 .notification .app-icon {
     opacity: 1;
@@ -407,7 +407,7 @@ scale:hover slider {
     border-radius: 100%;
 }
 
-/* Bentuk kartu tiap notifikasi */
+/* Notification card layout */
 .notification {
     background: alpha(mix(@background, #080814, 0.75), 0.97);
     border: 1px solid alpha(@primary, 0.3);
@@ -449,7 +449,7 @@ scale:hover slider {
     margin-top: 6px;
 }
 
-/* Tombol close notifikasi (Silang di kanan atas, terlihat halus dan menyala saat hover) */
+/* Close button */
 .notification-background .close-button,
 .close-button,
 .notification-close-button {
@@ -476,7 +476,7 @@ scale:hover slider {
     color: @foreground;
 }
 
-/* Progress bar di dalam notifikasi */
+/* Progress bar */
 .notification progressbar {
     margin-top: 8px;
 }
@@ -496,14 +496,14 @@ scale:hover slider {
     min-height: 4px;
 }
 
-/* Teks saat notifikasi kosong */
+/* Empty placeholder */
 .control-center-list-placeholder {
     color: alpha(@foreground, 0.4);
     font-size: 13px;
     margin: 20px 0;
 }
 
-/* 8. SEMBUNYIKAN SCROLLBAR */
+/* 8. HIDE SCROLLBAR */
 scrollbar,
 scrollbar trough,
 scrollbar slider,
@@ -519,7 +519,7 @@ scrolledwindow scrollbar slider {
     background: transparent;
 }
 
-/* 9. FLOATING NOTIFICATION POPUP */
+/* 9. FLOATING POPUPS */
 .floating-notifications {
     background: transparent;
 }

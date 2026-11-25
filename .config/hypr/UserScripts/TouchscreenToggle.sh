@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Touchscreen Toggle (Hyprland + Gestures Daemon)
-# Aman, instan, tidak butuh root, dan mencegah sentuhan tembus / boros baterai
+# Rootless instant toggle to prevent palm/phantom input and save battery
 # ==============================================================================
 
 STATUS_FILE="${XDG_RUNTIME_DIR:-/tmp}/touchscreen.status"
 NOTIF_ICON="input-touchscreen"
 
-# Cek status saat ini (default: disabled sejak boot jika file belum ada)
+# Read current state (default: disabled on boot)
 is_enabled() {
     if [ -f "$STATUS_FILE" ]; then
         [ "$(cat "$STATUS_FILE")" = "enabled" ]
@@ -17,31 +17,27 @@ is_enabled() {
 }
 
 disable_touchscreen() {
-    # 1. Hentikan daemon background gestures agar tidak mem-poll /dev/input dan hemat CPU/baterai
+    # 1. Stop background gestures daemon to save CPU/battery
     systemctl --user stop touchscreen-gestures.service 2>/dev/null || true
 
-    # 2. Nonaktifkan layar sentuh jari dan stylus di Hyprland
-    hyprctl keyword "device[wdht1f01:00-2575:0911]:enabled" false >/dev/null 2>&1
-    hyprctl keyword "device[wdht1f01:00-2575:0911-stylus]:enabled" false >/dev/null 2>&1
-    hyprctl keyword "input:touchdevice:enabled" false >/dev/null 2>&1
+    # 2. Disable touchscreen & stylus devices in Hyprland
+    hyprctl eval "hl.device({ name = 'wdht1f01:00-2575:0911', enabled = false }); hl.device({ name = 'wdht1f01:00-2575:0911-stylus', enabled = false }); hl.config({ input = { touchdevice = { enabled = false } } })" >/dev/null 2>&1
 
     echo "disabled" > "$STATUS_FILE"
     notify-send -u low -i "$NOTIF_ICON" "Touchscreen" "Disabled"
 }
 
 enable_touchscreen() {
-    # 1. Jika driver i2c di level kernel sempat ter-unbind, coba panggil modprobe jika sudo diizinkan
+    # 1. Re-bind i2c_hid_acpi kernel module if unbound and passwordless sudo allows
     if [ ! -d "/sys/bus/i2c/drivers/i2c_hid_acpi/i2c-WDHT1F01:00" ]; then
         sudo -n modprobe -r i2c_hid_acpi 2>/dev/null && sudo -n modprobe i2c_hid_acpi 2>/dev/null
         sleep 0.5
     fi
 
-    # 2. Aktifkan kembali layar sentuh jari dan stylus di Hyprland
-    hyprctl keyword "device[wdht1f01:00-2575:0911]:enabled" true >/dev/null 2>&1
-    hyprctl keyword "device[wdht1f01:00-2575:0911-stylus]:enabled" true >/dev/null 2>&1
-    hyprctl keyword "input:touchdevice:enabled" true >/dev/null 2>&1
+    # 2. Re-enable touchscreen & stylus devices in Hyprland
+    hyprctl eval "hl.device({ name = 'wdht1f01:00-2575:0911', enabled = true }); hl.device({ name = 'wdht1f01:00-2575:0911-stylus', enabled = true }); hl.config({ input = { touchdevice = { enabled = true } } })" >/dev/null 2>&1
 
-    # 3. Jalankan kembali daemon background gestures
+    # 3. Restart gestures daemon
     systemctl --user start touchscreen-gestures.service 2>/dev/null || true
 
     echo "enabled" > "$STATUS_FILE"

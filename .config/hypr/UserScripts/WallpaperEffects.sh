@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
+# Modified by: Fioren (@Leshoraa)
 # Wallpaper Effects using ImageMagick (SUPER SHIFT W)
 
 # Variables
@@ -14,7 +15,7 @@ rofi_theme="$HOME/.config/rofi/config-wallpaper-effect.rasi"
 iDIR="$HOME/.config/swaync/images"
 iDIRi="$HOME/.config/swaync/icons"
 
-# swww transition config
+# awww transition config
 FPS=60
 TYPE="wipe"
 DURATION=2
@@ -45,9 +46,9 @@ declare -A effects=(
 
 # Function to apply no effects
 no-effects() {
-    swww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
+    awww img -o "$focused_monitor" "$wallpaper_current" $SWWW_PARAMS &&
     wait $!
-    wallust run "$wallpaper_current" -s &&
+    "$SCRIPTSDIR/extract_dominant.py" "$wallpaper_current" &&
     wait $!
     # Refresh rofi, waybar, wallust palettes
 	sleep 2
@@ -83,11 +84,11 @@ main() {
             done
 
             sleep 1
-            swww img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
+            awww img -o "$focused_monitor" "$wallpaper_output" $SWWW_PARAMS &
 
             sleep 2
   
-            wallust run "$wallpaper_output" -s &
+            "$SCRIPTSDIR/extract_dominant.py" "$wallpaper_output" &
             sleep 1
             # Refresh rofi, waybar, wallust palettes
             "${SCRIPTSDIR}/Refresh.sh"

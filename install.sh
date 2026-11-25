@@ -78,18 +78,13 @@ CURRENT_HOST="$(hostname 2>/dev/null || uname -n)"
 
 if [[ "$CURRENT_USER" != "fioren" || "$CURRENT_HOST" != "leviola" ]]; then
     echo "=========================================================="
-    echo "⚠️  PERINGATAN KERAS / STRICT DEVICE LOCK:                "
-    echo "   Repositori ini dikhususkan secara eksklusif untuk     "
-    echo "   perangkat pribadi milik Fioren (@Leshoraa)            "
-    echo "   (ASUS Vivobook S 14 Flip TN3402QA / leviola).         "
-    echo "   Banyak pengaturan hardware (ACPI, udev rules, EPP,    "
-    echo "   battery threshold, touchpad numpad) yang dirancang    "
-    echo "   hanya untuk hardware ini dan TIDAK BOLEH dipasang     "
-    echo "   di perangkat lain!                                    "
+    echo "WARNING: STRICT DEVICE LOCK"
+    echo "Hardware-specific dotfiles for Fioren's ASUS Vivobook S 14"
+    echo "Flip TN3402QA (leviola) — ACPI, udev, EPP, charge limit,"
+    echo "and NumberPad configs will break other hardware."
     echo "=========================================================="
     if [[ "$FORCE_INSTALL" != "true" ]]; then
-        echo "❌ Instalasi dibatalkan demi keamanan hardware Anda."
-        echo "   (Gunakan --force hanya jika Anda tahu persis apa yang Anda lakukan)"
+        echo "Aborted. Pass --force to override."
         exit 1
     fi
 fi
@@ -128,6 +123,11 @@ deploy_config() {
     local src="$1"
     local dest="$2"
 
+    if [ -L "$dest" ] && [ "$(readlink -f "$dest")" = "$(readlink -f "$src")" ]; then
+        echo "Already linked: $dest -> $src"
+        return 0
+    fi
+
     backup_item "$dest"
 
     if [ "$DRY_RUN" = true ]; then
@@ -153,6 +153,18 @@ if [ -d "$DOTFILES_DIR/.config" ]; then
     for item in "$DOTFILES_DIR/.config"/*; do
         [ -e "$item" ] || continue
         base="$(basename "$item")"
+        if [ "$base" = "VSCodium" ]; then
+            if [ -f "$item/User/settings.json" ]; then
+                deploy_config "$item/User/settings.json" "$CONFIG_TARGET/VSCodium/User/settings.json"
+            fi
+            continue
+        fi
+        if [ "$base" = "systemd" ]; then
+            if [ -d "$item/user" ]; then
+                deploy_config "$item/user" "$CONFIG_TARGET/systemd/user"
+            fi
+            continue
+        fi
         deploy_config "$item" "$CONFIG_TARGET/$base"
     done
 fi
@@ -176,10 +188,20 @@ if [ -d "$DOTFILES_DIR/.local/share" ]; then
     done
 fi
 
-# Deploy wallpapers
+# Deploy wallpapers (preserve existing non-symlink wallpapers dir)
 if [ -d "$DOTFILES_DIR/wallpapers" ]; then
     mkdir -p "$HOME_TARGET/Pictures"
-    deploy_config "$DOTFILES_DIR/wallpapers" "$HOME_TARGET/Pictures/wallpapers"
+    if [ -d "$HOME_TARGET/Pictures/wallpapers" ] && [ ! -L "$HOME_TARGET/Pictures/wallpapers" ]; then
+        for wp_dir in "$DOTFILES_DIR/wallpapers"/*; do
+            [ -e "$wp_dir" ] || continue
+            wp_base="$(basename "$wp_dir")"
+            if [ ! -e "$HOME_TARGET/Pictures/wallpapers/$wp_base" ]; then
+                deploy_config "$wp_dir" "$HOME_TARGET/Pictures/wallpapers/$wp_base"
+            fi
+        done
+    else
+        deploy_config "$DOTFILES_DIR/wallpapers" "$HOME_TARGET/Pictures/wallpapers"
+    fi
 fi
 
 # Deploy home dotfiles (.zshrc, .zprofile, .gtkrc-2.0, etc.)

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
+# Modified by: Fioren (@Leshoraa)
 # This file used on waybar modules sourcing defaults set in $HOME/.config/hypr/UserConfigs/01-UserDefaults.conf
 
 # Define the path to the config file
-config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.conf
+config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.lua
 
 # Check if the config file exists
 if [[ ! -f "$config_file" ]]; then
@@ -11,9 +12,9 @@ if [[ ! -f "$config_file" ]]; then
     exit 1
 fi
 
-# Extract variables cleanly without fragile eval
-term=$(grep -E '^\s*\$term\s*=' "$config_file" | sed -E 's/^\s*\$term\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
-files=$(grep -E '^\s*\$files\s*=' "$config_file" | sed -E 's/^\s*\$files\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
+# Extract variables cleanly from Lua defaults
+term=$(grep -E '^\s*M\.term\s*=' "$config_file" | sed -E 's/^\s*M\.term\s*=\s*"([^"]*)".*/\1/' | xargs)
+files=$(grep -E '^\s*M\.files\s*=' "$config_file" | sed -E 's/^\s*M\.files\s*=\s*"([^"]*)".*/\1/' | xargs)
 
 # Fallback defaults if empty
 term=${term:-kitty}

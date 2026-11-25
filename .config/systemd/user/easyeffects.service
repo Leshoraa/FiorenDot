@@ -1,8 +1,8 @@
 [Unit]
 Description=Easy Effects Audio DSP Service
 Documentation=https://github.com/wwmm/easyeffects
-After=pipewire.service wireplumber.service
-PartOf=pipewire.service wireplumber.service
+After=graphical-session.target pipewire.service wireplumber.service
+PartOf=graphical-session.target
 
 [Service]
 Type=simple
@@ -11,4 +11,4 @@ Restart=on-failure
 RestartSec=2s
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

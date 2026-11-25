@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 # Rofi menu for KooL Hyprland Quick Settings (SUPER SHIFT E)
 # Updated for UserConfigs/configs separation
 
 # Modify this config file for default terminal and EDITOR
-config_file="$HOME/.config/hypr/UserConfigs/01-UserDefaults.conf"
+config_file="$HOME/.config/hypr/UserConfigs/01-UserDefaults.lua"
 
-tmp_config_file=$(mktemp)
-sed 's/^\$//g; s/ = /=/g' "$config_file" > "$tmp_config_file"
-source "$tmp_config_file"
+term=$(grep -E '^\s*M\.term\s*=' "$config_file" | sed -E 's/^\s*M\.term\s*=\s*"([^"]*)".*/\1/' | xargs)
+edit=$(grep -E '^\s*M\.editor\s*=' "$config_file" | sed -E 's/^\s*M\.editor\s*=\s*"([^"]*)".*/\1/' | xargs)
+term=${term:-kitty}
+edit=${edit:-${EDITOR:-nano}}
 # ##################################### #
 
 # variables
@@ -65,19 +67,19 @@ main() {
     
     # Map choices to corresponding files
     case "$choice" in
-    	"Edit User Defaults") file="$UserConfigs/01-UserDefaults.conf" ;;
-        "Edit User ENV variables") file="$UserConfigs/ENVariables.conf" ;;
-        "Edit User Keybinds") file="$UserConfigs/UserKeybinds.conf" ;;
-        "Edit User Startup Apps (overlay)") file="$UserConfigs/Startup_Apps.conf" ;;
-        "Edit User Window Rules (overlay)") file="$UserConfigs/WindowRules.conf" ;;
-        "Edit User Settings") file="$configs/SystemSettings.conf"; show_info "Editing default settings. Copy to UserConfigs/UserSettings.conf to override." ;;
-        "Edit User Decorations") file="$UserConfigs/UserDecorations.conf" ;;
-        "Edit User Animations") file="$UserConfigs/UserAnimations.conf" ;;
-        "Edit User Laptop Settings") file="$UserConfigs/Laptops.conf" ;;
-        "Edit System Default Keybinds") file="$configs/Keybinds.conf" ;;
-        "Edit System Default Startup Apps") file="$configs/Startup_Apps.conf" ;;
-        "Edit System Default Window Rules") file="$configs/WindowRules.conf" ;;
-        "Edit System Default Settings") file="$configs/SystemSettings.conf" ;;
+    	"Edit User Defaults") file="$UserConfigs/01-UserDefaults.lua" ;;
+        "Edit User ENV variables") file="$UserConfigs/ENVariables.lua" ;;
+        "Edit User Keybinds") file="$UserConfigs/UserKeybinds.lua" ;;
+        "Edit User Startup Apps (overlay)") file="$UserConfigs/Startup_Apps.lua" ;;
+        "Edit User Window Rules (overlay)") file="$UserConfigs/WindowRules.lua" ;;
+        "Edit User Settings") file="$UserConfigs/UserSettings.lua" ;;
+        "Edit User Decorations") file="$UserConfigs/UserDecorations.lua" ;;
+        "Edit User Animations") file="$UserConfigs/UserAnimations.lua" ;;
+        "Edit User Laptop Settings") file="$UserConfigs/Laptops.lua" ;;
+        "Edit System Default Keybinds") file="$configs/Keybinds.lua" ;;
+        "Edit System Default Startup Apps") file="$configs/Startup_Apps.lua" ;;
+        "Edit System Default Window Rules") file="$configs/WindowRules.lua" ;;
+        "Edit System Default Settings") file="$configs/SystemSettings.lua" ;;
         "Choose Kitty Terminal Theme") $scriptsDir/Kitty_themes.sh ;;
         "Configure Monitors (nwg-displays)") 
             if ! command -v nwg-displays &>/dev/null; then

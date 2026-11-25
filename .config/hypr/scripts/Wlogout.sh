@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Path Tema Rofi
+# Rofi power menu theme
 THEME="$HOME/.config/rofi/powermenu.rasi"
 
 # Option Icons (Nerd Font)
@@ -10,24 +10,23 @@ sleep="󰤄"
 reboot="󰑓"
 shutdown="󰐥"
 
-# Gabungkan Opsi
-# Gabungkan Opsi (Urutan Baru)
+# Menu entries
 options="$shutdown\n$reboot\n$sleep\n$logout\n$lock"
 
-# Ambil pilihan dari Rofi
+# Prompt via Rofi
 selected_option=$(echo -e "$options" | rofi -dmenu \
                   -i \
                   -selected-row 2 \
-                  -p "See you later, $(whoami)!" \
+                  -p "Session Menu" \
                   -theme "$THEME")
 
-# Perintah Eksekusi
+# Execute action
 case "$selected_option" in
     "$lock")
         hyprlock
         ;;
     "$logout")
-        hyprctl dispatch exit
+        hyprctl eval 'hl.dispatch(hl.dsp.exit())'
         ;;
     "$sleep")
         systemctl suspend

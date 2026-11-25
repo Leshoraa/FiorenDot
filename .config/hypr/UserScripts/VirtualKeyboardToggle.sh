@@ -38,7 +38,7 @@ else
         if pgrep -x wvkbd-mobintl >/dev/null; then
             pkill -SIGUSR2 wvkbd-mobintl
         else
-            hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
+            hyprctl eval "hl.exec_cmd('$WVKBD_BIN -L 300 -H 350')" >/dev/null
         fi
         echo 1 > "$V_STATE"
     fi

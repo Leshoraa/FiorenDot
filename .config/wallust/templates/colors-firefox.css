@@ -1,13 +1,13 @@
-/* Template Wallust untuk Cascade (Diperbaiki) */
+/* Wallust template for Cascade */
 :root {
-    /* Skema Warna Utama */
+    /* Primary Palette */
     --uc-base-colour: {{background}};
-    --uc-highlight-colour: {{color0}}; 
+    --uc-highlight-colour: {{color0 | lighten(0.06)}}; 
     --uc-inverted-colour: {{foreground}};
-    --uc-muted-colour: {{color8}};
+    --uc-muted-colour: {{foreground | darken(0.35)}};
     --uc-accent-colour: {{color4}}; 
 
-    /* Warna Identitas / Container */
+    /* Container Identity Colors */
     --uc-identity-colour-blue: {{color4}};
     --uc-identity-colour-turquoise: {{color6}};
     --uc-identity-colour-green: {{color2}};
@@ -18,7 +18,7 @@
     --uc-identity-colour-purple: {{color6}};
 }
 
-/* Pemetaan Variabel untuk UI Browser (WAJIB ADA) */
+/* Browser UI Variables */
 :root {
     --lwt-frame: var(--uc-base-colour) !important;
     --lwt-accent-color: var(--lwt-frame) !important;

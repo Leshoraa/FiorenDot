@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 ## /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 # For Dark and Light switching
 # Note: Scripts are looking for keywords Light or Dark except for wallpapers as the are in a separate directories
 
@@ -26,11 +27,11 @@ for pid in waybar rofi swaync ags swaybg; do
 done
 
 
-# Initialize swww if needed
-swww query || swww-daemon --format xrgb
+# Initialize awww if needed
+awww query || awww-daemon --format xrgb
 
-# Set swww options
-swww="swww img"
+# Set awww options
+swww="awww img"
 effect="--transition-bezier .43,1.19,1,.4 --transition-fps 60 --transition-type grow --transition-pos 0.925,0.977 --transition-duration 2"
 
 # Determine current theme mode

@@ -185,7 +185,7 @@ def main():
                                 # Horizontal Swipes (For 2, 3, or 4 fingers)
                                 elif abs_avg_x >= SWIPE_THRESHOLD_MM and abs_avg_x > abs_avg_y * 1.2:
                                     if avg_dx > 0 and all(d[0] >= MIN_FINGER_SWIPE_MM for d in displacements):
-                                        # Swipe RIGHT -> Workspace selanjutnya
+                                        # Swipe RIGHT -> Next workspace
                                         session_gesture_done = True
                                         last_trigger_time = now
                                         if session_max_fingers in (2, 3):
@@ -193,7 +193,7 @@ def main():
                                         elif session_max_fingers == 4:
                                             run_dispatch(['hyprctl', 'dispatch', 'movetoworkspace', '+1'])
                                     elif avg_dx < 0 and all(d[0] <= -MIN_FINGER_SWIPE_MM for d in displacements):
-                                        # Swipe LEFT -> Workspace sebelumnya
+                                        # Swipe LEFT -> Previous workspace
                                         session_gesture_done = True
                                         last_trigger_time = now
                                         if session_max_fingers in (2, 3):

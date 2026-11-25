@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script Optimasi Linux (Performa & Baterai) - ASUS Vivobook (AMD Ryzen 5 5600H)
+# Linux Performance & Battery Tuning - ASUS Vivobook (AMD Ryzen 5 5600H)
 # ==============================================================================
 
 set -e
 
 if [ "$EUID" -ne 0 ]; then
-    echo "❌ Error: Script ini memerlukan hak akses root (sudo)."
-    echo "Silakan jalankan: sudo bash $0"
+    echo "Error: root privileges required. Run: sudo bash $0" >&2
     exit 1
 fi
 
-echo "🛡️  [1/7] Membuat ACPI Override untuk menetralkan duplikat CPU OpenCore di Linux..."
+echo "[1/7] Building ACPI override to neutralize OpenCore CPU duplicate in Linux..."
 python3 -c "
 import struct, os, subprocess
 
@@ -38,23 +37,23 @@ p2 = subprocess.run(['cpio', '-H', 'newc', '--create'], cwd=build_dir, input=p.s
 with open('/boot/acpi_override.img', 'wb') as f:
     f.write(p2.stdout)
 "
-echo "  ✓ /boot/acpi_override.img berhasil dibuat."
+echo "  ✓ Created /boot/acpi_override.img."
 
-echo "🚀 [2/7] Membersihkan modul legacy acpi_cpufreq..."
+echo "[2/7] Removing legacy acpi_cpufreq autoload..."
 rm -f /etc/modules-load.d/acpi-cpufreq.conf
-echo "  ✓ Modul kernel disiapkan untuk native amd_pstate."
+echo "  ✓ Ready for native amd_pstate."
 
-echo "🔧 [3/7] Mengonfigurasi parameter boot loader (systemd-boot)..."
+echo "[3/7] Updating systemd-boot entries..."
 for conf in /boot/loader/entries/*.conf; do
     if [ -f "$conf" ]; then
         cp "$conf" "${conf}.bak"
-        # Bersihkan parameter lama jika ada
+        # Strip legacy pstate/OSI flags
         sed -i 's/ amd_pstate\.shared_mem=1//g' "$conf"
         sed -i 's/ amd_pstate=disable//g' "$conf"
         sed -i 's/ amd_pstate=active//g' "$conf"
         sed -i 's/ acpi_osi="!Processor Device"//g' "$conf"
 
-        # Pastikan acpi_override.img dimuat sebelum initramfs
+        # Load acpi_override.img before initramfs
         if ! grep -q "acpi_override.img" "$conf"; then
             sed -i '/initrd.*initramfs/i initrd  /acpi_override.img' "$conf"
         fi
@@ -62,35 +61,35 @@ for conf in /boot/loader/entries/*.conf; do
             sed -i '/initrd.*initramfs/i initrd  /amd-ucode.img' "$conf"
         fi
 
-        # Aktifkan driver modern AMD P-State (EPP / Autonomous Mode)
+        # Enable AMD P-State active (EPP)
         sed -i '/^options/ s/$/ amd_pstate=active/' "$conf"
-        echo "  ✓ Diperbarui: $conf (backup disimpan di ${conf}.bak)"
+        echo "  ✓ Updated $conf (backup: ${conf}.bak)"
     fi
 done
 
-echo "📦 [4/7] Mendaftarkan Linux Boot Manager (systemd-boot) ke UEFI NVRAM..."
+echo "[4/7] Registering systemd-boot with UEFI NVRAM..."
 bootctl install || true
-echo "  ✓ Bootloader Linux terdaftar di NVRAM."
+echo "  ✓ Bootloader registered."
 
-echo "🧹 [5/7] Menonaktifkan service background yang tidak diperlukan..."
+echo "[5/7] Disabling unneeded background services..."
 if systemctl is-enabled supergfxd.service &>/dev/null; then
     systemctl disable --now supergfxd.service || true
-    echo "  ✓ supergfxd.service dinonaktifkan."
+    echo "  ✓ Disabled supergfxd.service."
 else
-    echo "  - supergfxd.service sudah nonaktif."
+    echo "  - supergfxd.service already disabled."
 fi
 
 if systemctl is-enabled libvirtd.service &>/dev/null; then
     systemctl disable libvirtd.service || true
-    echo "  ✓ libvirtd.service dinonaktifkan dari autostart."
+    echo "  ✓ Disabled libvirtd.service autostart."
 fi
 
 if systemctl is-enabled NetworkManager-wait-online.service &>/dev/null; then
     systemctl disable NetworkManager-wait-online.service || true
-    echo "  ✓ NetworkManager-wait-online.service dinonaktifkan."
+    echo "  ✓ Disabled NetworkManager-wait-online.service."
 fi
 
-echo "🔋 [6/7] Mengonfigurasi Battery Health Charging Limit (Preserve State) & Izin Akses Tombol..."
+echo "[6/7] Configuring battery charge threshold & user sysfs permissions..."
 if [ -f /sys/class/power_supply/BATT/charge_control_end_threshold ]; then
     chmod 0666 /sys/class/power_supply/BATT/charge_control_end_threshold || true
     touch /etc/asus-battery-charge-threshold && chmod 0666 /etc/asus-battery-charge-threshold || true
@@ -110,7 +109,7 @@ ExecStart=/bin/sh -c 'chmod 0666 /sys/class/power_supply/BATT/charge_control_end
 WantedBy=multi-user.target
 EOF
 
-    # Udev rule agar charge_control_end_threshold selalu bisa diubah oleh tombol SwayNC tanpa password
+    # Allow passwordless threshold updates from SwayNC/user scripts
     cat << 'EOF' > /etc/udev/rules.d/99-battery-charge-threshold.rules
 ACTION=="add|change", SUBSYSTEM=="power_supply", ATTR{charge_control_end_threshold}!="", RUN+="/bin/chmod 0666 /sys%p/charge_control_end_threshold"
 EOF
@@ -118,12 +117,12 @@ EOF
     systemctl daemon-reload
     systemctl enable --now asus-battery-charge-threshold.service
     udevadm control --reload-rules && udevadm trigger --subsystem-match=power_supply || true
-    echo "  ✓ Batas charge tersimpan & izin kontrol non-root berhasil diatur."
+    echo "  ✓ Charge threshold persisted & non-root control enabled."
 else
-    echo "  - Hardware tidak mendukung charge_control_end_threshold."
+    echo "  - Hardware does not expose charge_control_end_threshold."
 fi
 
-echo "🧠 [7/7] Mengoptimalkan ZRAM & Powersave Rules..."
+echo "[7/7] Configuring ZRAM & powersave udev rules..."
 cat << 'EOF' > /etc/systemd/zram-generator.conf
 [zram0]
 zram-size = ram / 2
@@ -132,13 +131,13 @@ swap-priority = 100
 EOF
 
 systemctl restart systemd-zram-setup@zram0.service 2>/dev/null || true
-echo "  ✓ ZRAM dikonfigurasi ke 50% RAM (~7.5GB) dengan kompresi cepat zstd."
+echo "  ✓ ZRAM set to 50% RAM with zstd."
 
 # AMD P-State EPP Rule (Balance Performance)
 cat << 'EOF' > /etc/udev/rules.d/50-amd-epp.rules
 ACTION=="add", SUBSYSTEM=="cpu", ATTR{cpufreq/energy_performance_preference}!="", ATTR{cpufreq/energy_performance_preference}="balance_performance"
 EOF
-echo "  ✓ AMD P-State EPP balance_performance dikonfigurasi ke udev rules."
+echo "  ✓ Configured AMD P-State EPP (balance_performance)."
 
 # PCIe ASPM powersave policy
 cat << 'EOF' > /etc/udev/rules.d/99-powersave.rules
@@ -163,22 +162,22 @@ if [ -f /sys/module/pcie_aspm/parameters/policy ]; then
     echo powersave > /sys/module/pcie_aspm/parameters/policy 2>/dev/null || true
 fi
 
-# Terapkan EPP langsung jika saat ini sudah aktif
+# Apply EPP immediately if active
 if [ -f /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
     echo "balance_performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference >/dev/null 2>&1 || true
 fi
 
 echo ""
 echo "======================================================================"
-echo "✨ SEMUA OPTIMASI SISTEM SELESAI DITERAPKAN!"
+echo "System optimizations applied."
 echo "======================================================================"
-echo "Pemeriksaan driver CPU saat ini:"
+echo "CPU scaling state:"
 if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver ]; then
     echo "Driver: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver)"
     echo "Governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
     echo "EPP Preference: $(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo 'N/A')"
 else
-    echo "Driver cpufreq akan aktif penuh setelah sistem di-reboot."
+    echo "cpufreq driver will activate on reboot."
 fi
-echo "Batas charge baterai: $(cat /sys/class/power_supply/BATT/charge_control_end_threshold 2>/dev/null || echo 'N/A')%"
+echo "Battery charge threshold: $(cat /sys/class/power_supply/BATT/charge_control_end_threshold 2>/dev/null || echo 'N/A')%"
 echo "======================================================================"

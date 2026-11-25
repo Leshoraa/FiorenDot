@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 
 # Modified version of Refresh.sh but waybar wont refresh
 # Used by automatic wallpaper change

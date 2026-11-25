@@ -8,7 +8,7 @@
 
 set -e
 
-# Pastikan direktori state ada agar tidak terjadi crash user_migration di Waydroid
+# Ensure state directory exists to avoid Waydroid user_migration crash
 mkdir -p "$HOME/.local/state/waydroid" "$HOME/.local/share/applications"
 
 ARG="${1:-normal}"
@@ -44,32 +44,32 @@ echo "========================================="
 echo " Starting Waydroid: $MODE_NAME"
 echo "========================================="
 
-# 1. Hentikan sesi yang sedang berjalan jika ada
+# 1. Stop any active session
 if waydroid status 2>/dev/null | grep -q "RUNNING"; then
-    echo "Menghentikan sesi Waydroid aktif..."
+    echo "Stopping active Waydroid session..."
     waydroid session stop 2>/dev/null || true
     sleep 1
 fi
 
-# 2. Atur resolusi sesuai mode
-echo "Mengatur resolusi Waydroid ke ${WIDTH}x${HEIGHT}..."
+# 2. Apply target resolution
+echo "Setting Waydroid resolution to ${WIDTH}x${HEIGHT}..."
 sudo waydroid prop set persist.waydroid.width "$WIDTH"
 sudo waydroid prop set persist.waydroid.height "$HEIGHT"
 
-# 3. Pastikan folder shared Waydroid (~/WaydroidShare) terinisialisasi
+# 3. Ensure shared host storage (~/WaydroidShare) is initialized
 if [ -f "$HOME/.config/hypr/UserScripts/waydroid-share-init.sh" ]; then
     sudo "$HOME/.config/hypr/UserScripts/waydroid-share-init.sh" >/dev/null 2>&1 || true
 fi
 
-# 4. Restart container agar resolusi baru dibaca
-echo "Memuat ulang service Waydroid..."
+# 4. Restart container to pick up resolution properties
+echo "Restarting Waydroid service..."
 sudo systemctl restart waydroid-container.service
 
-# 4. Jalankan Full UI
-echo "Membuka Waydroid Full UI..."
+# 5. Launch Full UI
+echo "Launching Waydroid UI..."
 waydroid show-full-ui &
 
-# 5. Atur rotasi jika mode inverted
+# 6. Apply orientation lock when inverted
 if [ "$ROT" -ne 0 ]; then
     (
         for i in {1..10}; do
@@ -83,4 +83,4 @@ if [ "$ROT" -ne 0 ]; then
     ) &
 fi
 
-echo "Waydroid berhasil dijalankan ($MODE_NAME)!"
+echo "Waydroid started ($MODE_NAME)."

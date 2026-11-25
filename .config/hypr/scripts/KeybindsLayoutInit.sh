@@ -1,16 +1,10 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 # Initialize J/K keybinds so they always cycle windows globally (no layout-specific behavior)
 # This avoids double-actions when layouts change.
 
 set -euo pipefail
 
-# Always reset and bind SUPER+J/K the same way on startup
-hyprctl keyword unbind SUPER,J || true
-hyprctl keyword unbind SUPER,K || true
-
-# Cycle windows globally: J = next
-hyprctl keyword bind SUPER,J,cyclenext
-
-# Super + K is reserved for toggling on-screen virtual keyboard
-hyprctl keyword bindd "SUPER,K,Toggle virtual keyboard on/off,exec,$HOME/.config/hypr/UserScripts/VirtualKeyboardToggle.sh"
+# Always reset and bind SUPER+J/K the same way on startup (Hyprland 0.57+ Lua)
+hyprctl eval 'hl.unbind("SUPER + J"); hl.unbind("SUPER + K"); hl.bind("SUPER + J", hl.dsp.window.cycle_next()); hl.bind("SUPER + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/UserScripts/VirtualKeyboardToggle.sh"), { description = "Toggle virtual keyboard on/off" })' || true

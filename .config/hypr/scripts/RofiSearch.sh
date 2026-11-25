@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 # For Searching via web browsers
 
 # Define the path to the config file
-config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.conf
+config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.lua
 
 # Check if the config file exists
 if [[ ! -f "$config_file" ]]; then
@@ -11,8 +12,8 @@ if [[ ! -f "$config_file" ]]; then
     exit 1
 fi
 
-# Extract Search_Engine cleanly without fragile eval
-Search_Engine=$(grep -E '^\s*\$Search_Engine\s*=' "$config_file" | sed -E 's/^\s*\$Search_Engine\s*=\s*([^#]*).*/\1/' | sed "s/[\"'\r]//g" | xargs)
+# Extract search_engine cleanly from Lua defaults
+Search_Engine=$(grep -E '^\s*M\.search_engine\s*=' "$config_file" | sed -E 's/^\s*M\.search_engine\s*=\s*"([^"]*)".*/\1/' | xargs)
 Search_Engine=${Search_Engine:-"https://www.google.com/search?q={}"}
 
 # Rofi theme and message

@@ -45,7 +45,7 @@
         "actions": [
           {
             "label": "⊹ ࣪ ﹏𓊝﹏𓂁﹏﹏⊹ ࣪ ˖",
-            "command": "hyprctl dispatch dpms off"
+            "command": "hyprctl eval 'hl.dispatch(hl.dsp.dpms(\"off\"))'"
           }
         ]
       },

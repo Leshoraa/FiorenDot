@@ -10,6 +10,8 @@
 .initial_startup_done
 .current_wallpaper
 .current_wallpaper_square.png
+.current_wallpaper_square.source
+.wallpaper_current.source
 
 # Shell & tool histories
 .zsh_history

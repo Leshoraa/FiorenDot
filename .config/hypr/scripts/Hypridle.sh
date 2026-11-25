@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# Modified by: Fioren (@Leshoraa)
 
 PROCESS="hypridle"
 INHIBIT_TAG="HypridleToggle"
@@ -15,7 +16,7 @@ ensure_hypridle() {
     if ! pgrep -x "$PROCESS" >/dev/null; then
         systemctl --user start hypridle.service 2>/dev/null || {
             if command -v hyprctl >/dev/null 2>&1; then
-                hyprctl dispatch exec "$PROCESS" >/dev/null 2>&1
+                hyprctl eval "hl.exec_cmd('$PROCESS')" >/dev/null 2>&1
             else
                 nohup "$PROCESS" >/dev/null 2>&1 &
             fi

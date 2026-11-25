@@ -8,10 +8,10 @@ dir="${1:-r}"
 # Fast path: If active window is floating, move active window directly (takes ~6ms)
 if hyprctl activewindow -j | grep -q '"floating": true'; then
     case "$dir" in
-        l) hyprctl dispatch moveactive -40 0 ;;
-        r) hyprctl dispatch moveactive 40 0 ;;
-        u) hyprctl dispatch moveactive 0 -30 ;;
-        d) hyprctl dispatch moveactive 0 30 ;;
+        l) hyprctl eval 'hl.dispatch(hl.dsp.window.move({ x = -40, y = 0, relative = true }))' >/dev/null ;;
+        r) hyprctl eval 'hl.dispatch(hl.dsp.window.move({ x = 40, y = 0, relative = true }))' >/dev/null ;;
+        u) hyprctl eval 'hl.dispatch(hl.dsp.window.move({ x = 0, y = -30, relative = true }))' >/dev/null ;;
+        d) hyprctl eval 'hl.dispatch(hl.dsp.window.move({ x = 0, y = 30, relative = true }))' >/dev/null ;;
     esac
     exit 0
 fi

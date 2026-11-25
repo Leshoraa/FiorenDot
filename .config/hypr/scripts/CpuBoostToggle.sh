@@ -7,7 +7,7 @@
 BOOST_FILE="/sys/devices/system/cpu/cpufreq/boost"
 
 if [ ! -f "$BOOST_FILE" ]; then
-    echo "❌ Error: Sysfs boost file tidak ditemukan ($BOOST_FILE)."
+    echo "Error: sysfs boost file not found ($BOOST_FILE)." >&2
     exit 1
 fi
 
@@ -29,9 +29,9 @@ get_ac_status() {
     local ac
     ac=$(cat /sys/class/power_supply/ACAD/online 2>/dev/null || echo "1")
     if [ "$ac" -eq 1 ]; then
-        echo "AC Power (Charger)"
+        echo "AC"
     else
-        echo "Battery (Baterai)"
+        echo "Battery"
     fi
 }
 
@@ -53,19 +53,19 @@ case "${1:-status}" in
         echo "============================================================"
         echo "  Power Source       : $AC"
         if [ "$STATUS" = "1" ]; then
-            echo "  Current Boost      : AKTIF (Hingga 4.25 GHz)"
+            echo "  Current Boost      : ON (up to 4.25 GHz)"
         elif [ "$STATUS" = "0" ]; then
-            echo "  Current Boost      : NONAKTIF (Capped di Base Clock 3.30 GHz)"
+            echo "  Current Boost      : OFF (capped at 3.30 GHz base)"
         else
-            echo "  Current Boost      : Tidak diketahui ($STATUS)"
+            echo "  Current Boost      : Unknown ($STATUS)"
         fi
         if [ "$PREF" = "1" ]; then
-            echo "  Battery Preference : AKTIF (Tetap Boost saat charger dicabut)"
+            echo "  Battery Preference : ON (keep boost on battery)"
         else
-            echo "  Battery Preference : NONAKTIF (Hemat daya saat charger dicabut)"
+            echo "  Battery Preference : OFF (power-saving on battery)"
         fi
         echo ""
-        echo "  Frekuensi Real-Time Tiap Core:"
+        echo "  Per-Core Clock:"
         grep "cpu MHz" /proc/cpuinfo | awk '{printf "    Core %2d: %7.2f MHz\n", NR-1, $4}'
         echo "============================================================"
         ;;
@@ -73,10 +73,10 @@ case "${1:-status}" in
     on)
         if echo 1 > "$BOOST_FILE" 2>/dev/null; then
             save_battery_pref 1
-            echo "✓ CPU Turbo Boost berhasil DIAKTIFKAN (Hingga 4.25 GHz)."
-            send_notification "Aktif (Maks 4.25 GHz)" "speedometer"
+            echo "CPU Turbo Boost: ON (up to 4.25 GHz)"
+            send_notification "ON (max 4.25 GHz)" "speedometer"
         else
-            echo "❌ Gagal mengaktifkan boost. Periksa izin akses (butuh root atau chmod 0666)."
+            echo "Error: failed to enable boost (check permissions / chmod 0666)." >&2
             exit 1
         fi
         ;;
@@ -84,10 +84,10 @@ case "${1:-status}" in
     off)
         if echo 0 > "$BOOST_FILE" 2>/dev/null; then
             save_battery_pref 0
-            echo "✓ CPU Turbo Boost berhasil DINONAKTIFKAN (Capped di 3.30 GHz)."
-            send_notification "Nonaktif (Maks 3.30 GHz)" "battery-low"
+            echo "CPU Turbo Boost: OFF (capped at 3.30 GHz)"
+            send_notification "OFF (max 3.30 GHz)" "battery-low"
         else
-            echo "❌ Gagal menonaktifkan boost. Periksa izin akses (butuh root atau chmod 0666)."
+            echo "Error: failed to disable boost (check permissions / chmod 0666)." >&2
             exit 1
         fi
         ;;
@@ -102,7 +102,7 @@ case "${1:-status}" in
         ;;
 
     *)
-        echo "Penggunaan: $0 {status|on|off|toggle}"
+        echo "Usage: $0 {status|on|off|toggle}" >&2
         exit 1
         ;;
 esac

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+# Modified by: Fioren (@Leshoraa)
 
 SCRIPTSDIR=$HOME/.config/hypr/scripts
 UserScripts=$HOME/.config/hypr/UserScripts
@@ -16,7 +17,7 @@ for _prs in "${_ps[@]}"; do
 done
 
 if pidof waybar >/dev/null; then
-  killall -SIGUSR2 waybar
+  touch "$HOME/.config/waybar/style.css"
 else
   waybar &
 fi

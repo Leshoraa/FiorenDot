@@ -9,7 +9,7 @@ WVKBD_BIN="$HOME/.local/bin/wvkbd-mobintl"
 
 if ! pgrep -x wvkbd-mobintl >/dev/null; then
     # Not running -> Launch it visible
-    hyprctl dispatch exec "$WVKBD_BIN -L 300 -H 350"
+    hyprctl eval "hl.exec_cmd('$WVKBD_BIN -L 300 -H 350')" >/dev/null
     echo 1 > "$STATE_FILE"
 else
     # Running -> Toggle visibility between show and hide

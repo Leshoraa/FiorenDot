@@ -175,11 +175,11 @@ def pan_to_window(floating_windows, target_addr, center_x, center_y):
     
     if dx == 0 and dy == 0:
         if not is_protected_app(target_window):
-            subprocess.Popen(['hyprctl', 'dispatch', 'focuswindow', f'address:{target_addr}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(['hyprctl', 'eval', f"hl.dispatch(hl.dsp.focus({{ window = 'address:{target_addr}' }}))"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return
     batch_cmds = []
     for w in floating_windows:
-        batch_cmds.append(f"dispatch movewindowpixel {dx} {dy},address:{w['address']}")
+        batch_cmds.append(f"hl.dispatch(hl.dsp.window.move({{ x = {dx}, y = {dy}, relative = true, window = 'address:{w['address']}' }}))")
         if w['address'] in window_positions:
             window_positions[w['address']]['target_x'] += dx
             window_positions[w['address']]['target_y'] += dy
@@ -188,9 +188,9 @@ def pan_to_window(floating_windows, target_addr, center_x, center_y):
     for info in displaced.values():
         info['home_x'] += dx
         info['home_y'] += dy
-    subprocess.Popen(['hyprctl', '--batch', ';'.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(['hyprctl', 'eval', '; '.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if not is_protected_app(target_window):
-        subprocess.Popen(['hyprctl', 'dispatch', 'focuswindow', f'address:{target_addr}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.Popen(['hyprctl', 'eval', f"hl.dispatch(hl.dsp.focus({{ window = 'address:{target_addr}' }}))"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def change_focus(direction):
     global last_nav_time
@@ -199,8 +199,7 @@ def change_focus(direction):
         return
     last_nav_time = current_time
 
-    # FIX: Paksa update cache ke Hyprland real-time sebelum pindah pakai panah keyboard
-    # Ini yang mencegah layout mental/jump karena pakai koordinat lama
+    # Force real-time Hyprland cache refresh before directional navigation to avoid stale coords
     update_cache()
 
     try:
@@ -731,7 +730,7 @@ while True:
                         window_positions[addr]['target_y'] += idy
                         window_positions[addr]['sx'] += idx
                         window_positions[addr]['sy'] += idy
-                    batch_cmds.append(f"dispatch movewindowpixel {idx} {idy},address:{addr}")
+                    batch_cmds.append(f"hl.dispatch(hl.dsp.window.move({{ x = {idx}, y = {idy}, relative = true, window = 'address:{addr}' }}))")
                 for info in displaced.values():
                     info['home_x'] += idx
                     info['home_y'] += idy
@@ -764,9 +763,9 @@ while True:
                 ix = new_ix - prev_ix
                 iy = new_iy - prev_iy
                 if ix != 0 or iy != 0:
-                    batch_cmds.append(f"dispatch movewindowpixel {ix} {iy},address:{addr}")
+                    batch_cmds.append(f"hl.dispatch(hl.dsp.window.move({{ x = {ix}, y = {iy}, relative = true, window = 'address:{addr}' }}))")
         if batch_cmds:
-            subprocess.Popen(['hyprctl', '--batch', ';'.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(['hyprctl', 'eval', '; '.join(batch_cmds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except:
         pass
     wakeup_event.clear()

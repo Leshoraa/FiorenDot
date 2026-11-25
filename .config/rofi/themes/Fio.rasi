@@ -23,7 +23,7 @@ configuration {
 
 * {
     font:                       "JetBrainsMono Nerd Font 11";
-    background-alt:             @color1;
+    background-alt:             @color0;
     selected:                   @color12;
     active:                     @color11;
     urgent:                     @color13;
@@ -104,7 +104,7 @@ entry {
     vertical-align:             0.5;
 }
 
-/* Mode switcher dinonaktifkan di UI (tetap aktif via keyboard) */
+/* Mode switcher hidden in UI (active via keybinds) */
 mode-switcher {
     enabled:                    false;
 }
@@ -144,12 +144,12 @@ element normal.normal {
 
 element normal.urgent {
     background-color:           @urgent;
-    text-color:                 @foreground;
+    text-color:                 @background;
 }
 
 element normal.active {
     background-color:           @active;
-    text-color:                 @foreground;
+    text-color:                 @background;
 }
 
 element selected.normal {

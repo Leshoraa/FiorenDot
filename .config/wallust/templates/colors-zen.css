@@ -1,0 +1,76 @@
+/* Author: Fioren (@Leshoraa) */
+/* Wallust template for Zen Browser (live hot-reload via AutoConfig) */
+
+@-moz-document url-prefix("chrome://"), url-prefix("about:") {
+  :root {
+    --zen-primary-color: {{color12}} !important;
+    --zen-branding-dark: {{background}} !important;
+    --zen-branding-bg: {{background}} !important;
+    --zen-branding-bg-reverse: {{foreground}} !important;
+
+    --zen-colors-primary: color-mix(in srgb, {{color12}} 22%, {{background}}) !important;
+    --zen-colors-secondary: color-mix(in srgb, {{color12}} 32%, {{background}}) !important;
+    --zen-colors-tertiary: {{background}} !important;
+    --zen-colors-primary-foreground: {{color14}} !important;
+    --zen-colors-hover-bg: color-mix(in srgb, {{color12}} 35%, {{background}}) !important;
+    --zen-colors-border: rgba({{color8 | rgb}}, 0.55) !important;
+    --zen-colors-border-contrast: rgba({{color12 | rgb}}, 0.30) !important;
+    --zen-colors-input-bg: color-mix(in srgb, {{color12}} 10%, {{background}}) !important;
+
+    --zen-dialog-background: color-mix(in srgb, {{color0}} 92%, {{color12}} 8%) !important;
+    --zen-urlbar-background: color-mix(in srgb, {{color0}} 90%, {{color12}} 10%) !important;
+    --zen-themed-toolbar-bg-transparent: {{background}} !important;
+    --zen-main-browser-background: linear-gradient(135deg, {{background}}, color-mix(in srgb, {{color12}} 16%, {{background}})) !important;
+    --zen-main-browser-background-toolbar: color-mix(in srgb, {{color0}} 88%, {{color12}} 12%) !important;
+    --zen-appcontent-border: 1px solid rgba({{color12 | rgb}}, 0.28) !important;
+
+    --zen-toolbar-element-bg: rgba({{color12 | rgb}}, 0.12) !important;
+    --zen-toolbar-element-bg-hover: rgba({{color12 | rgb}}, 0.24) !important;
+    --tab-background-color-selected: color-mix(in srgb, {{color12}} 28%, {{background}}) !important;
+    --tab-background-color-hover: rgba({{color12 | rgb}}, 0.22) !important;
+
+    --toolbox-textcolor: {{foreground}} !important;
+    --toolbox-textcolor-inactive: color-mix(in srgb, {{foreground}} 75%, transparent) !important;
+    --toolbar-color: {{foreground}} !important;
+    --toolbar-text-color: {{foreground}} !important;
+    --toolbar-field-color: {{foreground}} !important;
+    --toolbar-field-background-color: color-mix(in srgb, {{color0}} 88%, {{color12}} 12%) !important;
+    --toolbar-field-focus-background-color: color-mix(in srgb, {{color0}} 80%, {{color12}} 20%) !important;
+    --toolbarbutton-icon-fill: {{color14}} !important;
+    --toolbarbutton-icon-fill-attention: {{color13}} !important;
+    --toolbarbutton-background-color-hover: rgba({{color12 | rgb}}, 0.18) !important;
+    --toolbarbutton-background-color-active: rgba({{color12 | rgb}}, 0.28) !important;
+
+    --arrowpanel-background: color-mix(in srgb, {{color0}} 92%, {{color12}} 8%) !important;
+    --arrowpanel-border-color: rgba({{color12 | rgb}}, 0.30) !important;
+    --arrowpanel-color: {{foreground}} !important;
+    --panel-background: color-mix(in srgb, {{color0}} 92%, {{color12}} 8%) !important;
+    --panel-color: {{foreground}} !important;
+    --panel-border-color: rgba({{color12 | rgb}}, 0.30) !important;
+
+    --lwt-accent-color: {{background}} !important;
+    --lwt-text-color: {{foreground}} !important;
+    --lwt-sidebar-background-color: {{background}} !important;
+    --sidebar-background-color: {{background}} !important;
+    --focus-outline-color: {{color12}} !important;
+    --in-content-page-background: {{background}} !important;
+    --in-content-accent-color: {{color12}} !important;
+  }
+
+  .zen-browser-generic-background,
+  #zen-browser-background {
+    --zen-main-browser-background: linear-gradient(135deg, {{background}}, color-mix(in srgb, {{color12}} 16%, {{background}})) !important;
+    --zen-main-browser-background-toolbar: color-mix(in srgb, {{color0}} 88%, {{color12}} 12%) !important;
+  }
+
+  tab.tabbrowser-tab[visuallyselected] > .tab-stack > .tab-background,
+  tab.tabbrowser-tab[selected="true"] > .tab-stack > .tab-background {
+    background: color-mix(in srgb, {{color12}} 26%, {{background}}) !important;
+    outline: 1px solid rgba({{color12 | rgb}}, 0.40) !important;
+  }
+
+  #urlbar[focused="true"] > .urlbar-background {
+    background-color: color-mix(in srgb, {{color0}} 82%, {{color12}} 18%) !important;
+    outline: 1.5px solid rgba({{color12 | rgb}}, 0.65) !important;
+  }
+}

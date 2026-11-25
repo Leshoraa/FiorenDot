@@ -10,7 +10,7 @@ $fill\
 $status[─╮](10)
 [╰─](10)$character"""
 
-# Garis penutup bawah di baris input perintah
+# Right-hand closing line on prompt input
 right_format = """[─╯](10)"""
 
 [fill]
@@ -38,8 +38,21 @@ error_symbol = "[❯](bold red)"
 # Kapsul status ujung kanan
 [status]
 disabled = false
-style = "bg:8 fg:15"
+style = "bg:8 fg:14"
 format = "[](8)[ $symbol ]($style)[](8)"
-success_symbol = "✓"
-symbol = "✗"
+success_symbol = ""
+symbol = ""
+not_executable_symbol = ""
+not_found_symbol = ""
+sigint_symbol = ""
+signal_symbol = ""
 map_symbol = true
+
+[profiles]
+transient = """
+[╭─](10)[](14)\
+$os\
+[](bg:10 fg:14)\
+$directory\
+[](fg:10)
+[╰─](10)$character"""

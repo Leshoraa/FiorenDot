@@ -2,16 +2,16 @@
 # waydroid-rescan: Trigger Android MediaScanner to refresh files in Waydroid Gallery/MediaStore
 
 if ! waydroid status 2>/dev/null | grep -q "RUNNING"; then
-    echo "Waydroid tidak sedang berjalan. Jalankan Waydroid terlebih dahulu."
+    echo "Waydroid is not running. Start Waydroid first."
     exit 0
 fi
 
-echo "==> Menyegarkan database media & galeri di Waydroid..."
+echo "==> Refreshing Waydroid MediaStore..."
 
-# 1. Metode Android 11+: Scan volume external_primary melalui MediaProvider
+# 1. Android 11+: scan external_primary volume via MediaProvider
 sudo waydroid shell content call --uri content://media --method scan_volume --arg external_primary >/dev/null 2>&1 || true
 
-# 2. Metode intent broadcast untuk setiap file media yang ada di /sdcard/
+# 2. Fallback intent broadcast per file under /sdcard/
 sudo waydroid shell sh -c '
 for folder in /sdcard/Pictures /sdcard/DCIM /sdcard/Movies /sdcard/Download /sdcard/Documents /sdcard/Shared; do
     if [ -d "$folder" ]; then
@@ -24,4 +24,4 @@ for folder in /sdcard/Pictures /sdcard/DCIM /sdcard/Movies /sdcard/Download /sdc
 done
 ' || true
 
-echo "==> Selesai! Galeri, Video, dan MediaStore Android telah diperbarui."
+echo "==> Done. Android MediaStore updated."

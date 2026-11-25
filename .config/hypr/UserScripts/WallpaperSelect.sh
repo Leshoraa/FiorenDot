@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+# Modified by: Fioren (@Leshoraa)
 # This script for selecting wallpapers (SUPER W)
 
 # WALLPAPERS PATH
@@ -111,21 +112,15 @@ set_sddm_wallpaper() {
 
 modify_startup_config() {
   local selected_file="$1"
-  local startup_config="$HOME/.config/hypr/configs/Startup_Apps.conf"
+  local startup_config="$HOME/.config/hypr/configs/Startup_Apps.lua"
 
-  # Check if it's a live wallpaper (video)
-  if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
-    # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*awww-daemon/s/^/\#/' "$startup_config" 2>/dev/null || true
-    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper/s/^#\s*//;' "$startup_config" 2>/dev/null || true
+  [[ -f "$startup_config" ]] || return 0
 
-    # Update the livewallpaper variable with the selected video path (using $HOME)
-    selected_file="${selected_file/#$HOME/\$HOME}"
-    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config" 2>/dev/null || true
+  # Check if it's a live wallpaper (video) vs static image in Lua Startup_Apps
+  if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm|MP4|MKV|MOV|WEBM)$ ]]; then
+    sed -i -E 's|^([[:space:]]*)hl\.exec_cmd\("awww-daemon"\)|\1-- hl.exec_cmd("awww-daemon")|' "$startup_config" 2>/dev/null || true
   else
-    # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*awww-daemon/s/^\s*#\s*//;' "$startup_config" 2>/dev/null || true
-    sed -i '/^\s*exec-once\s*=\s*mpvpaper/s/^/\#/' "$startup_config" 2>/dev/null || true
+    sed -i -E 's|^([[:space:]]*)--[[:space:]]*hl\.exec_cmd\("awww-daemon"\)|\1hl.exec_cmd("awww-daemon")|' "$startup_config" 2>/dev/null || true
   fi
 }
 
@@ -133,7 +128,8 @@ modify_startup_config() {
 apply_image_wallpaper() {
   local image_path="$1"
   local focused_monitor
-  focused_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name' 2>/dev/null || echo "eDP-1")
+  focused_monitor=$(hyprctl monitors 2>/dev/null | awk '/^Monitor/{name=$2} /focused: yes/{print name; exit}')
+  focused_monitor="${focused_monitor:-eDP-1}"
 
   kill_wallpaper_for_image
 
@@ -144,10 +140,8 @@ apply_image_wallpaper() {
 
   awww img -o "$focused_monitor" "$image_path" $AWWW_PARAMS &
 
-  # 1. Update warna UI (Otomatis reload Waybar, SwayNC, Rofi, Kitty)
-  "$SCRIPTSDIR/WallustSwww.sh" "$image_path"
-
-  set_sddm_wallpaper &
+  # 1. Apply UI palette immediately (WallustSwww.sh syncs SDDM asynchronously)
+  "$SCRIPTSDIR/WallustSwww.sh" "$image_path" &
 }
 
 apply_video_wallpaper() {

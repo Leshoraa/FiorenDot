@@ -1,23 +1,18 @@
-# FiorenDot --- WARNING: DO NOT RUN THIS ON YOUR MACHINE!!!
+# FiorenDot
 
-> CRITICAL: STRICTLY CONFIGURED FOR A SINGLE SPECIFIC LAPTOP (ASUS Vivobook S 14 Flip TN3402QA). DO NOT CLONE AND RUN INSTALL.SH ON OTHER HARDWARE!!!
+> Hardware-specific Arch Linux + Hyprland dotfiles built for the **ASUS Vivobook S 14 Flip TN3402QA** (`leviola`).
 
-Personal dotfiles and system configurations for **Arch Linux** powered by **Hyprland** Wayland compositor. Tailored for high productivity, 2-in-1 touchscreen convertibles, intelligent battery longevity, and dynamic aesthetic theming.
+Personal workstation & 2-in-1 convertible setup featuring custom ACPI/power tuning, stateful battery charge thresholds, infinite spatial canvas workflows, dynamic OKLCH/Wallust theming, and safe external display hotplug handling.
 
 > [!CAUTION]
-> ### HARDWARE LOCKOUT WARNING: PERSONAL HARDWARE BUILD ONLY!!!
-> **DO NOT BLINDLY RUN THESE SCRIPTS OR COPY SYSTEM CONFIGS TO OTHER DEVICES!!!**
-> This repository is not your average generic r/unixporn config collection. It contains raw, bare-metal hardware tuning specifically built for **Fioren's ASUS Vivobook S 14 Flip TN3402QA** (`leviola`). If you run `./install.sh` on your laptop, you are going to break things fast!!!
-> 
-> #### 6 WAYS THIS DOTFILE WILL DESTROY YOUR SETUP IF YOU RUN IT ON DIFFERENT HARDWARE:
-> 1. **Immediate Kernel Panic / Boot Failure (`acpi_override.img`)**: We are literally injecting raw, custom-compiled ACPI SSDT tables (`CpuPlugA` / `ZPSS`) straight into the initramfs at boot time!!! If your motherboard does not have the exact ASUS DSDT memory layout, the Linux kernel will choke, throw a massive kernel panic, and freeze before you even hit user space!!!
-> 2. **Instant Black Screen & Wayland Compositor Crash (`loader-linux.conf`)**: The bootloader parameters force `amd_pstate=active amdgpu.runpm=1 amdgpu.bapm=1` and aggressively blacklists driver modules for our specific Ryzen 5 5600H APU!!! If you run an Intel CPU or an NVIDIA GPU, your graphics drivers will completely fail to initialize, leaving you staring at a dead black screen with zero display output!!!
-> 3. **Infinite Crash Loop on Battery Services (`asus-battery-charge-threshold.service`)**: The charging limiter writes directly to ASUS-exclusive sysfs nodes under `/sys/class/power_supply/BAT0/charge_control_end_threshold` via `asus_wmi`!!! Dell, Lenovo, HP, or Framework laptops do not have these nodes. Your systemd journal will get spammed to death with restart loops every single second!!!
-> 4. **Dead Touchpad or Ghost Mouse Clicks (`asus_touchpad_numpad.service`)**: There is an active Python uinput daemon mapped strictly to the ASUS NumberPad dial matrix on the touchpad glass (`ux3402za` / TN3402QA)!!! Running this on Synaptics, Elan, or Apple touchpads will hijack your input bus, corrupt gestures, or leave your mouse cursor completely paralyzed!!!
-> 5. **Broken Touchscreen & Inverted Display Orientation (`TouchRotate.sh`)**: We hardcode the exact hardware chip vendor ID (`wdht1f01:00-2575:0911`) inside Hyprland settings, and our sensor daemon monitors the raw orientation matrices of this specific 2-in-1 chassis!!! Run this on another convertible and your screen will rotate upside down into an unusable mess!!!
-> 6. **Completely Ruined UI Geometry & Squished Layouts (16:10 1200p & Mobile DPI Math)**: Every single pixel in Waybar, Quickshell, dropterm, floating windows (`795x482`), and our infinite desktop canvas physics is calculated for a 1920x1200 16:10 display, plus aspect-ratio math for a Redmi Note 13 Pro in `ToggleFloat.sh`!!! Run this on a 16:9 1080p or 768p monitor and your panels will overflow, popups will get clipped, and your windows will spawn out of bounds!!!
-> 
-> *NOTE: Want the visual theme? Cherry-pick our Waybar CSS, Wallust templates, Kitty configs, and Hyprland animations manually. DO NOT run `./install.sh` on non-matching hardware unless you want a broken system!!!*
+> **Strict Device Lock**: Do **not** blindly run `./install.sh` or copy `system/` configs onto other machines. Several components are pinned to this chassis and will break non-matching hardware:
+> 1. **Boot / ACPI (`acpi_override.img`, `loader-linux.conf`)**: Injects a custom SSDT (`CpuPlugA` / `ZPSS`) and forces `amd_pstate=active amdgpu.runpm=1 amdgpu.bapm=1` for Ryzen 5 5600H (Cezanne).
+> 2. **Battery Threshold (`asus-battery-charge-threshold.service`)**: Writes to ASUS-specific sysfs (`/sys/class/power_supply/BATT/charge_control_end_threshold`).
+> 3. **Touchpad NumberPad (`asus_touchpad_numpad.service`)**: Binds a uinput daemon to the `TN3402QA` NumberPad matrix.
+> 4. **Touchscreen & Rotation (`TouchRotate.sh`)**: Targets device ID `wdht1f01:00-2575:0911` and convertible sensor transforms.
+> 5. **Display Geometry**: Waybar, Quickshell, floating presets (`795x482`), and infinite canvas coordinates are tuned for `1920x1200@60Hz` (`scale 1.2`) and `scrcpy` (`1220x2712`).
+>
+> *If you only want visual configs, cherry-pick `.config/waybar`, `.config/wallust`, `.config/kitty`, or `.config/swaync` manually.*
 
 ---
 
@@ -27,57 +22,34 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 
 ---
 
-## Key Features & Innovations
+## Key Features
 
-### 1. Smart Battery Health & Longevity Management
-An intelligent, automated battery protection system built directly on top of Linux kernel sysfs and systemd user services:
-* **80% Battery Health Threshold**: Default charge limit locked at 80% (`charge_control_end_threshold`) to drastically reduce battery aging and prevent cell swelling. Hardware automatically bypasses the battery to AC power when the threshold is reached.
-* **Temporary 100% Full-Charge Override**: Easily toggle to 100% via the SwayNC Control Center button or CLI (`BatteryLimitToggle.sh toggle`).
-* **Post-100% Soak Timer**: Unlike naive timers, the 1-hour countdown only starts **after** the battery actually reaches 100% capacity, ensuring you always have full charge ready before departing.
-* **Auto-Revert on Unplug (Student/Mobile Safety Net)**: Designed for flexible and unpredictable schedules. If you toggle to 100% and unplug at any time to head to campus or work, the system silently and automatically restores the 80% threshold for the next session.
-* **Sleep & Reboot Persistence**: Automatically re-enforces the threshold across system reboots and wake from sleep/suspend, counteracting ASUS Embedded Controller (EC) firmware resets.
-* **Streamlined Notifications**: Real-time notifications for `Charging`, `Discharging`, `Low Battery` (<15%), `Critical Battery` (≤5%), and `Charge Limit Reached`—delivered in clean English without notification icons.
+### 1. Battery Health & Power Management
+* **80% Charge Cap**: Persists an 80% `charge_control_end_threshold` across reboots, suspend/wake, and unplug events via systemd + udev.
+* **100% Override**: Toggle full charge from SwayNC or `BatteryLimitToggle.sh toggle`, with an automatic 1-hour post-full soak timer (`battery-limit-rtc.sh`) and auto-revert on AC unplug.
+* **AC/Battery Boost Sync**: Tracks per-battery Turbo Boost preference and tunes `vm.dirty_writeback_centisecs` / `vm.laptop_mode` on AC transitions.
 
-### 2. Finityren (Infinite Canvas & Spatial Navigation)
-Transforms your workspace into an unbounded infinite 2D canvas:
-* **True Spatial Geometry**: Direct navigation calculates Euclidean distance and directional cone angles rather than simple index cycling.
-* **Tear-Free Atomic Batch Movements**: Dispatches window coordinate shifts atomically via `hyprctl --batch` for 1:1 synchronized multi-window panning.
-* **Touchpad & Mouse Panning**: Hold `Super + Alt` and drag with mouse or slide fingers across absolute touchpads without physical clicking.
-* **Absolute Physical Centering**: Calculates the exact physical center of the monitor in logical pixels, compensating for top and bottom status bars.
+### 2. Finityren (Infinite 2D Canvas)
+* **Spatial Window Navigation**: Moves focus using Euclidean distance and directional cones instead of linear window cycling.
+* **Atomic Canvas Panning**: Shifts floating window coordinates via `hyprctl --batch` with `Super + Alt + Drag` (mouse or absolute touchpad).
 
-### 3. Dynamic Material You Tonal Theming (Wallust + Caelestia)
-* **Perceptual Color Extraction**: Uses pixel population histogram quantization with hue-excited neighbor smoothing in CIELAB / Saliencedark16 color space for high-contrast, eye-pleasing tonal palettes.
-* **Static & Video Wallpaper Engine**: Full support for both ultra-high-resolution images and animated video wallpapers (`.mp4`, `.webm`, `.mkv`).
-* **Instant Hot-Reload**: Wallpapers apply asynchronously via `awww` while Waybar reloads instantly via `SIGUSR2`, eliminating bar flashing and UI latency.
-* **System-wide Theme Propagation**: Synchronously updates Hyprland borders, Waybar, SwayNC, Rofi, Kitty, Ghostty, and Starship prompt.
+### 3. Wallust Palette & Wallpaper Engine
+* **OKLCH Contrast Guard**: Keeps dark surfaces grounded while preserving high-contrast accent colors from active wallpapers.
+* **Images & Video**: Supports static images (`awww`) and video wallpapers (`mpvpaper`), hot-reloading Hyprland, Waybar (`SIGUSR2`), SwayNC, Rofi, Kitty, Ghostty, and Starship.
 
-### 4. 2-in-1 Convertible & Touchscreen Integration
-* **Touchscreen On-Demand**: Touchscreen input is disabled by default on startup to avoid accidental touches, and can be toggled manually at any time via `Super + Shift + T`.
-* **Touchscreen Rofi Input**: Patched Rofi (`system/rofi/patch-rofi.sh`) with on-demand keyboard interactivity so that on-screen virtual keyboards (`wvkbd`) can receive touches and type directly into the app launcher without exclusive grab conflicts.
-* **Auto Screen Rotation**: Dynamic sensor detection and rotation via `TouchRotate.sh` for laptop, tent, and tablet orientations.
-* **Smart Tablet Virtual Keyboard**: Patched `wvkbd` with a dedicated Super key (`wvkbd-super.patch`). Pressing `Super + K` toggles whether the virtual keyboard auto-appears when entering tablet mode (active/inactive toggle), keeping the laptop mode clean while giving seamless touch typing in tablet mode.
-* **Multi-Finger Touchscreen Gestures**: Hardware-level atomic multi-touch gestures running in background via `touchscreen-gestures.service`:
-  * `2-Finger Tap`: Open / close application launcher (Rofi).
-  * `3-Finger Tap`: Instant toggle on-screen virtual keyboard (`wvkbd`).
-  * `4-Finger Tap`: Launch terminal emulator (`Kitty`).
-  * `5-Finger Tap`: Close active application window (`KillActiveProcess.sh`).
-  * `2-Finger Swipe Right / Left`: Switch workspace to next / previous.
-  * `3-Finger Swipe Up / Down`: Open desktop overview / toggle special workspace.
-  * `4-Finger Swipe Up / Down`: Open SwayNC notification panel / Rofi app launcher.
+### 4. Smart External Display & Projector Manager
+* **Non-Destructive Hotplug**: Keeps `eDP-1` (`1920x1200@60Hz`, `0x0`, `scale 1.2`) and primary workspaces (`1`–`5`) pinned on the laptop panel when connecting HDMI displays or projectors.
+* **Flicker-Free Mode Selection**: Automatically selects `50–62 Hz` with `bitdepth = 8` and `vrr = 0` on external outputs, with instant Extend / Mirror / Laptop Only / External Only switching (`XF86Display` or `Super + Ctrl + P`).
 
-### 5. Studio-Grade Audio DSP (EasyEffects)
-* **Custom Hardware Tuned Presets**: Tailored acoustic equalization profiles for Asus VivoBook speakers (Harman Kardon, Dolby Atmos, Perfect EQ).
-* **AI Noise Suppression**: Deep-learning background voice isolation using RNNoise for crystal clear microphone audio.
+### 5. 2-in-1 Convertible & Touchscreen Support
+* **On-Demand Touch Input**: Disabled on boot to prevent accidental touches; toggle anytime with `Super + Shift + T`.
+* **Auto Rotation & Virtual Keyboard**: `TouchRotate.sh` syncs display + stylus/touch transforms and auto-shows patched `wvkbd` (`Super` key patch + `Super + K` tablet auto-show toggle).
+* **Multi-Touch Gestures**: `touchscreen-gestures.service` provides hardware-level 2–5 finger taps and swipes.
 
-### 6. System Performance & Power Tuning
-* **ZRAM with zstd Compression**: High-throughput memory compression configured via `systemd-zram-generator`.
-* **Hardware Udev Rules**: Passwordless user control for charging thresholds (`99-battery-charge-threshold.rules`).
-* **Quickshell Workspace Overview**: Instant native overview with live window previews (`Super + A`).
-
-### 7. Offline Productivity Suite (Zero Standby RAM)
-* **Screen OCR / Snip-to-Text (`Super + Shift + O`)**: Select any rectangular region on screen with `slurp` + `grim` to instantly extract text via Tesseract OCR (`eng+ind`) directly to clipboard (`wl-copy`), accompanied by a desktop notification preview. 100% offline and zero persistent RAM usage.
-* **Quick Project Switcher (`Super + Shift + P`)**: Fast Rofi switcher that dynamically indexes all repositories and directories in `~/Projects`. Open in editor (`Codium`) on `Enter`, or terminal (`Kitty`) on `Shift + Enter`.
-* **Calculator (`Super + Alt + C`)**: Qalculate-powered modal with auto-copy and notification feedback.
+### 6. Audio & Offline Productivity
+* **EasyEffects DSP**: Tuned EQ presets and RNNoise mic suppression.
+* **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM) and passwordless sysfs udev rules.
+* **Offline Tools**: Tesseract screen OCR (`eng+ind` -> `wl-copy`), Rofi project launcher (`~/Projects`), and Qalculate modal.
 
 ---
 

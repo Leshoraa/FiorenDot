@@ -58,10 +58,10 @@ listview {
     fixed-height:               true;
     margin:                     0px 0px 0px 16px;
     expand:                     false;
-    width:                      1680px; /* Lebar dikunci agar 5 ikon muat sejajar */
+    width:                      1680px; /* Fixed width for 5 aligned icons */
 }
 
-/* Tombol Lingkaran */
+/* Action Circle */
 element {
     background-color:           rgba(255, 255, 255, 0);
     text-color:                 rgba(255, 255, 255, 0.28);
@@ -71,13 +71,13 @@ element {
     cursor:                     pointer;
 }
 
-/* Tombol Lingkaran Terpilih */
+/* Selected Action Circle */
 element selected.normal {
     background-color:           rgba(255, 255, 255, 0);
     text-color:                 #ffffff;
 }
 
-/* Teks / Ikon di Dalam Tombol */
+/* Icon / Label */
 element-text {
     background-color:           transparent;
     text-color:                 inherit;

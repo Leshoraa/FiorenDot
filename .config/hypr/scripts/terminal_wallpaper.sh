@@ -1,11 +1,10 @@
 #!/bin/bash
-# 1. Ambil path wallpaper aktif
-WALL=$(swww query | awk -F 'image: ' '{print $2}' | head -n 1)
+# 1. Get active wallpaper path
+WALL=$(awww query | awk -F 'image: ' '{print $2}' | head -n 1)
 [ -z "$WALL" ] && WALL=$(hyprctl hyprpaper listactive | awk '{print $NF}' | head -n 1)
 
-# 2. Keluar jika tidak ada wallpaper
+# 2. Exit if missing
 [ ! -f "$WALL" ] && exit 1
 
-# 3. Proses gambar ke /tmp dengan nama statis (agar ringan & gak nyampah)
-# Kita pakai 300x300 agar rasio tetap aman dan ukuran kecil.
+# 3. Downscale thumbnail to static path in /tmp
 magick "$WALL" -resize 300x300 /tmp/terminal_logo.png

@@ -5,7 +5,7 @@
     font-family: "JetBrainsMono Nerd Font";
     font-weight: bold;
     min-height: 0;
-    font-size: 8.2px; /* Ukuran dasar untuk seluruh ikon & modul drawer */
+    font-size: 8.2px; /* Base size for bar icons and drawer modules */
     font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
 }
 
@@ -77,9 +77,9 @@ tooltip {
 
 #clock {
     color: mix(@color0, @color12, 1.15);
-    font-weight: 700; /* Diturunkan dari bold tebal agar lebih halus */
+    font-weight: 700; /* Semi-bold weight */
     font-size: 132%;
-    letter-spacing: 0.4px; /* Memberi ruang napas antar angka */
+    letter-spacing: 0.4px; /* Digit spacing */
     padding: 1px 6px;
 }
 

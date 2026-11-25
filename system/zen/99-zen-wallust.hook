@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = zen-browser-bin
+Target = zen-browser
+
+[Action]
+Description = Restore Zen Browser Wallust live hot-reload AutoConfig...
+When = PostTransaction
+Exec = /usr/local/bin/install-zen-hotreload.sh --quiet

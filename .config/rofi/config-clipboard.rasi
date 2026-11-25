@@ -30,7 +30,7 @@ listview {
   cycle: true;
 }
 
-/* ---- Elements (Clean Text Only - Tanpa Ikon Kecil) ---- */
+/* ---- Elements (Clean Text Only) ---- */
 element {
   orientation:                horizontal;
   spacing:                    14px;

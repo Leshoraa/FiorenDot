@@ -66,7 +66,7 @@ fi
 
 if [ "$IS_FLOATING" = "true" ]; then
     # Toggle pin using Hyprland's native dispatcher
-    hyprctl dispatch pin "address:$ADDR"
+    hyprctl eval "hl.dispatch(hl.dsp.window.pin({ window = 'address:$ADDR' }))" >/dev/null
     
     if [ "$IS_PINNED" = "true" ]; then
         notify-send -u low \
@@ -84,9 +84,9 @@ if [ "$IS_FLOATING" = "true" ]; then
 else
     if [ "$AUTO_FLOAT" = true ]; then
         # Float first then pin
-        hyprctl dispatch togglefloating "address:$ADDR"
+        hyprctl eval "hl.dispatch(hl.dsp.window.float({ action = 'toggle', window = 'address:$ADDR' }))" >/dev/null
         sleep 0.05
-        hyprctl dispatch pin "address:$ADDR"
+        hyprctl eval "hl.dispatch(hl.dsp.window.pin({ window = 'address:$ADDR' }))" >/dev/null
         notify-send -u low \
             -h string:x-canonical-private-synchronous:hypr-pin \
             -a "Hyprland" \

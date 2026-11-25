@@ -1,4 +1,5 @@
 //* ---- 💫 https://github.com/JaKooLit 💫 ---- *//
+/* Modified by: Fioren (@Leshoraa) */
 /* Waybar Modules */
 
 /* NOTE: hyprland-workspaces, Custom Modules, Custom Vertical & Groups on a separate files */
@@ -265,7 +266,7 @@
 	"format-en": "US",
 	"format-tr": "Korea",
 	"keyboard-name": "at-translated-set-2-keyboard",
-	"on-click": "hyprctl switchxkblayout $SET_KB next"
+	"on-click": "$HOME/.config/hypr/scripts/SwitchKeyboardLayout.sh"
 },
 
 "hyprland/submap": {

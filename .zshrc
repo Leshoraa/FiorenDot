@@ -51,7 +51,27 @@ setopt appendhistory
 alias config='/usr/bin/git --git-dir=/home/hyprlan/.cfg/ --work-tree=/home/hyprlan'
 
 # Initialize Starship prompt
+export ZLE_RPROMPT_INDENT=0
 eval "$(starship init zsh)"
+
+# Transient prompt: collapse prior prompt on Enter to keep resize clean
+_STARSHIP_DEFAULT_PROMPT="$PROMPT"
+_STARSHIP_DEFAULT_RPROMPT="$RPROMPT"
+
+_starship_transient_finish() {
+    PROMPT='$('/usr/bin/starship' prompt --profile=transient --terminal-width="$COLUMNS" --keymap="${KEYMAP:-}" --status="${STARSHIP_CMD_STATUS:-}" --pipestatus="${STARSHIP_PIPE_STATUS[*]:-}" --cmd-duration="${STARSHIP_DURATION:-}" --jobs="$STARSHIP_JOBS_COUNT")'
+    RPROMPT=''
+    zle .reset-prompt
+}
+
+_starship_transient_precmd() {
+    PROMPT="$_STARSHIP_DEFAULT_PROMPT"
+    RPROMPT="$_STARSHIP_DEFAULT_RPROMPT"
+}
+
+autoload -Uz add-zsh-hook add-zle-hook-widget
+add-zsh-hook precmd _starship_transient_precmd
+add-zle-hook-widget zle-line-finish _starship_transient_finish
 
 export PATH=$PATH:$HOME/.spicetify
 
@@ -72,33 +92,33 @@ nvm() {
 # Run fastfetch at the very end so that shell is 100% loaded and starship prompt appears instantly
 fastfetch
 
-# Shortcut Scrcpy (Wireless & Kabel USB)
+# Scrcpy helper (Wireless & USB)
 hp() {
     local default_ip="192.168.18.176"
     local common_opts=(-S -w --always-on-top --window-height=850)
 
     case "$1" in
-        -k|--kabel|kabel)
-            echo "🔌 Menghubungkan scrcpy via Kabel USB (Kualitas Tajam)..."
+        -k|--usb|usb)
+            echo " Connecting scrcpy over USB..."
             scrcpy -d -m 1920 -b 20M "${common_opts[@]}"
             ;;
         -w|--wireless|wireless|"")
             local target_ip="${2:-$default_ip}"
-            echo "📶 Menghubungkan scrcpy via Wireless ($target_ip)..."
+            echo " Connecting scrcpy over Wi-Fi ($target_ip)..."
             adb connect "$target_ip:5555" >/dev/null 2>&1
             scrcpy -s "$target_ip:5555" -m 1920 --max-fps=60 --video-codec=h265 -b 16M "${common_opts[@]}"
             ;;
         *)
             if [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
                 local target_ip="$1"
-                echo "📶 Menghubungkan scrcpy via Wireless ($target_ip)..."
+                echo " Connecting scrcpy over Wi-Fi ($target_ip)..."
                 adb connect "$target_ip:5555" >/dev/null 2>&1
                 scrcpy -s "$target_ip:5555" -m 1920 --max-fps=60 --video-codec=h265 -b 16M "${common_opts[@]}"
             else
-                echo "Penggunaan: hp [-w [IP] | -k]"
-                echo "  hp -w          : Mode Wireless (IP default: $default_ip)"
-                echo "  hp -w <IP>     : Mode Wireless ke IP tertentu"
-                echo "  hp -k          : Mode Kabel USB"
+                echo "Usage: hp [-w [IP] | -k]"
+                echo "  hp -w        Wireless mode (default: $default_ip)"
+                echo "  hp -w <IP>   Wireless mode to target IP"
+                echo "  hp -k        USB mode"
             fi
             ;;
     esac

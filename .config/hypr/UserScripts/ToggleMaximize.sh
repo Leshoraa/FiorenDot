@@ -15,13 +15,13 @@ def get_active_window():
     except Exception:
         return {}
 
-def run_cmd(args):
-    subprocess.run(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def hypr_eval(code):
+    subprocess.run(['hyprctl', 'eval', code], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def main():
     win = get_active_window()
     if not win or 'address' not in win:
-        run_cmd(['hyprctl', 'dispatch', 'fullscreen', '1'])
+        hypr_eval('hl.dispatch(hl.dsp.window.fullscreen({ mode = "maximized" }))')
         return
 
     addr = win.get('address')
@@ -31,21 +31,21 @@ def main():
     is_floating = win.get('floating', False)
 
     if is_fullscreen > 0:
-        # Sedang maximize / fullscreen -> Kembalikan ke normal
+        # Maximized / fullscreen -> restore normal state
         if is_fullscreen == 1:
-            run_cmd(['hyprctl', 'dispatch', 'fullscreen', '1'])
+            hypr_eval('hl.dispatch(hl.dsp.window.fullscreen({ mode = "maximized" }))')
         else:
-            run_cmd(['hyprctl', 'dispatch', 'fullscreen', '0'])
+            hypr_eval('hl.dispatch(hl.dsp.window.fullscreen({ mode = "fullscreen", action = "unset" }))')
 
-        # Jika jendela dalam status floating, kembalikan menjadi normal tiled (kecuali window khusus seperti scrcpy)
+        # Unfloat back to tiled (except scrcpy)
         if is_floating and 'scrcpy' not in win_class:
             time.sleep(0.04)
             cur = get_active_window()
             if cur.get('address') == addr and cur.get('floating', False):
-                run_cmd(['hyprctl', 'dispatch', 'togglefloating', f'address:{addr}'])
+                hypr_eval(f'hl.dispatch(hl.dsp.window.float({{ action = "toggle", window = "address:{addr}" }}))')
     else:
-        # Sedang normal -> Maximize
-        run_cmd(['hyprctl', 'dispatch', 'fullscreen', '1'])
+        # Normal -> maximize
+        hypr_eval('hl.dispatch(hl.dsp.window.fullscreen({ mode = "maximized" }))')
 
 if __name__ == '__main__':
     main()

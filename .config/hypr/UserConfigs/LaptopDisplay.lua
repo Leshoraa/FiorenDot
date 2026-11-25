@@ -1,0 +1,1 @@
+-- Laptop display override (managed by user / lid switch scripts if enabled)

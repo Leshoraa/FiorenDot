@@ -11,6 +11,10 @@
 
 direction="${1:-next}"
 
+go_ws() {
+    hyprctl eval "hl.dispatch(hl.dsp.focus({ workspace = $1 }))" >/dev/null
+}
+
 active_ws=$(hyprctl activeworkspace -j 2>/dev/null)
 curr_id=$(jq -r '.id // empty' <<< "$active_ws")
 
@@ -34,14 +38,14 @@ if [[ ${#occupied_list[@]} -eq 0 ]]; then
         if [[ "$target_id" -gt 5 ]]; then
             target_id=1
         fi
-        hyprctl dispatch workspace "$target_id"
+        go_ws "$target_id"
         exit 0
     elif [[ "$direction" == "prev" ]]; then
         target_id=$((curr_id - 1))
         if [[ "$target_id" -lt 1 ]]; then
             target_id=5
         fi
-        hyprctl dispatch workspace "$target_id"
+        go_ws "$target_id"
         exit 0
     fi
 fi
@@ -52,7 +56,7 @@ last_occupied="${occupied_list[-1]}"
 if [[ "$direction" == "next" ]]; then
     # If currently beyond Z (e.g. workspace 30), recover to first occupied workspace
     if [[ "$curr_id" -gt 26 ]]; then
-        hyprctl dispatch workspace "$first_occupied"
+        go_ws "$first_occupied"
         exit 0
     fi
 
@@ -69,28 +73,28 @@ if [[ "$direction" == "next" ]]; then
 
         if [[ -n "$next_occupied" ]]; then
             # Jump directly to the next occupied workspace (e.g. from D to J)
-            hyprctl dispatch workspace "$next_occupied"
+            go_ws "$next_occupied"
             exit 0
         else
             # No more occupied workspaces ahead -> wrap around to the first occupied workspace (e.g. B or A)
-            hyprctl dispatch workspace "$first_occupied"
+            go_ws "$first_occupied"
             exit 0
         fi
     else
         # Currently on an occupied workspace.
         target_id=$((curr_id + 1))
         if [[ "$target_id" -gt 26 ]]; then
-            hyprctl dispatch workspace "$first_occupied"
+            go_ws "$first_occupied"
             exit 0
         fi
-        hyprctl dispatch workspace "$target_id"
+        go_ws "$target_id"
         exit 0
     fi
 
 elif [[ "$direction" == "prev" ]]; then
     # If currently beyond Z (e.g. workspace 30), recover to last occupied workspace
     if [[ "$curr_id" -gt 26 ]]; then
-        hyprctl dispatch workspace "$last_occupied"
+        go_ws "$last_occupied"
         exit 0
     fi
 
@@ -108,21 +112,21 @@ elif [[ "$direction" == "prev" ]]; then
 
         if [[ -n "$prev_occupied" ]]; then
             # Jump directly to previous occupied workspace (e.g. from D to C, or I to C)
-            hyprctl dispatch workspace "$prev_occupied"
+            go_ws "$prev_occupied"
             exit 0
         else
             # No occupied workspace behind -> wrap around to the last occupied workspace
-            hyprctl dispatch workspace "$last_occupied"
+            go_ws "$last_occupied"
             exit 0
         fi
     else
         # Currently on an occupied workspace.
         target_id=$((curr_id - 1))
         if [[ "$target_id" -lt 1 ]]; then
-            hyprctl dispatch workspace "$last_occupied"
+            go_ws "$last_occupied"
             exit 0
         fi
-        hyprctl dispatch workspace "$target_id"
+        go_ws "$target_id"
         exit 0
     fi
 fi

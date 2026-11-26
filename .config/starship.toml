@@ -38,8 +38,8 @@ error_symbol = "[❯](bold red)"
 # Kapsul status ujung kanan
 [status]
 disabled = false
-style = "bg:8 fg:14"
-format = "[](8)[ $symbol ]($style)[](8)"
+style = "bg:10 fg:15"
+format = "[](10)[ $symbol ]($style)[](10)"
 success_symbol = ""
 symbol = ""
 not_executable_symbol = ""

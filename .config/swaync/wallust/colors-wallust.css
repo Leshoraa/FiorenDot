@@ -2,12 +2,12 @@
 /* Modified by: Fioren (@Leshoraa) */
  /* wallust template - colors-swaync */
 
-@define-color text #E6EAEC;
-@define-color background rgba(9,22,27,0.25);
-@define-color background-alt #09161B;
-@define-color cursor #E6EAEC;
-@define-color hovered #6DAFC9;
-@define-color button-background #6DAFC9;
-@define-color button-active #8AC3E4;
-@define-color border #E7AE8D;
-@define-color urgent #E6EAEC;
+@define-color text #E9E9EC;
+@define-color background rgba(15,16,25,0.25);
+@define-color background-alt #0F1019;
+@define-color cursor #E9E9EC;
+@define-color hovered #9DA2C6;
+@define-color button-background #9DA2C6;
+@define-color button-active #B4AFD1;
+@define-color border #B5B4D0;
+@define-color urgent #E9E9EC;

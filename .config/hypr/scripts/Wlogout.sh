@@ -17,7 +17,7 @@ options="$shutdown\n$reboot\n$sleep\n$logout\n$lock"
 selected_option=$(echo -e "$options" | rofi -dmenu \
                   -i \
                   -selected-row 2 \
-                  -p "Session Menu" \
+                  -p "See you later, $(whoami)!" \
                   -theme "$THEME")
 
 # Execute action

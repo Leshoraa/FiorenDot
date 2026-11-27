@@ -16,15 +16,17 @@ if [ -r "$PALETTE_FILE" ]; then
                 ;;
         esac
     done < "$PALETTE_FILE"
-    printf '\033[2J\033[H'
+    printf '\033[?25l\033[2J\033[H'
 fi
 
 exec tuigreet \
+    --user fioren \
     --time \
     --remember \
     --remember-user-session \
     --asterisks \
     --greeting "Hyprland • leviola" \
     --sessions /usr/share/wayland-sessions \
+    --session-wrapper /etc/greetd/session-silent.sh \
     --cmd /usr/bin/start-hyprland \
     --theme 'border=blue;text=white;prompt=magenta;time=cyan;greet=blue;action=cyan;button=blue;container=black;input=white;title=magenta'

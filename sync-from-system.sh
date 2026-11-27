@@ -126,6 +126,7 @@ safe_copy_file "/etc/sysctl.d/50-cursor.conf" "$DOTFILES_DIR/system/sysctl/50-cu
 safe_copy_file "/etc/systemd/resolved.conf.d/no-mdns.conf" "$DOTFILES_DIR/system/network/no-mdns.conf"
 safe_copy_file "/etc/greetd/config.toml" "$DOTFILES_DIR/system/greetd/config.toml"
 safe_copy_file "/etc/greetd/launch-tuigreet.sh" "$DOTFILES_DIR/system/greetd/launch-tuigreet.sh"
+safe_copy_file "/etc/greetd/session-silent.sh" "$DOTFILES_DIR/system/greetd/session-silent.sh"
 safe_copy_file "/etc/systemd/system/greetd.service.d/override.conf" "$DOTFILES_DIR/system/greetd/greetd-override.conf"
 safe_copy_file "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" "$DOTFILES_DIR/system/boot/loader-linux.conf"
 

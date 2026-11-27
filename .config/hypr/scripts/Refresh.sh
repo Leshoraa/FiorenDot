@@ -9,7 +9,7 @@ file_exists() {
   if [ -e "$1" ]; then return 0; else return 1; fi
 }
 
-_ps=(rofi swaync ags)
+_ps=(rofi ags)
 for _prs in "${_ps[@]}"; do
   if pidof "${_prs}" >/dev/null; then
     pkill "${_prs}"
@@ -24,8 +24,14 @@ fi
 
 pkill qs 2>/dev/null || true
 
-swaync >/dev/null 2>&1 &
-swaync-client --reload-config
+if systemctl --user is-active --quiet swaync.service || systemctl --user is-enabled --quiet swaync.service; then
+  systemctl --user restart swaync.service
+else
+  pkill swaync >/dev/null 2>&1 || true
+  swaync >/dev/null 2>&1 &
+  sleep 0.2
+  swaync-client --reload-config >/dev/null 2>&1 || true
+fi
 
 # Reset and balance audio channels (fixes one-sided audio bug in Zen Browser & other apps)
 if [ -x "${SCRIPTSDIR}/FixAudioBalance.sh" ]; then

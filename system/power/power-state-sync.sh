@@ -37,7 +37,7 @@ if [ "$AC_ONLINE" -eq 1 ]; then
     fi
 
     # Standard NVMe writeback on AC
-    /usr/bin/sysctl -w vm.dirty_writeback_centisecs=500 vm.laptop_mode=0 >/dev/null 2>&1 || true
+    /usr/bin/sysctl -w vm.dirty_writeback_centisecs=500 >/dev/null 2>&1 || true
 
     echo "1" > "$LAST_AC_FILE"
     chmod 0666 "$LAST_AC_FILE" 2>/dev/null || true
@@ -53,7 +53,7 @@ else
     fi
 
     # Power-saving NVMe writeback on battery
-    /usr/bin/sysctl -w vm.dirty_writeback_centisecs=1500 vm.laptop_mode=5 >/dev/null 2>&1 || true
+    /usr/bin/sysctl -w vm.dirty_writeback_centisecs=1500 >/dev/null 2>&1 || true
 
     echo "0" > "$LAST_AC_FILE"
     chmod 0666 "$LAST_AC_FILE" 2>/dev/null || true

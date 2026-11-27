@@ -26,8 +26,12 @@
 
     --zen-toolbar-element-bg: rgba({{color12 | rgb}}, 0.12) !important;
     --zen-toolbar-element-bg-hover: rgba({{color12 | rgb}}, 0.24) !important;
-    --tab-background-color-selected: color-mix(in srgb, {{color12}} 28%, {{background}}) !important;
+    --tab-background-color-selected: {{color12}} !important;
     --tab-background-color-hover: rgba({{color12 | rgb}}, 0.22) !important;
+    --tab-selected-bgcolor: {{color12}} !important;
+    --tab-selected-textcolor: {{color0}} !important;
+    --tab-selected-outline-color: transparent !important;
+    --zen-split-view-active-tab-bg: {{color12}} !important;
 
     --toolbox-textcolor: {{foreground}} !important;
     --toolbox-textcolor-inactive: color-mix(in srgb, {{foreground}} 75%, transparent) !important;
@@ -63,10 +67,29 @@
     --zen-main-browser-background-toolbar: color-mix(in srgb, {{color0}} 88%, {{color12}} 12%) !important;
   }
 
-  tab.tabbrowser-tab[visuallyselected] > .tab-stack > .tab-background,
-  tab.tabbrowser-tab[selected="true"] > .tab-stack > .tab-background {
-    background: color-mix(in srgb, {{color12}} 26%, {{background}}) !important;
-    outline: 1px solid rgba({{color12 | rgb}}, 0.40) !important;
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) > .tab-stack > .tab-background {
+    background: {{color12}} !important;
+    background-color: {{color12}} !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]):hover > .tab-stack > .tab-background {
+    background: {{color13}} !important;
+    background-color: {{color13}} !important;
+  }
+
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]),
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-content,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-label-container,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-label,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-text,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-close-button,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-reset-button,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-audio-button,
+  tab.tabbrowser-tab:is([visuallyselected], [selected="true"]) .tab-icon-overlay {
+    color: {{color0}} !important;
+    fill: {{color0}} !important;
   }
 
   #urlbar[focused="true"] > .urlbar-background {

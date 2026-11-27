@@ -18,7 +18,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(scriptsDir .. "/Polkit.sh")
 
     -- Startup apps
-    hl.exec_cmd("swaync")
+    hl.exec_cmd("systemctl --user start swaync.service || swaync")
     hl.exec_cmd("sleep 2 && python " .. UserScripts .. "/infinite_desktop_core.py auto auto 1.0")
     hl.exec_cmd("waybar")
 

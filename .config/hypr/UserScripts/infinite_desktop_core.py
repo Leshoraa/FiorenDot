@@ -302,7 +302,7 @@ def kbd_reader(dev_path):
                 elif code in (KEY_LEFTCTRL, KEY_RIGHTCTRL):
                     ctrl_pressed = (value == 1)
                     wakeup_event.set()
-                if super_pressed and alt_pressed and not ctrl_pressed:
+                if super_pressed and alt_pressed and not ctrl_pressed and not os.path.exists("/tmp/phantom_active"):
                     if value == 1:
                         if code == KEY_UP:
                             threading.Thread(target=change_focus, args=('up',), daemon=True).start()
@@ -570,6 +570,10 @@ def update_cache():
             cached_clients = clients
             cached_monitors = monitors
         with lock:
+            if os.path.exists("/tmp/phantom_active"):
+                window_positions.clear()
+                displaced.clear()
+                return
             if workspace_id != last_workspace_id:
                 window_positions.clear()
                 displaced.clear()
@@ -699,6 +703,15 @@ while True:
             acc_x = 0.0
             acc_y = 0.0
     try:
+        if os.path.exists("/tmp/phantom_active"):
+            with lock:
+                window_positions.clear()
+                displaced.clear()
+                dragged_window_addr = None
+            refresh_event.set()
+            wakeup_event.clear()
+            wakeup_event.wait(timeout=0.15)
+            continue
         with cache_lock:
             workspace_id = cached_workspace_id
             clients = cached_clients

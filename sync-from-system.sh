@@ -122,6 +122,7 @@ safe_copy_file "/etc/udev/rules.d/99-flightcontroller.rules" "$DOTFILES_DIR/syst
 
 safe_copy_file "/etc/sysctl.d/99-zram.conf" "$DOTFILES_DIR/system/sysctl/99-zram.conf"
 safe_copy_file "/etc/sysctl.d/50-cursor.conf" "$DOTFILES_DIR/system/sysctl/50-cursor.conf"
+safe_copy_file "/etc/systemd/resolved.conf.d/no-mdns.conf" "$DOTFILES_DIR/system/network/no-mdns.conf"
 safe_copy_file "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" "$DOTFILES_DIR/system/boot/loader-linux.conf"
 
 echo "========================================"

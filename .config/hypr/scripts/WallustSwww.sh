@@ -186,6 +186,7 @@ fi
   fi
 
   nice -n 19 "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 || true
+  nice -n 19 "$SCRIPTSDIR/greetd_theme.sh" >/dev/null 2>&1 || true
   rm -f "$trailing_pid_file"
 ) >/dev/null 2>&1 &
 echo $! > "$trailing_pid_file"

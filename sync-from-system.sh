@@ -100,7 +100,8 @@ safe_copy_file "$CONFIG_SOURCE/VSCodium/User/settings.json" "$DOTFILES_DIR/.conf
 
 # 7. Sync system hardware, power, kernel & udev configs if present
 mkdir -p "$DOTFILES_DIR/system/power" "$DOTFILES_DIR/system/gpu" "$DOTFILES_DIR/system/input" \
-         "$DOTFILES_DIR/system/hardware" "$DOTFILES_DIR/system/sysctl" "$DOTFILES_DIR/system/boot"
+         "$DOTFILES_DIR/system/hardware" "$DOTFILES_DIR/system/sysctl" "$DOTFILES_DIR/system/boot" \
+         "$DOTFILES_DIR/system/greetd"
 
 safe_copy_file "/usr/lib/systemd/system-sleep/battery-limit-rtc.sh" "$DOTFILES_DIR/system/power/battery-limit-rtc.sh"
 safe_copy_file "/usr/local/bin/power-state-sync.sh" "$DOTFILES_DIR/system/power/power-state-sync.sh"
@@ -123,6 +124,9 @@ safe_copy_file "/etc/udev/rules.d/99-flightcontroller.rules" "$DOTFILES_DIR/syst
 safe_copy_file "/etc/sysctl.d/99-zram.conf" "$DOTFILES_DIR/system/sysctl/99-zram.conf"
 safe_copy_file "/etc/sysctl.d/50-cursor.conf" "$DOTFILES_DIR/system/sysctl/50-cursor.conf"
 safe_copy_file "/etc/systemd/resolved.conf.d/no-mdns.conf" "$DOTFILES_DIR/system/network/no-mdns.conf"
+safe_copy_file "/etc/greetd/config.toml" "$DOTFILES_DIR/system/greetd/config.toml"
+safe_copy_file "/etc/greetd/launch-tuigreet.sh" "$DOTFILES_DIR/system/greetd/launch-tuigreet.sh"
+safe_copy_file "/etc/systemd/system/greetd.service.d/override.conf" "$DOTFILES_DIR/system/greetd/greetd-override.conf"
 safe_copy_file "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" "$DOTFILES_DIR/system/boot/loader-linux.conf"
 
 echo "========================================"

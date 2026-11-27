@@ -36,7 +36,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 
 ### 3. Wallust Palette & Wallpaper Engine
 * **OKLCH Contrast Guard**: Keeps dark surfaces grounded while preserving high-contrast accent colors from active wallpapers.
-* **Images & Video**: Supports static images (`awww`) and video wallpapers (`mpvpaper`), hot-reloading Hyprland, Waybar (`SIGUSR2`), SwayNC, Rofi, Kitty, Ghostty, and Starship.
+* **Images & Video**: Supports static images (`awww`) and video wallpapers (`mpvpaper`), hot-reloading Hyprland, Waybar (`SIGUSR2`), SwayNC, Rofi, Kitty, Ghostty, Starship, and `tuigreet` console palette.
 
 ### 4. Smart External Display & Projector Manager
 * **Non-Destructive Hotplug**: Keeps `eDP-1` (`1920x1200@60Hz`, `0x0`, `scale 1.2`) and primary workspaces (`1`–`5`) pinned on the laptop panel when connecting HDMI displays or projectors.
@@ -60,6 +60,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 | Component | Software / Tool | Description |
 | :--- | :--- | :--- |
 | **OS** | Arch Linux | Rolling-release base with Linux Zen / Dynamic kernel |
+| **Display Manager** | greetd + tuigreet | Lightweight TUI greeter (`vt1`) with live Wallust framebuffer palette sync |
 | **Compositor** | Hyprland 0.57+ | Dynamic tiling Wayland compositor configured via Lua (`hyprland.lua`) |
 | **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) with Cava visualizer & live workspace sync |
 | **Notification Center** | SwayNC | Notification daemon (`swaync.service`), control center, and quick setting toggles |
@@ -191,7 +192,7 @@ The included `install.sh` script backs up existing configurations in `~/.config`
 
 #### Arch Linux (Official Repositories)
 ```bash
-sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct easyeffects jq python tesseract tesseract-data-eng tesseract-data-ind
+sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct easyeffects jq python tesseract tesseract-data-eng tesseract-data-ind greetd greetd-tuigreet
 ```
 
 #### AUR Packages

@@ -48,7 +48,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 * **Multi-Touch Gestures**: `touchscreen-gestures.service` provides hardware-level 2–5 finger taps and swipes.
 
 ### 6. Audio, Networking & Offline Productivity
-* **EasyEffects DSP**: Tuned EQ presets and RNNoise mic suppression.
+* **PipeWire Native Filter-Chain DSP**: Runs the `Harman Kardon VivoBook` speaker EQ, Calf BassEnhancer, and LSP Limiter in-process (`pipewire.conf.d`) with negligible RAM overhead instead of keeping EasyEffects open in the background (`Clean Mic RNNoise` ready via `noise-suppression-for-voice`).
 * **Conflict-Free mDNS**: `system/network/no-mdns.conf` disables duplicate mDNS in `systemd-resolved` (`MulticastDNS=no`) so `avahi-daemon` resolves `.local` cleanly without hostname collisions.
 * **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM) and passwordless sysfs udev rules.
 * **Offline Tools**: Tesseract screen OCR (`eng+ind` -> `wl-copy`), Rofi project launcher (`~/Projects`), and Qalculate modal.
@@ -72,7 +72,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 | **Theming Engine** | Wallust + Caelestia | Dynamic wallpaper-based palette generation |
 | **Power Menu** | Wlogout | Fast lock, sleep, reboot, and shutdown modal |
 | **Audio Server** | PipeWire + WirePlumber | Low-latency modern Linux audio subsystem |
-| **Audio Processing** | EasyEffects | DSP equalizer, loudness normalizer, RNNoise suppression |
+| **Audio Processing** | PipeWire Filter-Chain (+ LV2) | In-process `Harman Kardon VivoBook` EQ, Calf BassEnhancer, and LSP Limiter |
 | **Virtual Keyboard** | wvkbd (custom patch) | Touchscreen on-screen keyboard with Super key support |
 | **Screen Capture** | Grim + Slurp + Swappy | Region screenshotting and integrated annotation tool |
 
@@ -223,6 +223,7 @@ sudo usermod -aG input $USER
 FiorenDot/
 ├── .config/
 │   ├── hypr/               # Hyprland configs, UserConfigs, UserScripts & scripts
+│   ├── pipewire/           # Native filter-chain DSP configs (Harman Kardon & RNNoise)
 │   ├── swaync/             # Notification daemon, custom CSS & button grid
 │   ├── waybar/             # Status bar modules, layouts, and styles
 │   ├── wallust/            # Dynamic palette templates & configuration

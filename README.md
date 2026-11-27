@@ -25,13 +25,14 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 ## Key Features
 
 ### 1. Battery Health & Power Management
-* **80% Charge Cap**: Persists an 80% `charge_control_end_threshold` across reboots, suspend/wake, and unplug events via systemd + udev.
-* **100% Override**: Toggle full charge from SwayNC or `BatteryLimitToggle.sh toggle`, with an automatic 1-hour post-full soak timer (`battery-limit-rtc.sh`) and auto-revert on AC unplug.
-* **AC/Battery Boost Sync**: Tracks per-battery Turbo Boost preference and tunes `vm.dirty_writeback_centisecs` / `vm.laptop_mode` on AC transitions.
+* **Persistent Manual Limit (80% / 100%)**: Persists your chosen `charge_control_end_threshold` (`80` or `100`) across reboots, AC unplug, and suspend/resume (`asus-battery-charge-threshold.service`, `battery-limit-rtc.sh`, and `udev` without waking the laptop during sleep).
+* **Safe 100% Soak Revert**: Toggle full charge from SwayNC (`󰂄 Charge 100%`) or `BatteryLimitToggle.sh`; automatically reverts to `80%` only after staying plugged in at `>= 99%` / `Full` for 2 hours (`SOAK_SECONDS=7200`).
+* **AC/Battery Boost Sync**: Tracks per-battery Turbo Boost preference and tunes `vm.dirty_writeback_centisecs` (`500` on AC / `1500` on battery) on AC transitions cleanly.
 
 ### 2. Finityren (Infinite 2D Canvas)
 * **Spatial Window Navigation**: Moves focus using Euclidean distance and directional cones instead of linear window cycling.
-* **Atomic Canvas Panning**: Shifts floating window coordinates via `hyprctl --batch` with `Super + Alt + Drag` (mouse or absolute touchpad).
+* **Atomic Canvas Panning**: Shifts floating window coordinates via `hl.dsp.window.move` with `Super + Alt + Drag` (mouse or absolute touchpad).
+* **Overview Coexistence**: Automatically pauses keyboard, cache, collision, and panning loops whenever Phantomat is active (`/tmp/phantom_active`).
 
 ### 3. Wallust Palette & Wallpaper Engine
 * **OKLCH Contrast Guard**: Keeps dark surfaces grounded while preserving high-contrast accent colors from active wallpapers.
@@ -46,8 +47,9 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 * **Auto Rotation & Virtual Keyboard**: `TouchRotate.sh` syncs display + stylus/touch transforms and auto-shows patched `wvkbd` (`Super` key patch + `Super + K` tablet auto-show toggle).
 * **Multi-Touch Gestures**: `touchscreen-gestures.service` provides hardware-level 2–5 finger taps and swipes.
 
-### 6. Audio & Offline Productivity
+### 6. Audio, Networking & Offline Productivity
 * **EasyEffects DSP**: Tuned EQ presets and RNNoise mic suppression.
+* **Conflict-Free mDNS**: `system/network/no-mdns.conf` disables duplicate mDNS in `systemd-resolved` (`MulticastDNS=no`) so `avahi-daemon` resolves `.local` cleanly without hostname collisions.
 * **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM) and passwordless sysfs udev rules.
 * **Offline Tools**: Tesseract screen OCR (`eng+ind` -> `wl-copy`), Rofi project launcher (`~/Projects`), and Qalculate modal.
 
@@ -58,11 +60,11 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 | Component | Software / Tool | Description |
 | :--- | :--- | :--- |
 | **OS** | Arch Linux | Rolling-release base with Linux Zen / Dynamic kernel |
-| **Compositor** | Hyprland | Dynamic tiling Wayland compositor with fluid animations |
-| **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) with Cava visualizer |
-| **Notification Center** | SwayNC | Notification daemon, control center, and quick setting toggles |
+| **Compositor** | Hyprland 0.57+ | Dynamic tiling Wayland compositor configured via Lua (`hyprland.lua`) |
+| **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) with Cava visualizer & live workspace sync |
+| **Notification Center** | SwayNC | Notification daemon (`swaync.service`), control center, and quick setting toggles |
 | **Overview** | Quickshell | Native workspace overview with live window previews |
-| **Spatial Overview** | Phantomat (patched) | Spatial overview & zoomable workspace manager |
+| **Spatial Overview** | Phantomat (patched) | Grid overview with aligned borders, safe floating drag, and live Socket2 workspace sync |
 | **App Launcher** | Rofi-wayland | Application menu, RofiBeats, wallpaper picker, calculator |
 | **Terminals** | Kitty / Ghostty | GPU-accelerated terminal emulators with daemon mode |
 | **Shell & Prompt** | Zsh + Oh My Zsh + Starship | Rich completions, autosuggestions, syntax highlighting |
@@ -102,7 +104,9 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 ### Spatial Overview (Phantomat)
 | Shortcut | Action |
 | :--- | :--- |
-| `Alt + Tab` | Toggle Spatial Overview (zoom out, grid layout, type-to-search & land) |
+| `Alt + Tab` / `Super + Alt + Space` | Toggle Spatial Overview (zoom out, grid layout, & live Waybar sync) |
+| `Tab` / `Shift + Tab` | Cycle windows across workspaces while updating active workspace |
+| `Super + Alt + Arrow Keys` | Navigate selection / workspaces in overview |
 | `Super + =` / `Super + +` | Zoom in overview camera |
 | `Super + -` | Zoom out overview camera |
 | `Super + 0` | Reset / fit all workspaces in overview |
@@ -229,9 +233,10 @@ FiorenDot/
 ├── .local/
 │   ├── bin/                # Custom helper binaries & scripts
 │   └── share/easyeffects/  # Tuned audio DSP presets (Harman Kardon, Dolby)
-├── system/                 # Kernel sysfs, udev rules, wvkbd & phantomat patches, zram
+├── system/                 # Kernel sysfs, udev, network, power, zen, wvkbd & phantomat patches
 ├── wallpapers/             # Curated aesthetic wallpapers
 ├── install.sh              # Interactive setup and deployment script
+├── sync-from-system.sh     # Sync active system & /etc configs back into the repo
 └── README.md               # System documentation & reference
 ```
 

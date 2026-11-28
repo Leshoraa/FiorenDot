@@ -49,8 +49,8 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 
 ### 6. Audio, Networking & Offline Productivity
 * **PipeWire Native Filter-Chain DSP**: Runs the `Harman Kardon VivoBook` speaker EQ, Calf BassEnhancer, and LSP Limiter in-process (`pipewire.conf.d`) with negligible RAM overhead instead of keeping EasyEffects open in the background (`Clean Mic RNNoise` ready via `noise-suppression-for-voice`).
-* **Conflict-Free mDNS**: `system/network/no-mdns.conf` disables duplicate mDNS in `systemd-resolved` (`MulticastDNS=no`) so `avahi-daemon` resolves `.local` cleanly without hostname collisions.
-* **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM), capped `journald` logs (`50M` disk / `16M` runtime), silent kernel boot flags, and passwordless sysfs udev rules.
+* **Conflict-Free mDNS**: `system/network/no-mdns.conf` disables duplicate mDNS in `systemd-resolved` (`MulticastDNS=no`) and `nsswitch.conf` enables `mdns_minimal` so `avahi-daemon` resolves `.local` cleanly without hostname collisions or NSS warnings.
+* **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM), capped `journald` logs (`50M` disk / `16M` runtime), PipeWire rlimits real-time audio (`RTPRIO 88` without RTKit overhead), strict `/boot` mask (`0077`), silent kernel boot flags, and passwordless sysfs udev rules.
 * **Offline Tools**: Tesseract screen OCR (`eng+ind` -> `wl-copy`), Rofi project launcher (`~/Projects`), and Qalculate modal.
 
 ---
@@ -192,7 +192,7 @@ The included `install.sh` script backs up existing configurations in `~/.config`
 
 #### Arch Linux (Official Repositories)
 ```bash
-sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct calf lsp-plugins-lv2 noise-suppression-for-voice jq python tesseract tesseract-data-eng tesseract-data-ind greetd greetd-tuigreet
+sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct calf lsp-plugins-lv2 noise-suppression-for-voice nss-mdns jq python tesseract tesseract-data-eng tesseract-data-ind greetd greetd-tuigreet
 ```
 
 #### AUR Packages

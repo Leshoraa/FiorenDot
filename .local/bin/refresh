@@ -3,6 +3,10 @@
 refresh_audio() {
     echo "[Audio] Restarting PipeWire and WirePlumber (filter-chain DSP)..."
     systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || true
+    sleep 1.5
+    if [ -x "$HOME/.config/hypr/scripts/FixAudioBalance.sh" ]; then
+        "$HOME/.config/hypr/scripts/FixAudioBalance.sh" >/dev/null 2>&1 || true
+    fi
 }
 
 refresh_ui() {

@@ -20,16 +20,24 @@ if os.path.exists(p):
                         cv = d.get("channelVolumes", [])
                         cmap = d.get("channelMap", [])
                         
+                        changed = False
+                        if d.get("target") in ("easyeffects_sink", "easyeffects_source"):
+                            del d["target"]
+                            changed = True
+
                         # If an output stream is stuck as MONO or has uneven stereo volumes
                         if k.startswith("Output/Audio:") and (cmap == ["MONO"] or len(cv) == 1):
                             d["channelMap"] = ["FL", "FR"]
                             d["channelVolumes"] = [1.0, 1.0]
-                            line = f"{k}={json.dumps(d)}\n"
+                            changed = True
                         elif len(cv) == 2 and cv[0] != cv[1]:
                             m = max(cv)
                             if m <= 0:
                                 m = 1.0
                             d["channelVolumes"] = [m, m]
+                            changed = True
+
+                        if changed:
                             line = f"{k}={json.dumps(d)}\n"
                     except Exception:
                         pass

@@ -33,6 +33,5 @@ exec tuigreet \
     --greet-align center \
     --greeting "Hyprland • leviola" \
     --sessions /usr/share/wayland-sessions \
-    --session-wrapper /etc/greetd/session-silent.sh \
     --cmd /usr/bin/start-hyprland \
     --theme 'border=blue;text=white;prompt=magenta;time=cyan;greet=blue;action=cyan;button=blue;container=black;input=white;title=magenta'

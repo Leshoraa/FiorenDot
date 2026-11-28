@@ -126,6 +126,7 @@ safe_copy_file "/etc/greetd/launch-tuigreet.sh" "$DOTFILES_DIR/system/greetd/lau
 safe_copy_file "/etc/greetd/session-silent.sh" "$DOTFILES_DIR/system/greetd/session-silent.sh"
 safe_copy_file "/etc/systemd/system/greetd.service.d/override.conf" "$DOTFILES_DIR/system/greetd/greetd-override.conf"
 safe_copy_file "/etc/systemd/journald.conf.d/10-size-limit.conf" "$DOTFILES_DIR/system/systemd/10-size-limit.conf"
+safe_copy_file "/etc/mkinitcpio.conf" "$DOTFILES_DIR/system/boot/mkinitcpio.conf"
 safe_copy_file "/boot/loader/loader.conf" "$DOTFILES_DIR/system/boot/loader.conf"
 safe_copy_file "/boot/loader/entries/2026-07-21_11-54-02_linux.conf" "$DOTFILES_DIR/system/boot/loader-linux.conf"
 safe_copy_file "/boot/loader/entries/linux-lts.conf" "$DOTFILES_DIR/system/boot/loader-linux-lts.conf"

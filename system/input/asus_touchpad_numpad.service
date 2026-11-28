@@ -1,7 +1,7 @@
 [Unit]
 Description=Asus Touchpad to Numpad Handler
 After=sysinit.target
-Before=greetd.service display-manager.service
+After=multi-user.target
 
 [Service]
 Type=simple

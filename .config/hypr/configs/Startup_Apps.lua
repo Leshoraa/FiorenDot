@@ -19,7 +19,7 @@ hl.on("hyprland.start", function()
 
     -- Startup apps
     hl.exec_cmd("systemctl --user start swaync.service || swaync")
-    hl.exec_cmd("sleep 2 && python " .. UserScripts .. "/infinite_desktop_core.py auto auto 1.0")
+    hl.exec_cmd("sleep 0.5 && python " .. UserScripts .. "/infinite_desktop_core.py auto auto 1.0")
     hl.exec_cmd("waybar")
 
     -- Clipboard manager
@@ -29,6 +29,6 @@ hl.on("hyprland.start", function()
     -- Hypridle for hyprlock
     hl.exec_cmd("systemctl --user start hypridle.service || hypridle")
 
-    hl.exec_cmd("sleep 1 && hyprctl dismissnotify -1")
-    hl.exec_cmd('sleep 2 && rot8 --display eDP-1 --hooks "' .. UserScripts .. '/TouchRotate.sh"')
+    hl.exec_cmd("sleep 0.5 && hyprctl dismissnotify -1")
+    hl.exec_cmd('sleep 0.5 && rot8 --display eDP-1 --hooks "' .. UserScripts .. '/TouchRotate.sh"')
 end)

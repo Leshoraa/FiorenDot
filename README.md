@@ -50,7 +50,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 ### 6. Audio, Networking & Offline Productivity
 * **PipeWire Native Filter-Chain DSP**: Runs the `Harman Kardon VivoBook` speaker EQ, Calf BassEnhancer, and LSP Limiter in-process (`pipewire.conf.d`) with negligible RAM overhead instead of keeping EasyEffects open in the background (`Clean Mic RNNoise` ready via `noise-suppression-for-voice`).
 * **Conflict-Free mDNS**: `system/network/no-mdns.conf` disables duplicate mDNS in `systemd-resolved` (`MulticastDNS=no`) so `avahi-daemon` resolves `.local` cleanly without hostname collisions.
-* **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM), capped `journald` logs (`50M` disk / `16M` runtime), silent kernel boot flags, and passwordless sysfs udev rules.
+* **Performance Stack**: `systemd-zram-generator` (`zstd`, 50% RAM), `systemd` + `lz4` mkinitcpio, capped `journald` logs (`50M` disk / `16M` runtime), silent kernel boot flags, and passwordless sysfs udev rules.
 * **Offline Tools**: Tesseract screen OCR (`eng+ind` -> `wl-copy`), Rofi project launcher (`~/Projects`), and Qalculate modal.
 
 ---
@@ -60,7 +60,7 @@ https://github.com/user-attachments/assets/d04b9009-9919-40bc-a0a7-0fad74e87f09
 | Component | Software / Tool | Description |
 | :--- | :--- | :--- |
 | **OS** | Arch Linux | Rolling-release base with Linux Zen / Dynamic kernel |
-| **Display Manager** | greetd + tuigreet | Lightweight TUI greeter (`vt1`) with live Wallust framebuffer palette sync |
+| **Display Manager** | greetd + tuigreet | Direct `initial_session` cold-boot into Hyprland with Wallust-synced `tuigreet` fallback (`vt1`) |
 | **Compositor** | Hyprland 0.57+ | Dynamic tiling Wayland compositor configured via Lua (`hyprland.lua`) |
 | **Status Bar** | Waybar | Custom modules & layout (`Fioren V1`) with Cava visualizer & live workspace sync |
 | **Notification Center** | SwayNC | Notification daemon (`swaync.service`), control center, and quick setting toggles |

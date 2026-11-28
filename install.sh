@@ -179,7 +179,7 @@ if [ -d "$DOTFILES_DIR/.local/bin" ]; then
     done
 fi
 
-# Deploy .local/share presets (e.g. EasyEffects)
+# Deploy .local/share presets if present
 if [ -d "$DOTFILES_DIR/.local/share" ]; then
     for share_item in "$DOTFILES_DIR/.local/share"/*; do
         [ -e "$share_item" ] || continue

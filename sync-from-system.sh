@@ -84,21 +84,18 @@ if [ -d "$DOTFILES_DIR/.local/bin" ]; then
     done
 fi
 
-# 4. Sync .local/share/easyeffects presets
-safe_sync_dir "$HOME_SOURCE/.local/share/easyeffects" "$DOTFILES_DIR/.local/share/easyeffects"
-
-# 5. Sync home dotfiles
+# 4. Sync home dotfiles
 for home_file in .zshrc .zprofile .gtkrc-2.0; do
     safe_copy_file "$HOME_SOURCE/$home_file" "$DOTFILES_DIR/$home_file"
 done
 
-# 6. Sync standalone .config files & VSCodium
+# 5. Sync standalone .config files & VSCodium
 for cfg_file in chromium-flags.conf brave-flags.conf pavucontrol.ini; do
     safe_copy_file "$CONFIG_SOURCE/$cfg_file" "$DOTFILES_DIR/.config/$cfg_file"
 done
 safe_copy_file "$CONFIG_SOURCE/VSCodium/User/settings.json" "$DOTFILES_DIR/.config/VSCodium/User/settings.json"
 
-# 7. Sync system hardware, power, kernel & udev configs if present
+# 6. Sync system hardware, power, kernel & udev configs if present
 mkdir -p "$DOTFILES_DIR/system/power" "$DOTFILES_DIR/system/gpu" "$DOTFILES_DIR/system/input" \
          "$DOTFILES_DIR/system/hardware" "$DOTFILES_DIR/system/sysctl" "$DOTFILES_DIR/system/boot" \
          "$DOTFILES_DIR/system/greetd"

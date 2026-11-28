@@ -94,22 +94,6 @@ menu() {
   done
 }
 
-# Offer SDDM Simple Wallpaper Option (only for non-video wallpapers)
-set_sddm_wallpaper() {
-  local sddm_themes_dir="/usr/share/sddm/themes"
-  if [ ! -d "$sddm_themes_dir" ] && [ -d "/run/current-system/sw/share/sddm/themes" ]; then
-    sddm_themes_dir="/run/current-system/sw/share/sddm/themes"
-  fi
-
-  local sddm_simple="$sddm_themes_dir/simple_sddm_2"
-
-  local sddm_pixie="$sddm_themes_dir/pixie"
-
-  if { [ -d "$sddm_simple" ] && [ -w "$sddm_simple" ]; } || { [ -d "$sddm_pixie" ] && [ -w "$sddm_pixie" ]; }; then
-    "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 &
-  fi
-}
-
 modify_startup_config() {
   local selected_file="$1"
   local startup_config="$HOME/.config/hypr/configs/Startup_Apps.lua"
@@ -140,7 +124,7 @@ apply_image_wallpaper() {
 
   awww img -o "$focused_monitor" "$image_path" $AWWW_PARAMS &
 
-  # 1. Apply UI palette immediately (WallustSwww.sh syncs SDDM asynchronously)
+  # 1. Apply UI palette immediately (WallustSwww.sh syncs greetd palette asynchronously)
   "$SCRIPTSDIR/WallustSwww.sh" "$image_path" &
 }
 

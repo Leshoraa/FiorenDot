@@ -192,7 +192,7 @@ The included `install.sh` script backs up existing configurations in `~/.config`
 
 #### Arch Linux (Official Repositories)
 ```bash
-sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct easyeffects jq python tesseract tesseract-data-eng tesseract-data-ind greetd greetd-tuigreet
+sudo pacman -S hyprland waybar rofi-wayland swaync kitty zsh starship cava btop swappy grim slurp kvantum qt5ct qt6ct calf lsp-plugins-lv2 noise-suppression-for-voice jq python tesseract tesseract-data-eng tesseract-data-ind greetd greetd-tuigreet
 ```
 
 #### AUR Packages
@@ -202,11 +202,10 @@ yay -S wallust-git wlogout ghostty fastfetch quickshell awww wvkbd
 
 ### 4. Enable Background Services
 
-Enable user services for battery protection, gestures, and audio:
+Enable user services for battery protection and gestures:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable --now battery-protection.service
-systemctl --user enable --now easyeffects.service
 systemctl --user enable --now touchscreen-gestures.service
 ```
 
@@ -233,8 +232,7 @@ FiorenDot/
 │   ├── quickshell/         # Workspace overview QML definitions
 │   └── systemd/user/       # User systemd units (battery-protection, etc.)
 ├── .local/
-│   ├── bin/                # Custom helper binaries & scripts
-│   └── share/easyeffects/  # Tuned audio DSP presets (Harman Kardon, Dolby)
+│   └── bin/                # Custom helper binaries & scripts
 ├── system/                 # Kernel sysfs, udev, network, power, zen, wvkbd & phantomat patches
 ├── wallpapers/             # Curated aesthetic wallpapers
 ├── install.sh              # Interactive setup and deployment script

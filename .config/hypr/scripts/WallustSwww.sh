@@ -153,7 +153,7 @@ done
   fi
 ) >/dev/null 2>&1 &
 
-# Debounced trailing heavy maintenance (cp .wallpaper_current, Rofi square crop, SDDM)
+# Debounced trailing heavy maintenance (cp .wallpaper_current, Rofi square crop, greetd palette)
 trailing_pid_file="/tmp/wallust_trailing.pid"
 if [[ -f "$trailing_pid_file" ]]; then
   old_pid=""
@@ -185,7 +185,6 @@ fi
     nice -n 19 magick "${final_wp}[0]" -resize 500x500^ -gravity center -extent 500x500 "$HOME/.config/rofi/.current_wallpaper_square.png" >/dev/null 2>&1 || true
   fi
 
-  nice -n 19 "$SCRIPTSDIR/sddm_wallpaper.sh" --normal >/dev/null 2>&1 || true
   nice -n 19 "$SCRIPTSDIR/greetd_theme.sh" >/dev/null 2>&1 || true
   rm -f "$trailing_pid_file"
 ) >/dev/null 2>&1 &

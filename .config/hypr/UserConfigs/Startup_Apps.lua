@@ -9,5 +9,5 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("bluetoothctl power off")
 
     -- Pinch-to-Zoom daemon (2-finger pinch -> cursor:zoom_factor)
-    hl.exec_cmd("sleep 0.5 && python3 " .. UserScripts .. "/PinchZoom.py")
+    hl.exec_cmd("sleep 3 && python3 " .. UserScripts .. "/PinchZoom.py")
 end)

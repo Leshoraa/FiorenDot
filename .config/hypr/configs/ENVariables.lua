@@ -9,6 +9,7 @@ hl.env("DOTS_VERSION", "2.3.19")
 hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("CLUTTER_BACKEND", "wayland")
+hl.env("SDL_VIDEODRIVER", "wayland,x11")
 
 -- XDG Specifications
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")

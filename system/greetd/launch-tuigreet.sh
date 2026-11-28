@@ -21,10 +21,16 @@ fi
 
 exec tuigreet \
     --user fioren \
+    --battery \
     --time \
+    --time-format "%a %d %b  %H:%M" \
     --remember \
     --remember-user-session \
     --asterisks \
+    --width 56 \
+    --container-padding 1 \
+    --prompt-padding 1 \
+    --greet-align center \
     --greeting "Hyprland • leviola" \
     --sessions /usr/share/wayland-sessions \
     --session-wrapper /etc/greetd/session-silent.sh \
